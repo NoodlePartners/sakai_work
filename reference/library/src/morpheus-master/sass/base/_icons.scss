@@ -92,14 +92,19 @@
   .icon-sakai--pdf {                                        @extend .fa-file-pdf-o; }
   .icon-sakai--subsite {                                    @extend .fa-level-up; }
   .icon-sakai--subsites-list {                              @extend .fa-level-down; }
+   // bullhorn icons
+  .icon-sakai--academic-bullhorn {                           @extend .fa-bullhorn; padding-right: 5px;}
+  .icon-sakai--social-bullhorn {                             @extend .fa-users;}
 
-  // bullhorn icons
-  .icon-sakai--academic-bullhorn {                          @extend .fa-bullhorn; padding-right: 5px;}
-  .icon-sakai--social-bullhorn {                            @extend .fa-users;}
 
   // when we're showing the motd tool as "Welcome" on the gateway page, use a different icon.
   a.Mrphs-hierarchy-item.Mrphs-hierarchy--toolName[href*="!gateway"] .icon-sakai--sakai-motd,
   a.Mrphs-toolsNav__menuitem--link[href*="!gateway"] .icon-sakai--sakai-motd {
     @extend .fa-sign-in;
   }
+
+  .icon-sakai--sakai-commons{                                     @extend .fa-university;}
+  .icon-sakai--sakai-widget-site-information{	                    @extend .fa-home;}
+  .icon-sakai--sakai-Examity{                                     @extend .fa-lock;}
+  .icon-sakai--sakai-gsbm-syllabus{		                        @extend .fa-map-o;}
 }
