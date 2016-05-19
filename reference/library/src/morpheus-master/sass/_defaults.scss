@@ -30,7 +30,7 @@ $header-font-weight: 700 !default;										// 300, 400 or 700 as you wish
 
 /* Color palette */
 $background-color: 			 #FFFFFF !default;
-$background-color-secondary: #444444 !default;
+$background-color-secondary: #00205c !default;
 
 $tool-background-color:		 $background-color !default;
 $toolMenuBGColor:			 #EBEBEB !default;
@@ -38,7 +38,7 @@ $toolMenuColor: 			 #424242 !default;
 $toolTabBGColor: 			 #F8F8F8 !default;
 $toolBorderColor:			 #E0E0E0 !default;
 
-$primary-color:    			 #2a94c0 !default;
+$primary-color:    			 #0081bc !default;
 $secondary-color:  			 #F00 !default;
 $alt-colour: 				 #d36f00 !default;
 
@@ -94,9 +94,9 @@ $hierarchy-size: 3.5em;
 $measure: 960px !default;
 
 /* Logo location */
-$logo: 'images/logo.png' !default;
+$logo: 'images/pepperdine.png' !default;
 $logo-height: 30px !default;
-$logo-width: 50px !default;
+$logo-width: 146px !default;
 
 /* Tool icons */
 $skin-with-icons: true !default;
