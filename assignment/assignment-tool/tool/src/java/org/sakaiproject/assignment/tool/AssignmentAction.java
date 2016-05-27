@@ -196,6 +196,7 @@ public class AssignmentAction extends PagedResourceActionII
 	private static final String ASSIGNMENT_TOOL_ID = "sakai.assignment.grades";
 	
 	private static final Boolean allowReviewService = ServerConfigurationService.getBoolean("assignment.useContentReview", false);
+	private static final Boolean allowAssignmentCommons = ServerConfigurationService.getBoolean("assignment.allowAssignmentCommons", true);
 	private static final Boolean allowPeerAssessment = ServerConfigurationService.getBoolean("assignment.usePeerAssessment", true);
 	
 	/** Is the review service available? */
@@ -561,6 +562,8 @@ public class AssignmentAction extends PagedResourceActionII
 	private static final String NEW_ASSIGNMENT_OPEN_DATE_ANNOUNCED = "new_assignment_open_date_announced";
 
 	private static final String NEW_ASSIGNMENT_CHECK_ADD_HONOR_PLEDGE = "new_assignment_check_add_honor_pledge";
+
+	private static final String NEW_ASSIGNMENT_CHECK_ADD_COMMONS = "new_assignment_check_add_commons";
 
 	private static final String NEW_ASSIGNMENT_CHECK_HIDE_DUE_DATE = "new_assignment_check_hide_due_date";
 
@@ -1593,6 +1596,7 @@ public class AssignmentAction extends PagedResourceActionII
 		
 		context.put("contentTypeImageService", state.getAttribute(STATE_CONTENT_TYPE_IMAGE_SERVICE));
 		context.put("currentTime", TimeService.newTime());
+		context.put("currentUserId", user.getId());
 
 		// SAK-21525 - Groups were not being queried for authz
 		boolean allowSubmit = AssignmentService.allowAddSubmissionCheckGroups((String) state.getAttribute(STATE_CONTEXT_STRING),assignment);
@@ -2541,6 +2545,9 @@ public class AssignmentAction extends PagedResourceActionII
 		}
 		context.put("name_CheckAddHonorPledge", NEW_ASSIGNMENT_CHECK_ADD_HONOR_PLEDGE);
 
+		context.put("allowAssignmentCommons", allowAssignmentCommons);
+		context.put("name_CheckAddCommons", NEW_ASSIGNMENT_CHECK_ADD_COMMONS);
+
 		// SAK-17606
 		context.put("name_CheckAnonymousGrading", NEW_ASSIGNMENT_CHECK_ANONYMOUS_GRADING);
 
@@ -2675,6 +2682,10 @@ public class AssignmentAction extends PagedResourceActionII
 		String s = (String) state.getAttribute(NEW_ASSIGNMENT_CHECK_ADD_HONOR_PLEDGE);
 		if (s == null) s = "1";
 		context.put("value_CheckAddHonorPledge", s);
+
+		String checkAddCommons = (String) state.getAttribute(NEW_ASSIGNMENT_CHECK_ADD_COMMONS);
+		if (checkAddCommons == null) checkAddCommons = "false";
+		context.put("value_CheckAddCommons", checkAddCommons);
 		
 		// put resubmission option into context
 		assignment_resubmission_option_into_context(context, state);
@@ -3154,6 +3165,7 @@ public class AssignmentAction extends PagedResourceActionII
 		context.put("value_opendate_notification_low", Assignment.ASSIGNMENT_OPENDATE_NOTIFICATION_LOW);
 		context.put("value_opendate_notification_high", Assignment.ASSIGNMENT_OPENDATE_NOTIFICATION_HIGH);
 		context.put("value_CheckAddHonorPledge", state.getAttribute(NEW_ASSIGNMENT_CHECK_ADD_HONOR_PLEDGE));
+		context.put("value_CheckAddCommons", state.getAttribute(NEW_ASSIGNMENT_CHECK_ADD_COMMONS));
 		context.put("honor_pledge_text", ServerConfigurationService.getString("assignment.honor.pledge", rb.getString("gen.honple2")));
 
 		// SAK-17606
@@ -4434,6 +4446,7 @@ public class AssignmentAction extends PagedResourceActionII
 			addDecoUrlMapToContext(session, context, false);
 		}
 
+		context.put("currentUserId", UserDirectoryService.getCurrentUser().getId());
 		context.put("currentTime", TimeService.newTime());
 		context.put("submissionTypeTable", submissionTypeTable());
 		context.put("hideAssignmentFlag", state.getAttribute(VIEW_ASSIGNMENT_HIDE_ASSIGNMENT_FLAG));
@@ -7450,6 +7463,8 @@ public class AssignmentAction extends PagedResourceActionII
 		if (s == null) s = "1";
 		state.setAttribute(NEW_ASSIGNMENT_CHECK_ADD_HONOR_PLEDGE, s);
 
+		state.setAttribute(NEW_ASSIGNMENT_CHECK_ADD_COMMONS, params.getString(NEW_ASSIGNMENT_CHECK_ADD_COMMONS));
+
 		String grading = params.getString(NEW_ASSIGNMENT_ADD_TO_GRADEBOOK);
 		state.setAttribute(NEW_ASSIGNMENT_ADD_TO_GRADEBOOK, grading);
 
@@ -8256,6 +8271,8 @@ public class AssignmentAction extends PagedResourceActionII
 
 			String checkAddHonorPledge = (String) state.getAttribute(NEW_ASSIGNMENT_CHECK_ADD_HONOR_PLEDGE);
 
+			boolean checkAddCommons = "true".equals((String) state.getAttribute(NEW_ASSIGNMENT_CHECK_ADD_COMMONS));
+
 			String addtoGradebook = state.getAttribute(NEW_ASSIGNMENT_ADD_TO_GRADEBOOK) != null?(String) state.getAttribute(NEW_ASSIGNMENT_ADD_TO_GRADEBOOK):"" ;
 
 			long category = state.getAttribute(NEW_ASSIGNMENT_CATEGORY) != null ? ((Long) state.getAttribute(NEW_ASSIGNMENT_CATEGORY)).longValue() : -1;
@@ -8382,7 +8399,7 @@ public class AssignmentAction extends PagedResourceActionII
 				state.setAttribute("contentReviewSuccess", Boolean.TRUE);
 
 				// commit the changes to AssignmentContent object
-				commitAssignmentContentEdit(state, ac, a.getReference(), title, submissionType,useReviewService,allowStudentViewReport, gradeType, gradePoints, description, checkAddHonorPledge, attachments, submitReviewRepo, generateOriginalityReport, checkTurnitin, checkInternet, checkPublications, checkInstitution, excludeBibliographic, excludeQuoted, excludeType, excludeValue, openTime, dueTime, closeTime, hideDueDate);
+				commitAssignmentContentEdit(state, ac, a.getReference(), title, submissionType,useReviewService,allowStudentViewReport, gradeType, gradePoints, description, checkAddHonorPledge, checkAddCommons, attachments, submitReviewRepo, generateOriginalityReport, checkTurnitin, checkInternet, checkPublications, checkInstitution, excludeBibliographic, excludeQuoted, excludeType, excludeValue, openTime, dueTime, closeTime, hideDueDate);
 				
 				// set the Assignment Properties object
 				ResourcePropertiesEdit aPropertiesEdit = a.getPropertiesEdit();
@@ -9550,11 +9567,12 @@ public class AssignmentAction extends PagedResourceActionII
 		}
 	}
 
-	private void commitAssignmentContentEdit(SessionState state, AssignmentContentEdit ac, String assignmentRef, String title, int submissionType,boolean useReviewService, boolean allowStudentViewReport, int gradeType, String gradePoints, String description, String checkAddHonorPledge, List attachments, String submitReviewRepo, String generateOriginalityReport, boolean checkTurnitin, boolean checkInternet, boolean checkPublications, boolean checkInstitution, boolean excludeBibliographic, boolean excludeQuoted, int excludeType, int excludeValue, Time openTime, Time dueTime, Time closeTime, boolean hideDueDate) 
+	private void commitAssignmentContentEdit(SessionState state, AssignmentContentEdit ac, String assignmentRef, String title, int submissionType,boolean useReviewService, boolean allowStudentViewReport, int gradeType, String gradePoints, String description, String checkAddHonorPledge, boolean checkAddCommons, List attachments, String submitReviewRepo, String generateOriginalityReport, boolean checkTurnitin, boolean checkInternet, boolean checkPublications, boolean checkInstitution, boolean excludeBibliographic, boolean excludeQuoted, int excludeType, int excludeValue, Time openTime, Time dueTime, Time closeTime, boolean hideDueDate) 
 	{
 		ac.setTitle(title);
 		ac.setInstructions(description);
 		ac.setHonorPledge(Integer.parseInt(checkAddHonorPledge));
+		ac.setHasCommons(checkAddCommons);
 		ac.setHideDueDate(hideDueDate);
 		ac.setTypeOfSubmission(submissionType);
 		ac.setAllowReviewService(useReviewService);
@@ -10109,6 +10127,8 @@ public class AssignmentAction extends PagedResourceActionII
 				}
 								
 				state.setAttribute(NEW_ASSIGNMENT_CHECK_ADD_HONOR_PLEDGE, Integer.toString(a.getContent().getHonorPledge()));
+
+				state.setAttribute(NEW_ASSIGNMENT_CHECK_ADD_COMMONS, Boolean.toString(a.getContent().getHasCommons()));
 				
 				state.setAttribute(AssignmentService.NEW_ASSIGNMENT_ADD_TO_GRADEBOOK, properties.getProperty(AssignmentService.NEW_ASSIGNMENT_ADD_TO_GRADEBOOK));
 				state.setAttribute(AssignmentService.PROP_ASSIGNMENT_ASSOCIATE_GRADEBOOK_ASSIGNMENT, properties.getProperty(AssignmentService.PROP_ASSIGNMENT_ASSOCIATE_GRADEBOOK_ASSIGNMENT));
