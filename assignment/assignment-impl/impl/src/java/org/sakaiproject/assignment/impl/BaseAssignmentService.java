@@ -1976,6 +1976,7 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 				retVal.setTitle(existingContent.getTitle() + " - " + rb.getString("assignment.copy"));
 				retVal.setInstructions(existingContent.getInstructions());
 				retVal.setHonorPledge(existingContent.getHonorPledge());
+				retVal.setHasCommons(existingContent.getHasCommons());
 				retVal.setHideDueDate(existingContent.getHideDueDate());
 				retVal.setTypeOfSubmission(existingContent.getTypeOfSubmission());
 				retVal.setTypeOfGrade(existingContent.getTypeOfGrade());
@@ -6861,6 +6862,7 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 							nContent.setContext(toContext);
 							nContent.setGroupProject(oContent.getGroupProject());
 							nContent.setHonorPledge(oContent.getHonorPledge());
+							nContent.setHasCommons(oContent.getHasCommons());
 							nContent.setHideDueDate(oContent.getHideDueDate());
 							nContent.setIndividuallyGraded(oContent.individuallyGraded());
 							// replace all occurrence of old context with new context inside instruction text
@@ -8846,6 +8848,8 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 
 		protected int m_honorPledge;
 
+		protected boolean m_hasCommons;
+
 		protected int m_typeOfSubmission;
 
 		protected int m_typeOfGrade;
@@ -8984,6 +8988,15 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 			catch (Exception e)
 			{
 				M_log.warn(" BaseAssignmentContent Exception parsing honor pledge int from xml file string : " + e);
+			}
+
+			try
+			{
+				m_hasCommons = Boolean.parseBoolean(el.getAttribute("hascommons"));
+			}
+			catch (Exception e)
+			{
+				M_log.warn(" BaseAssignmentContent Exception parsing hascommons boolean from xml file string : " + e);
 			}
 
 			try
@@ -9201,6 +9214,15 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 
 							try
 							{
+								m_hasCommons = Boolean.parseBoolean(attributes.getValue("hascommons"));
+							}
+							catch (Exception e)
+							{
+								M_log.warn(" BaseAssignmentContent Exception parsing hascommons boolean from xml file string : " + e);
+							}
+
+							try
+							{
 								m_typeOfSubmission = Integer.parseInt(attributes.getValue("submissiontype"));
 							}
 							catch (Exception e)
@@ -9351,6 +9373,7 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 			content.setAttribute("excludeValue", Integer.toString(m_excludeValue));
 			
 			content.setAttribute("honorpledge", String.valueOf(m_honorPledge));
+			content.setAttribute("hascommons", String.valueOf(m_hasCommons));
 			content.setAttribute("submissiontype", String.valueOf(m_typeOfSubmission));
 			content.setAttribute("typeofgrade", String.valueOf(m_typeOfGrade));
 			content.setAttribute("scaled_maxgradepoint", String.valueOf(m_maxGradePoint));
@@ -9408,6 +9431,7 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 				m_title = content.getTitle();
 				m_instructions = content.getInstructions();
 				m_honorPledge = content.getHonorPledge();
+				m_hasCommons = content.getHasCommons();
 				m_typeOfSubmission = content.getTypeOfSubmission();
 				m_typeOfGrade = content.getTypeOfGrade();
 				m_maxGradePoint = content.getMaxGradePoint();
@@ -9748,6 +9772,11 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 		public int getHonorPledge()
 		{
 			return m_honorPledge;
+		}
+
+		public boolean getHasCommons()
+		{
+			return m_hasCommons;
 		}
 
 		/**
@@ -10189,7 +10218,11 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 			m_honorPledge = pledgeType;
 		}
 
-		
+		public void setHasCommons(boolean hasCommons)
+		{
+			m_hasCommons = hasCommons;
+		}
+
 		/**
 		 * Does this Assignment allow using the review service?
 		 * 
