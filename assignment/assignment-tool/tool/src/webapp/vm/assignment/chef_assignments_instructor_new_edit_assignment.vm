@@ -529,6 +529,19 @@
 			</label>
 		</div>
 
+		#if ($allowAssignmentCommons)
+        <div class="checkbox indnt2">
+            <label id="assignment-lbl-add-commons" for="$name_CheckAddCommons">
+            #if($!value_CheckAddCommons.equals("true"))
+                <input id="$name_CheckAddCommons" name="$name_CheckAddCommons" type="checkbox" value="true" checked="checked" />
+			#else
+                <input id="$name_CheckAddCommons" name="$name_CheckAddCommons" type="checkbox" value="true" />
+			#end
+				$tlang.getString("gen.allowcommons")
+            </label>
+        </div>
+        #end
+
 		#if ($allowReviewService)
 			<div class="form-group row">
 				<h4> $reviewServiceTitle </h4>
@@ -1033,7 +1046,7 @@
 		</div>
 		</p>
 		#end
-
+        
 
 		## group/section support
                 <h4>$!tlang.getString('access')</h4>
@@ -1092,6 +1105,7 @@
                         <label class="$class" for="groups">$tlang.getString("group")</label>
 			#end
 		#end
+        
 
 		## added group awareness
 		<div class="radio">

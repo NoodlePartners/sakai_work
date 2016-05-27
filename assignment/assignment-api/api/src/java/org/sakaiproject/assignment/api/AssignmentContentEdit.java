@@ -119,6 +119,8 @@ public interface AssignmentContentEdit extends AssignmentContent, AttachmentCont
 	 */
 	public void setHonorPledge(int pledgeType);
 
+	public void setHasCommons(boolean hasCommons);
+
 	/**
 	 * Does this Assignment allow attachments?
 	 * 
