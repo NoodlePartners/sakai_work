@@ -267,4 +267,31 @@
         #end
     </ul>
 #end
+#macro( commons $assignment $currentUserId )
+<h4>$tlang.getString("gen.assignmentcommons")</h4> 
+<link rel="stylesheet" type="text/css" href="/commons-tool/css/commons.css" media="all" />
+<div id="assignment-commons-$assignment.getId()" data-assignment-id="$assignment.getId()">
+    <div id="commons-toolbar"></div>
+    <div id="commons-content"></div>
+</div>
+<script type="text/javascript">
+
+    var commons = {
+            i18n: {},
+            commonsId: '$assignment.getId()',
+            siteId: '$assignment.getContext()',
+            embedder: 'ASSIGNMENT',
+            userId: '$currentUserId'
+        };
+
+</script>
+
+<script type="text/javascript" src="/commons-tool/lib/handlebars.runtime-v4.0.5.js"></script>
+<script type="text/javascript" src="/commons-tool/templates/templates.js"></script>
+<script type="text/javascript" src="/library/webjars/jquery-i18n-properties/1.2.2/jquery.i18n.properties.min.js"></script>
+<script type="text/javascript" src="/commons-tool/lib/autosize.min.js"></script>
+<script type="text/javascript" src="/commons-tool/js/commons_utils.js"></script>
+<script type="text/javascript" src="/commons-tool/js/commons_permissions.js"></script>
+<script type="text/javascript" src="/commons-tool/js/commons.js"></script>
+#end
 <!-- end:  assignment_macros.vm -->
