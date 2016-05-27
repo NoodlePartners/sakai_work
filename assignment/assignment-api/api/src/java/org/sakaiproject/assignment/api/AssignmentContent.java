@@ -166,6 +166,8 @@ public interface AssignmentContent extends Entity, AttachmentContainer
 	 */
 	public int getHonorPledge();
 
+	public boolean getHasCommons();
+
 	/**
 	 * Access whether this AssignmentContent allows attachments.
 	 * 
