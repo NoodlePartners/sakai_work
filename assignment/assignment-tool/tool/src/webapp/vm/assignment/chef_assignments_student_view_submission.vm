@@ -1255,5 +1255,8 @@ $(document).ready(function(){
 		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
 	</form>
 	#end
+	#if ($assignment.getContent().getHasCommons())
+		#commons($assignment)
+	#end
 </div>
 <!-- end: chef_assignments_student_view_submission.vm  -->
