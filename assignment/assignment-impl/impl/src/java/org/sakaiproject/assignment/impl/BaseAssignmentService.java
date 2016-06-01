@@ -14271,7 +14271,7 @@ public abstract class BaseAssignmentService implements AssignmentService, Entity
 			return false;
 		}
 		return false;
-	} 
+	}
  
         public String getDeepLink(String context, String assignmentId) throws Exception {
  
