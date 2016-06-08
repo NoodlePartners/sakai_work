@@ -42,13 +42,13 @@ import org.sakaiproject.portal.api.Portal;
 import org.sakaiproject.portal.api.PortalHandlerException;
 import org.sakaiproject.portal.api.PortalRenderContext;
 import org.sakaiproject.portal.api.StoredState;
+import org.sakaiproject.portal.util.URLUtils;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.ToolException;
-import org.sakaiproject.portal.util.URLUtils;
 
 /**
  * @author ieb
@@ -227,14 +227,11 @@ public class PageHandler extends BasePortalHandler
 
 					if (site != null)
 					{
-						boolean thisTool = portal.getSiteHelper().allowTool(site,
-								placement);
-						// System.out.println(" Allow Tool Display -" +
-						// placement.getTitle() + " retval = " + thisTool);
-						if (!thisTool) continue; // Skip this tool if not
-						// allowed
+						boolean thisTool = portal.getSiteHelper().allowTool(site,placement);
+						if (!thisTool) continue; // Skip this tool if not allowed
 					}
 
+					//Get the tool data map.
 					Map m = portal.includeTool(res, req, placement);
 					if (m != null)
 					{
@@ -259,6 +256,8 @@ public class PageHandler extends BasePortalHandler
 					boolean thisTool = portal.getSiteHelper().allowTool(site,
 								placement);
 					if (!thisTool) continue; // Skip this tool if not allowed
+					
+					//Get the tool data map.
 					Map m = portal.includeTool(res, req, placement);
 					if (m != null)
 					{
