@@ -1192,15 +1192,15 @@ public class SakaiProxyImpl implements SakaiProxy {
 				ProfileConstants.PICTURE_SETTING_UPLOAD_PROP);
 
 		// if 'upload'
-		if (pictureType.equals(ProfileConstants.PICTURE_SETTING_UPLOAD_PROP)) {
+		if (StringUtils.equals(pictureType, ProfileConstants.PICTURE_SETTING_UPLOAD_PROP)) {
 			return ProfileConstants.PICTURE_SETTING_UPLOAD;
 		}
 		// if 'url'
-		else if (pictureType.equals(ProfileConstants.PICTURE_SETTING_URL_PROP)) {
+		else if (StringUtils.equals(pictureType, ProfileConstants.PICTURE_SETTING_URL_PROP)) {
 			return ProfileConstants.PICTURE_SETTING_URL;
 		}
 		// if 'official'
-		else if (pictureType.equals(ProfileConstants.PICTURE_SETTING_OFFICIAL_PROP)) {
+		else if (StringUtils.equals(pictureType, ProfileConstants.PICTURE_SETTING_OFFICIAL_PROP)) {
 			return ProfileConstants.PICTURE_SETTING_OFFICIAL;
 		}
 		// gravatar is not an enforceable setting, hence no block here. it is purely a user preference.

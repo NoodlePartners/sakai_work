@@ -42,6 +42,7 @@ public class ProfileStatusLogicImpl implements ProfileStatusLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public ProfileStatus getUserStatus(final String userUuid, ProfilePrivacy privacy) {
 		
 		//check privacy
@@ -82,6 +83,7 @@ public class ProfileStatusLogicImpl implements ProfileStatusLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public ProfileStatus getUserStatus(final String userUuid) {
 		return getUserStatus(userUuid, privacyLogic.getPrivacyRecordForUser(userUuid));
 	}
@@ -91,6 +93,7 @@ public class ProfileStatusLogicImpl implements ProfileStatusLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean setUserStatus(String userId, String status) {
 		
 		//create object
@@ -103,6 +106,7 @@ public class ProfileStatusLogicImpl implements ProfileStatusLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean setUserStatus(ProfileStatus profileStatus) {
 		
 		//current user must be the user making the request
@@ -126,6 +130,7 @@ public class ProfileStatusLogicImpl implements ProfileStatusLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean clearUserStatus(String userId) {
 		
 		ProfileStatus profileStatus = getUserStatus(userId);
@@ -151,6 +156,7 @@ public class ProfileStatusLogicImpl implements ProfileStatusLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getStatusUpdatesCount(final String userUuid) {
 		return dao.getStatusUpdatesCount(userUuid);
 	}
