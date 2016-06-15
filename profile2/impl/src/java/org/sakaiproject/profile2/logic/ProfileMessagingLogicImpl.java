@@ -47,6 +47,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getAllUnreadMessagesCount(final String userId) {
 		return dao.getAllUnreadMessagesCount(userId);
 	}
@@ -55,6 +56,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getThreadsWithUnreadMessagesCount(final String userId) {
 		return dao.getThreadsWithUnreadMessagesCount(userId);
 	}
@@ -62,6 +64,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getSentMessagesCount(final String userId) {
 		return dao.getSentMessagesCount(userId);
 	}
@@ -71,6 +74,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean sendNewMessage(final String uuidTo, final String uuidFrom, final String threadId, final String subject, final String messageStr) {
 		
 		//setup thread
@@ -127,6 +131,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public Message replyToThread(final String threadId, final String reply, final String uuidFrom) {
 		
 		try {
@@ -168,6 +173,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<MessageThread> getMessageThreads(final String userId) {
 		
 		List<MessageThread> threads = dao.getMessageThreads(userId);
@@ -183,6 +189,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getMessageThreadsCount(final String userId) {
 		return dao.getMessageThreadsCount(userId);
 	}
@@ -190,6 +197,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<Message> getMessagesInThread(final String threadId) {
 		return dao.getMessagesInThread(threadId);
 	}
@@ -197,6 +205,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public int getMessagesInThreadCount(final String threadId) {
 		return dao.getMessagesInThreadCount(threadId);
 	}
@@ -206,6 +215,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public Message getMessage(final String id) {
 		return dao.getMessage(id);
 	}
@@ -213,6 +223,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public MessageThread getMessageThread(final String threadId) {
 		
 		MessageThread thread = dao.getMessageThread(threadId);
@@ -232,6 +243,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean toggleMessageRead(MessageParticipant participant, final boolean status) {
 		return dao.toggleMessageRead(participant, status);
 	}
@@ -250,6 +262,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public MessageParticipant getMessageParticipant(final String messageId, final String userUuid) {
 		return dao.getMessageParticipant(messageId, userUuid);
 	}
@@ -276,6 +289,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public List<String> getThreadParticipants(final String threadId) {
 		return dao.getThreadParticipants(threadId);
 	}
@@ -283,6 +297,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean isThreadParticipant(final String threadId, final String userId) {
 		return getThreadParticipants(threadId).contains(userId);
 	}
@@ -290,6 +305,7 @@ public class ProfileMessagingLogicImpl implements ProfileMessagingLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public String getThreadSubject(final String threadId) {
 		MessageThread thread = dao.getMessageThread(threadId);
 		return thread.getSubject();

@@ -17,6 +17,7 @@ package org.sakaiproject.profile2.logic;
 
 import java.util.HashMap;
 
+import org.apache.commons.lang.StringUtils;
 import lombok.Setter;
 
 import org.apache.log4j.Logger;
@@ -43,6 +44,7 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public ProfilePrivacy getPrivacyRecordForUser(final String userId) {
 		return getPrivacyRecordForUser(userId, true);
 	}
@@ -50,6 +52,7 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public ProfilePrivacy getPrivacyRecordForUser(final String userId, final boolean useCache) {
 		
 		if(userId == null){
@@ -96,6 +99,7 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean savePrivacyRecord(ProfilePrivacy privacy) {
 
 		//if changes not allowed
@@ -123,10 +127,11 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean isActionAllowed(final String userX, final String userY, final PrivacyType type) {
 		
 		//if user is requesting own info, they ARE allowed
-    	if(userY.equals(userX)) {
+    	if(StringUtils.equals(userX, userY)) {
     		return true;
     	}
     	
@@ -164,7 +169,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_BASICINFO:
+				break;
+			case PRIVACY_OPTION_BASICINFO:
 	    		
 	    		//if user is friend and friends are allowed
 	        	if(isConnected && profilePrivacy.getBasicInfo() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
@@ -186,7 +192,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_CONTACTINFO:
+				break;
+			case PRIVACY_OPTION_CONTACTINFO:
 	    		
 	    		//if user is friend and friends are allowed
 	        	if(isConnected && profilePrivacy.getContactInfo() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
@@ -208,7 +215,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        
-	    	case PRIVACY_OPTION_STAFFINFO:
+				break;
+			case PRIVACY_OPTION_STAFFINFO:
 	    		
 	    		//if restricted to only self, not allowed
 	        	if(profilePrivacy.getStaffInfo() == ProfileConstants.PRIVACY_OPTION_ONLYME) {
@@ -230,7 +238,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        
-	    	case PRIVACY_OPTION_STUDENTINFO:
+				break;
+			case PRIVACY_OPTION_STUDENTINFO:
 	    		
 	    		//if restricted to only self, not allowed
 	        	if(profilePrivacy.getStudentInfo() == ProfileConstants.PRIVACY_OPTION_ONLYME) {
@@ -252,7 +261,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_BUSINESSINFO:
+				break;
+			case PRIVACY_OPTION_BUSINESSINFO:
 	    		
 	    		//if restricted to only self, not allowed
 	        	if(profilePrivacy.getBusinessInfo() == ProfileConstants.PRIVACY_OPTION_ONLYME) {
@@ -274,7 +284,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_SOCIALINFO:
+				break;
+			case PRIVACY_OPTION_SOCIALINFO:
 	    		
 	    		//if restricted to only self, not allowed
 	        	if(profilePrivacy.getSocialNetworkingInfo() == ProfileConstants.PRIVACY_OPTION_ONLYME) {
@@ -296,7 +307,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_PERSONALINFO:
+				break;
+			case PRIVACY_OPTION_PERSONALINFO:
 	    		
 	    		//if restricted to only self, not allowed
 	        	if(profilePrivacy.getPersonalInfo() == ProfileConstants.PRIVACY_OPTION_ONLYME) {
@@ -318,7 +330,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_MYFRIENDS:
+				break;
+			case PRIVACY_OPTION_MYFRIENDS:
 	    		
 	    		//if restricted to only self, not allowed
 	        	if(profilePrivacy.getMyFriends() == ProfileConstants.PRIVACY_OPTION_ONLYME) {
@@ -340,7 +353,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_MYPICTURES:
+				break;
+			case PRIVACY_OPTION_MYPICTURES:
 	    		
 	    		//if user is friend and friends are allowed
 	        	if (isConnected && profilePrivacy.getMyPictures() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
@@ -357,7 +371,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_MYSTATUS:
+				break;
+			case PRIVACY_OPTION_MYSTATUS:
 	    		
 	    		//if user is friend and friends are allowed
 	        	if(isConnected && profilePrivacy.getMyStatus() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
@@ -374,7 +389,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_MYKUDOS:
+				break;
+			case PRIVACY_OPTION_MYKUDOS:
 	    		//if user is friend and friends are allowed
 	        	if(isConnected && profilePrivacy.getMyKudos() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
 	        		result = true; break;
@@ -390,7 +406,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_MYWALL:
+				break;
+			case PRIVACY_OPTION_MYWALL:
 	    		
 	    		//if user is friend and friends are allowed
 	        	if(isConnected && profilePrivacy.getMyWall() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
@@ -407,7 +424,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        	
-	    	case PRIVACY_OPTION_ONLINESTATUS:
+				break;
+			case PRIVACY_OPTION_ONLINESTATUS:
 	    		
 	    		//if user is friend and friends are allowed
 	        	if(isConnected && profilePrivacy.getOnlineStatus() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
@@ -424,7 +442,8 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        		result = true; break;
 	        	}
 	        
-	    	case PRIVACY_OPTION_MESSAGES:
+				break;
+			case PRIVACY_OPTION_MESSAGES:
 	    		
 	    		//if nobody allowed
 	        	if(profilePrivacy.getMessages() == ProfileConstants.PRIVACY_OPTION_NOBODY) {
@@ -442,6 +461,7 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        	}
 	    		
 			
+				break;
 			default: 
 				//invalid type
 		    	log.error("ProfilePrivacyLogic.isActionAllowed. False for userX: " + userX + ", userY: " + userY + ", type: " + type);  
@@ -455,6 +475,7 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean isBirthYearVisible(String uuid) {
 		return getPrivacyRecordForUser(uuid).isShowBirthYear();
 	}
