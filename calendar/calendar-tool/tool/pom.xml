@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.sakaiproject.kernel</groupId>
             <artifactId>sakai-kernel-impl</artifactId>
-            <version>12-SNAPSHOT</version>
+            <version>${sakai.version}</version>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.kernel</groupId>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.sakaiproject.basiclti</groupId>
             <artifactId>basiclti-impl</artifactId>
-            <version>12-SNAPSHOT</version>
+            <version>${sakai.version}</version>
         </dependency>
     </dependencies>
 
