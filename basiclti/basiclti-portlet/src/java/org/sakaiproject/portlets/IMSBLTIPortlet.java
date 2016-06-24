@@ -206,7 +206,7 @@ public class IMSBLTIPortlet extends GenericPortlet {
 			}
 
 			// Check to see if our launch will be successful
-			String[] retval = SakaiBLTIUtil.postLaunchHTML(placement.getId(), rb);
+			String[] retval = SakaiBLTIUtil.postLaunchHTML(placement.getId(), rb, req);
 			if ( retval.length > 1 ) {
 				String iframeUrl = "/access/basiclti/site/"+context+"/"+placement.getId();
 				String frameHeight =  getCorrectProperty(request, "frameheight", null);
@@ -262,10 +262,33 @@ public class IMSBLTIPortlet extends GenericPortlet {
 					text.append("\" \n");
 					text.append("width=\"100%\" frameborder=\"0\" marginwidth=\"0\"\n");
 					text.append("marginheight=\"0\" scrolling=\"auto\"\n");
-					text.append("src=\""+iframeUrl+"\">\n");
+					if(req.getParameterMap().containsKey("ltiId") && req.getParameterMap().containsKey("ltiAction")&& req.getParameterMap().containsKey("sakaiId")) {
+						text.append("src=\""+iframeUrl+
+								"?ltiId=" +
+								req.getParameter("ltiId") +
+								"&ltiAction=" +
+								req.getParameter("ltiAction")+
+								"&sakaiId=" +
+								req.getParameter("sakaiId")+
+								"\">\n");
+					}
+					else {
+						text.append("src=\""+iframeUrl+"\">\n");
+					}
 					text.append(rb.getString("noiframes"));
 					text.append("<br>");
-					text.append("<a href=\""+iframeUrl+"\">");
+					if(req.getParameterMap().containsKey("ltiId") && req.getParameterMap().containsKey("ltiAction")&& req.getParameterMap().containsKey("sakaiId")) {
+						text.append("<a href=\"" +iframeUrl+
+								"?ltiId=" +
+								req.getParameter("ltiId") +
+								"&ltiAction=" +
+								req.getParameter("ltiAction")+
+								"&sakaiId=" +
+								req.getParameter("sakaiId")+
+								"\">");
+					} else {
+						text.append("<a href=\"" + iframeUrl + "\">");
+					}
 					text.append(rb.getString("noiframe.press.here"));
 					text.append("</a>\n");
 					text.append("</iframe>\n");
