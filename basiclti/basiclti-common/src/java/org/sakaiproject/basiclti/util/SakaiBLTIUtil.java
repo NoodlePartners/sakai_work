@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.json.simple.JSONObject;
@@ -756,7 +757,7 @@ public class SakaiBLTIUtil {
 
 	// This must return an HTML message as the [0] in the array
 	// If things are successful - the launch URL is in [1]
-	public static String[] postLaunchHTML(Map<String, Object> content, Map<String,Object> tool, LTIService ltiService, ResourceLoader rb)
+	public static String[] postLaunchHTML(Map<String, Object> content, Map<String,Object> tool, LTIService ltiService, ResourceLoader rb, HttpServletRequest req)
 	{
 		if ( content == null ) {
 			return postError("<p>" + getRB(rb, "error.content.missing" ,"Content item is missing or improperly configured.")+"</p>" ); 
@@ -853,6 +854,12 @@ public class SakaiBLTIUtil {
 		addSiteInfo(ltiProps, lti2subst, site);
 		addRoleInfo(ltiProps, lti2subst,  context, (String)tool.get("rolemap"));
 		addUserInfo(ltiProps, lti2subst, tool);
+
+		if(req != null) {
+			setProperty(ltiProps, "lti_id", req.getParameter("ltiId"));
+			setProperty(ltiProps, "lti_action", req.getParameter("ltiAction"));
+			setProperty(ltiProps, "sakai_id", req.getParameter("sakaiId"));
+		}
 
 
 		// This is for 1.2 - Not likely to be used
@@ -1340,7 +1347,7 @@ public class SakaiBLTIUtil {
 
 	// This must return an HTML message as the [0] in the array
 	// If things are successful - the launch URL is in [1]
-	public static String[] postLaunchHTML(String placementId, ResourceLoader rb)
+	public static String[] postLaunchHTML(String placementId, ResourceLoader rb, ServletRequest req)
 	{
 		if ( placementId == null ) return postError("<p>" + getRB(rb, "error.missing" ,"Error, missing placementId")+"</p>" );
 		ToolConfiguration placement = SiteService.findTool(placementId);
@@ -1358,6 +1365,13 @@ public class SakaiBLTIUtil {
 		if ( ! loadFromPlacement(toolProps, ltiProps, placement) ) {
 			return postError("<p>" + getRB(rb, "error.nolaunch" ,"Not Configured.")+"</p>");
 		}
+
+		if(req != null) {
+			setProperty(ltiProps, "lti_id", req.getParameter("ltiId"));
+			setProperty(ltiProps, "lti_action", req.getParameter("ltiAction"));
+			setProperty(ltiProps, "sakai_id", req.getParameter("sakaiId"));
+		}
+
 		return postLaunchHTML(toolProps, ltiProps, rb);
 	}
 
