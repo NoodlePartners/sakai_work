@@ -190,6 +190,7 @@
 					#if ($event.getType()=="Quiz") $tlang.getString("legend.key14") #end
 					#if ($event.getType()=="Special event") $tlang.getString("legend.key15") #end
 					#if ($event.getType()=="Web Assignment") $tlang.getString("legend.key16") #end
+					#if ($event.getType()=="Adobe Connect Meeting") $tlang.getString("legend.key101") #end
 				</td>	
 			</tr>
 			#if($owner_name && $owner_name !="")

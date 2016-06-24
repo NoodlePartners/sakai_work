@@ -27,6 +27,7 @@ calendar Portlet
 		<li><i class="icon icon-calendar-quiz"></i> $tlang.getString('legend.key14')</li>
 		<li><i class="icon icon-calendar-special-event"></i> $tlang.getString('legend.key15')</li>
 		<li><i class="icon icon-calendar-web-assignment"></i> $tlang.getString('legend.key16')</li>
+        <li><i class="icon icon-calendar-activity"></i> $tlang.getString('legend.key101')</li>
 	</ul>
 	<div class="clear"></div>
 #end
@@ -67,6 +68,8 @@ calendar Portlet
 <i class="icon icon-calendar-special-event" title="$tlang.getString('legend.key15')" ></i>
 #elseif ($eventType =="Web Assignment")
 <i class="icon icon-calendar-web-assignment" title="$tlang.getString('legend.key16')" ></i>
+#elseif ($eventType =="Adobe Connect Meeting")
+<i class="icon icon-calendar-activity" title="$tlang.getString('legend.key101')" ></i>
 #end
 #end
 
