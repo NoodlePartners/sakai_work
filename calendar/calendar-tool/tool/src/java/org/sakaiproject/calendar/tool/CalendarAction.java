@@ -46,6 +46,8 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
+import org.sakaiproject.lti.api.LTIService;
+import org.sakaiproject.util.foorm.SakaiFoorm;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.alias.api.Alias;
@@ -108,7 +110,10 @@ import org.sakaiproject.util.MergedListEntryProviderFixedListWrapper;
 import org.sakaiproject.util.ParameterParser;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.Validator;
-
+import org.sakaiproject.site.api.ToolConfiguration;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * The schedule tool.
@@ -215,12 +220,23 @@ extends VelocityPortletStateAction
 	private final static String ASSN_ENTITY_PREFIX = EntityReference.SEPARATOR+ASSN_ENTITY_ID+EntityReference.SEPARATOR+ASSN_ENTITY_ACTION+EntityReference.SEPARATOR;
    
 	private NumberFormat monthFormat = null;
+	
+	protected HttpServletRequest _request;
+    protected HttpServletResponse _response;
+    public static final String AC_CALENDAR_EVENT = "Adobe Connect Meeting";
 
 	public CalendarAction() {
 		super();
 		aliasService = ComponentManager.get(AliasService.class);
 	}
-	
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException 
+	{
+        _request = req;
+        _response = res;
+        super.doGet(req, res);
+    }
+
 	/**
 	 * Converts a string that is used to store additional attribute fields to an array of strings.
 	 */
@@ -2457,7 +2473,157 @@ extends VelocityPortletStateAction
 		else if (stateName.equals(STATE_SET_FREQUENCY))
 		{
 			buildFrequencyContext(portlet, context, runData, state);
-		}
+        } 
+		else if (stateName.equals(lti_edit) || stateName.equals(lti_delete)) 
+		{
+            final String getServerUrl = ServerConfigurationService.getServerUrl();
+
+            String securityKey = "";
+            CalendarEvent event = getEvent(runData, context);
+            String description = event.getDescriptionFormatted();
+            int startIndex = description.indexOf(">", description.indexOf("id_token_secret"));
+            int endIndex = description.indexOf("<", startIndex);
+            securityKey = description.substring(startIndex+1, endIndex);
+
+            String meetingId = "";
+            startIndex = description.indexOf(">", description.indexOf("id_token_meetingId"));
+            endIndex = description.indexOf("<", startIndex);
+            meetingId = description.substring(startIndex+1, endIndex);
+
+            String siteId = ToolManager.getCurrentPlacement().getContext();
+
+            String toolId = null;
+            String pageId = null;
+			String url = null;
+            try 
+			{
+                Site site = (Site) SiteService.getInstance().getSite(siteId);
+                Collection<ToolConfiguration> tools = site.getTools("sakai.basiclti");
+
+				if(tools.size() > 0) {
+					url = "##SERVER_URL##/portal/site/##SITE_ID##/page/##PAGE_ID##";
+					for (ToolConfiguration tool : tools) {
+						Properties config = tool.getPlacementConfig();
+
+						if (config.getProperty("imsti.key").equals(securityKey)) {
+							toolId = tool.getId();
+							pageId = tool.getPageId();
+						}
+					}
+				}
+				//if tool is not found in site's level tools we try to find it in global LTIs
+				if(toolId == null){
+					tools = site.getTools("sakai.web.168");
+					Map<String,Object> toolMap = null;
+					Long contentKey = null;
+					LTIService ltiService = (LTIService) ComponentManager.get("org.sakaiproject.lti.api.LTIService");
+					url = getServerUrl;
+
+					Map<String,Object> content = null;
+					SakaiFoorm foorm = new SakaiFoorm();
+
+					for (ToolConfiguration tool : tools) {
+
+
+						Properties config = tool.getPlacementConfig();
+
+						if (config.getProperty("source") != null) {
+							M_log.info("config.getProperty(\"source\"): " + config.getProperty("source"));
+
+							String[] split = config.getProperty("source").split(":");
+
+							M_log.info("split: " + split);
+
+							if(split.length == 2)
+								contentKey =  foorm.getLongKey(split[1]);
+
+
+							if ( contentKey >= 0 ) {
+								content = ltiService.getContentDao(contentKey, siteId);
+								if (content != null) {
+									String contentSiteId = (String) content.get(LTIService.LTI_SITE_ID);
+									if (contentSiteId == null || !siteId.equals(contentSiteId)) {
+										content = null;
+									}
+								}
+								if (content != null) {
+									Long toolKey = foorm.getLongKey(content.get(LTIService.LTI_TOOL_ID));
+									if (toolKey >= 0) toolMap = ltiService.getToolDao(toolKey, siteId);
+								}
+							}
+
+
+							M_log.info("toolMap: " + toolMap);
+
+							Object consumerKey = toolMap.get("consumerkey");
+
+							M_log.info("consumerKey: " + consumerKey);
+
+							if(consumerKey != null && consumerKey.equals(securityKey))
+							{
+								url += config.getProperty("source");
+								toolId = tool.getId();
+								pageId = tool.getPageId();
+								break;
+							}
+
+
+						}
+					}
+				}
+				/*else {
+					tools = site.getTools("sakai.web.168");
+					for (ToolConfiguration tool : tools) {
+						Properties config = tool.getPlacementConfig();
+
+						if (config.getProperty("source") != null) {
+
+							toolId = tool.getId();
+							pageId = tool.getPageId();
+						}
+					}
+				}*/
+            } catch (IdUnusedException e) 
+			{
+
+            }
+
+            String urlTemplate = url + "?ltiId=##LTI_ID##%26ltiAction=##LTI_ACTION##%26sakaiId=##SAKAI_ID##";
+            url = StringUtils.replace(urlTemplate, "##SERVER_URL##", getServerUrl);
+            url = StringUtils.replace(url, "##SITE_ID##", siteId);
+            url = StringUtils.replace(url, "##TOOL_ID##", toolId);
+            url = StringUtils.replace(url, "##PAGE_ID##", pageId);
+            url = StringUtils.replace(url, "##LTI_ID##", meetingId);
+            url = StringUtils.replace(url, "##SAKAI_ID##", event.getId());
+            if(stateName.equals(lti_edit))
+                url = StringUtils.replace(url, "##LTI_ACTION##", "edit");
+            else if(stateName.equals(lti_delete))
+                url = StringUtils.replace(url, "##LTI_ACTION##", "delete");
+
+            try 
+			{
+
+                if(state.getState().equals(lti_edit))
+				{
+                    state.setState("description");
+                }
+				else if(state.getState().equals(lti_delete)) 
+				{
+                    state.setPrimaryCalendarEdit(null);
+                    state.setState("week");
+                }
+
+                _response.sendRedirect(_response.encodeRedirectURL(getServerUrl + "/egcint/redirect.jsf?url=" + url));
+
+                return null;
+            } 
+			catch (Exception e)
+			 {
+                M_log.error("Redirect error:");
+                M_log.error(e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
 		if (stateName.equals("description") 
 		        || stateName.equals("year") 
@@ -4605,6 +4771,31 @@ extends VelocityPortletStateAction
 	/**
 	 * Action is used when the user click on the doRevise in the menu
 	 */
+
+	private String lti_edit = "lti_edit";
+    private String lti_delete = "lti_delete";
+
+    private CalendarEvent getEvent(RunData data, Context context) 
+	{
+        CalendarEvent calendarEventObj = null;
+        Calendar calendarObj = null;
+        CalendarActionState state = (CalendarActionState) getState(context, data, CalendarActionState.class);
+        String calId = state.getPrimaryCalendarReference();
+        try 
+		{
+            calendarObj = CalendarService.getCalendar(calId);
+            // get the edit object, and lock the event for the furthur revise
+            calendarEventObj = calendarObj.getEvent(state.getCalendarEventId());
+        } catch (IdUnusedException e) 
+		{
+            e.printStackTrace();
+        } catch (PermissionException e) 
+		{
+            e.printStackTrace();
+        }
+
+        return calendarEventObj;
+    }
 	public void doRevise(RunData data, Context context)
 	{
 		CalendarEvent calendarEventObj = null;
@@ -4631,10 +4822,16 @@ extends VelocityPortletStateAction
 			{
 				String eventId = state.getCalendarEventId();
 				// get the edit object, and lock the event for the furthur revise
+				 calendarEventObj = calendarObj.getEvent(eventId);
+                //FOR LTI events                
+                if (calendarEventObj.getType().equals(AC_CALENDAR_EVENT)) {
+                    state.setState(lti_edit);
+                    return;
+                }
 				CalendarEventEdit edit = calendarObj.getEditEvent(eventId, org.sakaiproject.calendar.api.CalendarService.EVENT_MODIFY_CALENDAR);
 				state.setEdit(edit);
 				state.setPrimaryCalendarEdit(edit);
-				calendarEventObj = calendarObj.getEvent(eventId);
+			
 				state.setAttachments(calendarEventObj.getAttachments());
 			}
 			catch (IdUnusedException err)
@@ -5185,11 +5382,19 @@ extends VelocityPortletStateAction
 			{
 				String eventId = state.getCalendarEventId();
 				// get the edit object, and lock the event for the furthur revise
+				
+				calendarEventObj = calendarObj.getEvent(eventId);
+
+                
+                if (calendarEventObj.getType().equals(AC_CALENDAR_EVENT)) {				
+                    state.setState(lti_delete);
+                    return;
+                }
 				CalendarEventEdit edit = calendarObj.getEditEvent(eventId,
 																				  org.sakaiproject.calendar.api.CalendarService.EVENT_REMOVE_CALENDAR);
 				state.setEdit(edit);
 				state.setPrimaryCalendarEdit(edit);
-				calendarEventObj = calendarObj.getEvent(eventId);
+								
 				state.setAttachments(calendarEventObj.getAttachments());
 				
 				// after deletion, it needs to go back to previous page
