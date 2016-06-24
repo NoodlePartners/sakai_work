@@ -55,6 +55,7 @@ public class EventTypes {
 		eventTypes.add("Quiz");
 		eventTypes.add("Special event");
 		eventTypes.add("Web Assignment");
+		eventTypes.add("Adobe Connect Meeting");
 	}
 
 	private static Map<String, String>	eventTypesToLocalized	= new HashMap<String, String>();
@@ -106,6 +107,7 @@ public class EventTypes {
 		eventTypesToLocalized.put("Quiz", msgs.getString("legend.key14"));
 		eventTypesToLocalized.put("Special event", msgs.getString("legend.key15"));
 		eventTypesToLocalized.put("Web Assignment", msgs.getString("legend.key16"));
+		eventTypesToLocalized.put("Adobe Connect Meeting", msgs.getString("legend.key101"));
 	}
 
 }
