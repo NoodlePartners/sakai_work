@@ -381,7 +381,7 @@ public class BasicLTISecurityServiceImpl implements EntityProducer {
 							doSplash(req, res, splash, rb);
 							return;
 					}
-					retval = SakaiBLTIUtil.postLaunchHTML(content, tool, ltiService, rb);
+					retval = SakaiBLTIUtil.postLaunchHTML(content, tool, ltiService, rb, req);
 				} 
 				else if (refId.startsWith("export:") && refId.length() > 7) 
 				{
@@ -475,7 +475,7 @@ public class BasicLTISecurityServiceImpl implements EntityProducer {
 					}
 
 					// Get the post data for the placement
-					retval = SakaiBLTIUtil.postLaunchHTML(refId, rb);
+					retval = SakaiBLTIUtil.postLaunchHTML(refId, rb, req);
 				}
 
 				try

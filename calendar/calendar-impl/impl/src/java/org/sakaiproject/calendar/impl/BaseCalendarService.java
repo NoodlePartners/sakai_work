@@ -2610,7 +2610,7 @@ public abstract class BaseCalendarService implements CalendarService, DoubleStor
 			edit.setDescription(description);
 			edit.setType(type);
 			edit.setLocation(location);
-         edit.setCreator();
+         	edit.setCreator();
 			
 			// for site...
 			if (access == EventAccess.SITE)
