@@ -441,6 +441,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				return;
 			}
 		}
+
+        UIOutput.make(tofill, "current-pageid", Long.toString(simplePageBean.getCurrentPage().getPageId()));
 		
 		boolean canEditPage = simplePageBean.canEditPage();
 		boolean canReadPage = simplePageBean.canReadPage();
