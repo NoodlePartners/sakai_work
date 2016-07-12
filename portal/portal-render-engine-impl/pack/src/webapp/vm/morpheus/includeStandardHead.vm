@@ -56,7 +56,8 @@
                     "sitenav": false // This is not allowed in morpheus
                 },
                 "pageScriptPath" : "$!{pageScriptPath}",
-                "portalCDNQuery" : "$!{portalCDNQuery}"
+                "portalCDNQuery" : "$!{portalCDNQuery}",
+                'snapPollTimeout': $!{snapPollTimeout}
             };
         </script>
         
