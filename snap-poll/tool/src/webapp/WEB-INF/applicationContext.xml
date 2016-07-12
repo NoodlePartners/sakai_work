@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider"
+		    class="org.sakaiproject.snappoll.tool.entityprovider.SnapPollEntityProvider"
+            init-method="init">
+
+        <property name="emailService"><ref bean="org.sakaiproject.email.api.EmailService"/></property>
+        <property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
+        <property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+        <property name="userDirectoryService"><ref bean="org.sakaiproject.user.api.UserDirectoryService"/></property>
+	</bean>
+
+</beans>
