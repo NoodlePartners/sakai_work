@@ -45,9 +45,13 @@
 
  }
  </script>
+
+ 
+
  </head>
 
  <body rsf:id="scr=sakai-body">
+     <span style="display: none;" rsf:id="current-pageid" id="current-pageid"></span>
  <script type="text/javascript" src="$context/js/jquery-1.9.1.min.js"></script>
  <script type="text/javascript" src="$context/js/jquery-ui-1.11.1.custom.min.js"></script>
  <script rsf:id="datepicker" type="text/javascript" src="/library/js/lang-datepicker/lang-datepicker.js"></script>
@@ -75,7 +79,7 @@
  // to get to the page to remove it. This will be cancelled in the javascript
  // after all content has loaded.
      window.onbeforeunload = function() {
-	 return ""; // default message is OK
+	    return ""; // default message is OK
      }
  </script>
 
@@ -2034,7 +2038,8 @@
          <input type="hidden" rsf:id="csrf22" />
 	 <input type="hidden" rsf:id="delete-item-itemid" id="delete-item-itemid" />
          <input type="submit" rsf:id="delete-item-button" id="delete-item-button" />
-       </form>
+     </form>
 
+     <script type="text/javascript" src="/lessonbuilder-tool/js/snap-poll-integration.js"></script>
 </body>
 </html>

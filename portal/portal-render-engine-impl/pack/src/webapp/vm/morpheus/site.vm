@@ -15,6 +15,23 @@
             ${sakai_html_head_js}
         #end ## END of IF ( ${bufferedResponse} && ${responseHead} )
 
+        <div id="snap-poll">
+            <div id="snap-poll-question">${rloader.snap_poll_question1}</div>
+            <div id="snap-poll-options">
+                <span class="snap-poll-option fa fa-2x fa-frown-o" style="color: #88114A;" data-option="1"></span>
+                <span class="snap-poll-option fa fa-2x fa-frown-o" style="color: #BF6624;" data-option="2"></span>
+                <span class="snap-poll-option fa fa-2x fa-meh-o" style="color: #FCB03F;" data-option="3"></span>
+                <span class="snap-poll-option fa fa-2x fa-smile-o" style="color: #6CBD41;" data-option="4"></span>
+                <span class="snap-poll-option fa fa-2x fa-smile-o" style="color: #007B39;" data-option="5"></span>
+            </div>
+            <div id="snap-poll-comment-title">${rloader.snap_poll_question2}</div>
+            <textarea id="snap-poll-comment-box"></textarea>
+            <div id="snap-poll-buttons">
+                <button id="snap-poll-send" disabled="true">${rloader.snap_poll_send}</button>
+                <button id="snap-poll-ignore">${rloader.snap_poll_ignore}</button>
+            </div>
+        </div>
+
         <div #if( ${roleSwitchState} ) class="Mrphs-portalWrapper swapped-view" #else class="Mrphs-portalWrapper"#end>
 
             ## Skip Nav
