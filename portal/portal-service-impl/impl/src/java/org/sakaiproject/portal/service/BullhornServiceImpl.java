@@ -24,6 +24,7 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
+import org.sakaiproject.portal.api.PortalService;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 //import org.sakaiproject.samigo.util.SamigoConstants;
@@ -52,11 +53,8 @@ import lombok.extern.slf4j.Slf4j;
 @Setter @Slf4j
 public class BullhornServiceImpl implements Observer {
 
-    private final static String SOCIAL_INSERT_SQL
-        = "INSERT INTO SOCIAL_ALERTS (FROM_USER,TO_USER,EVENT,REF,EVENT_DATE,URL) VALUES(?,?,?,?,?,?)";
-
-    private final static String ACADEMIC_INSERT_SQL
-        = "INSERT INTO ACADEMIC_ALERTS (FROM_USER,TO_USER,EVENT,REF,TITLE,SITE_ID,EVENT_DATE,URL) VALUES(?,?,?,?,?,?,?,?)";
+    private final static String BULLHORN_INSERT_SQL
+        = "INSERT INTO BULLHORN_ALERTS (ALERT_TYPE, FROM_USER,TO_USER,EVENT,REF,TITLE,SITE_ID,EVENT_DATE,URL) VALUES(?,?,?,?,?,?,?,?,?)";
 
     private static final List<String> HANDLED_EVENTS = new ArrayList();
 
@@ -309,16 +307,16 @@ public class BullhornServiceImpl implements Observer {
                                             , String title, String siteId, Date eventTime ,String url) {
 
         sqlService.dbInsert(null
-            , ACADEMIC_INSERT_SQL
-            , new Object[] {from, to, event, ref, title, siteId, eventTime, url}
+            , BULLHORN_INSERT_SQL
+            , new Object[] {PortalService.ACADEMIC, from, to, event, ref, title, siteId, eventTime, url}
             , "ID");
     }
 
     private void doSocialInsert(String from, String to, String event, String ref, Date eventTime ,String url) {
 
         sqlService.dbInsert(null
-            , SOCIAL_INSERT_SQL
-            , new Object[] {from, to, event, ref, eventTime, url}
+            , BULLHORN_INSERT_SQL
+            , new Object[] {PortalService.SOCIAL, from, to, event, ref, "", "", eventTime, url}
             , "ID");
     }
 }
