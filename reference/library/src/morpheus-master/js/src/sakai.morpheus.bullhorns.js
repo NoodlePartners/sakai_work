@@ -145,8 +145,14 @@
                                     var title = alert.title;
                                     var siteTitle = alert.siteTitle;
 
+                                    var faClass = 'fa-bullhorn';
+                                    if (alert.event === 'asn.new.assignment'
+                                                                || alert.event === 'asn.grade.submission') {
+                                        faClass = 'fa-file-text';
+                                    }
+
                                     markup += '<a href="' + alert.url + '" style="text-decoration: none;"><div id="portal-bullhorn-alert-' + alert.id + '" class="portal-bullhorn-alert">'
-                                                + '<div class="portal-bullhorn-photo" style="background-image:url(/direct/profile/' + alert.from + '/image/thumb)"></div>'
+                                                + '<div class="portal-bullhorn-icon fa fa-stack"><i class="fa fa-circle fa-stack-2x"></i><i class="fa ' + faClass + ' fa-stack-1x fa-inverse"></i></div>'
                                                 + '<div class="portal-bullhorn-content"><div class="portal-bullhorn-message"><span class="portal-bullhorn-display-name">' + alert.fromDisplayName + '</span>';
 
                                     var message = '';
