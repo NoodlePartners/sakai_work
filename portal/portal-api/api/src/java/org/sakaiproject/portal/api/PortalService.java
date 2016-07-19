@@ -75,6 +75,16 @@ public interface PortalService
 	public static final String SAKAI_CONTROLLING_PORTAL = "sakai-controlling-portal";
 
 	/**
+	 * Used by the bullhorn alerts code
+	 */
+	public static final String ACADEMIC = "ACADEMIC";
+
+	/**
+	 * Used by the bullhorn alerts code
+	 */
+	public static final String SOCIAL = "SOCIAL";
+
+	/**
 	 * The Site ID that the user was originally trying to access when they hit the error.
 	 */
 	String SAKAI_PORTAL_ORIGINAL_SITEID = "SAKAI_PORTAL_ORIGINAL_SITEID";
@@ -336,13 +346,6 @@ public interface PortalService
 	public List<BullhornAlert> getSocialAlerts(String userId);
 
 	/**
-	 * @param userId The user to clear the alert for
-	 * @param alertId The alert to clear
-	 * @return boolean to indicate success
-	 */
-	public boolean clearSocialAlert(String userId, long alertId);
-
-	/**
 	 * @param userId The user to clear the alerts for
 	 * @return boolean to indicate success
 	 */
@@ -365,7 +368,7 @@ public interface PortalService
 	 * @param alertId The alert to clear
 	 * @return boolean to indicate success
 	 */
-	public boolean clearAcademicAlert(String userId, long alertId);
+	public boolean clearBullhornAlert(String userId, long alertId);
 
 	/**
 	 * @param userId The user to clear the alerts for

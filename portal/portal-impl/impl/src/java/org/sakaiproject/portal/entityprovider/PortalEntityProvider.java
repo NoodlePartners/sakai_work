@@ -151,14 +151,14 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 		}
 	}
 
-	@EntityCustomAction(action = "clearSocialAlert", viewKey = EntityView.VIEW_LIST)
-	public boolean clearSocialAlert(Map<String, Object> params) {
+	@EntityCustomAction(action = "clearBullhornAlert", viewKey = EntityView.VIEW_LIST)
+	public boolean clearBullhornAlert(Map<String, Object> params) {
 
 		String currentUserId = getCheckedCurrentUser();
 
 		try {
 			long alertId = Long.parseLong((String) params.get("id"));
-			return portalService.clearSocialAlert(currentUserId, alertId);
+			return portalService.clearBullhornAlert(currentUserId, alertId);
 		} catch (Exception e) {
 			log.error("Failed to clear social alert", e);
 		}
@@ -205,21 +205,6 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 
 			return new ActionReturn(data);
 		}
-	}
-
-	@EntityCustomAction(action = "clearAcademicAlert", viewKey = EntityView.VIEW_LIST)
-	public boolean clearAcademicAlert(Map<String, Object> params) {
-
-		String currentUserId = getCheckedCurrentUser();
-
-		try {
-			long alertId = Long.parseLong((String) params.get("id"));
-			return portalService.clearAcademicAlert(currentUserId, alertId);
-		} catch (Exception e) {
-			log.error("Failed to clear academic alert", e);
-		}
-
-		return false;
 	}
 
 	@EntityCustomAction(action = "clearAllAcademicAlerts", viewKey = EntityView.VIEW_LIST)

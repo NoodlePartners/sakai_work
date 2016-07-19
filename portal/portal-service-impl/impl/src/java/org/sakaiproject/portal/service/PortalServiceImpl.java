@@ -83,6 +83,18 @@ public class PortalServiceImpl implements PortalService
 	 */
 	public static final String PARM_STATE_RESET = "sakai.state.reset";
 
+	private static final String ALERTS_SELECT_SQL =
+				"SELECT * FROM BULLHORN_ALERTS WHERE ALERT_TYPE = ? AND TO_USER = ? ORDER BY EVENT_DATE DESC";
+
+	private static final String ALERTS_COUNT_SQL =
+				"SELECT COUNT(*) FROM BULLHORN_ALERTS WHERE ALERT_TYPE = ? AND TO_USER = ?";
+
+	private static final String ALERT_DELETE_SQL =
+				"DELETE FROM BULLHORN_ALERTS WHERE ID = ? AND TO_USER = ?";
+
+	private static final String ALERTS_DELETE_SQL =
+				"DELETE FROM BULLHORN_ALERTS WHERE ALERT_TYPE = ? AND TO_USER = ?";
+
 	private Map<String, PortalRenderEngine> renderEngines = new ConcurrentHashMap<String, PortalRenderEngine>();
 
 	private Map<String, Map<String, PortalHandler>> handlerMaps = new ConcurrentHashMap<String, Map<String, PortalHandler>>();
@@ -725,9 +737,8 @@ public class PortalServiceImpl implements PortalService
 
 	public List<BullhornAlert> getSocialAlerts(String userId) {
 
-		List<BullhornAlert> alerts = sqlService.dbRead(
-                "SELECT * FROM SOCIAL_ALERTS WHERE TO_USER = ? ORDER BY EVENT_DATE DESC"
-				, new Object[] { userId }
+		List<BullhornAlert> alerts = sqlService.dbRead(ALERTS_SELECT_SQL
+				, new Object[] { SOCIAL, userId }
 				, new SqlReader() {
 						public Object readSqlResultRecord(ResultSet rs) {
 							return new BullhornAlert(rs);
@@ -763,8 +774,8 @@ public class PortalServiceImpl implements PortalService
 		} else {
 			log.debug("bullhorn_alert_count_cache miss");
 
-			List<Integer> counts = sqlService.dbRead("SELECT COUNT(*) FROM SOCIAL_ALERTS WHERE TO_USER = ?"
-			, new Object[] { userId }
+			List<Integer> counts = sqlService.dbRead(ALERTS_COUNT_SQL
+			, new Object[] { SOCIAL, userId }
 			, new SqlReader() {
 					public Object readSqlResultRecord(ResultSet rs) {
 
@@ -784,9 +795,9 @@ public class PortalServiceImpl implements PortalService
 		}
 	}
 
-	public boolean clearSocialAlert(String userId, long alertId) {
+	public boolean clearBullhornAlert(String userId, long alertId) {
 
-		sqlService.dbWrite("DELETE FROM SOCIAL_ALERTS WHERE ID = ? AND TO_USER = ?"
+		sqlService.dbWrite(ALERT_DELETE_SQL
 						, new Object[] {alertId, userId});
 
 		Cache countCache = memoryService.newCache("bullhorn_alert_count_cache");
@@ -797,8 +808,8 @@ public class PortalServiceImpl implements PortalService
 
 	public boolean clearAllSocialAlerts(String userId) {
 
-		sqlService.dbWrite("DELETE FROM SOCIAL_ALERTS WHERE TO_USER = ?"
-						, new Object[] {userId});
+		sqlService.dbWrite(ALERTS_DELETE_SQL
+						, new Object[] {SOCIAL, userId});
 
 		Cache countCache = memoryService.newCache("bullhorn_alert_count_cache");
 		countCache.remove(userId);
@@ -808,9 +819,8 @@ public class PortalServiceImpl implements PortalService
 
 	public List<BullhornAlert> getAcademicAlerts(String userId) {
 
-		List<BullhornAlert> alerts = sqlService.dbRead(
-                "SELECT * FROM ACADEMIC_ALERTS WHERE TO_USER = ? ORDER BY EVENT_DATE DESC"
-				, new Object[] { userId }
+		List<BullhornAlert> alerts = sqlService.dbRead(ALERTS_SELECT_SQL
+				, new Object[] { ACADEMIC, userId }
 				, new SqlReader() {
 						public Object readSqlResultRecord(ResultSet rs) {
 							return new BullhornAlert(rs);
@@ -850,8 +860,8 @@ public class PortalServiceImpl implements PortalService
 			return count;
 		} else {
 			log.debug("bullhorn_alert_count_cache miss");
-			List<Integer> counts = sqlService.dbRead("SELECT COUNT(*) FROM ACADEMIC_ALERTS WHERE TO_USER = ?"
-				, new Object[] { userId }
+			List<Integer> counts = sqlService.dbRead(ALERTS_COUNT_SQL
+				, new Object[] { ACADEMIC, userId }
 				, new SqlReader() {
 						public Object readSqlResultRecord(ResultSet rs) {
 
@@ -871,21 +881,10 @@ public class PortalServiceImpl implements PortalService
 		}
 	}
 
-	public boolean clearAcademicAlert(String userId, long alertId) {
-
-		sqlService.dbWrite("DELETE FROM ACADEMIC_ALERTS WHERE ID = ? AND TO_USER = ?"
-						, new Object[] {alertId, userId});
-
-		Cache countCache = memoryService.newCache("bullhorn_alert_count_cache");
-		countCache.remove(userId);
-
-		return true;
-	}
-
 	public boolean clearAllAcademicAlerts(String userId) {
 
-		sqlService.dbWrite("DELETE FROM ACADEMIC_ALERTS WHERE TO_USER = ?"
-						, new Object[] {userId});
+		sqlService.dbWrite(ALERTS_DELETE_SQL
+						, new Object[] {ACADEMIC, userId});
 
 		Cache countCache = memoryService.newCache("bullhorn_alert_count_cache");
 		countCache.remove(userId);
