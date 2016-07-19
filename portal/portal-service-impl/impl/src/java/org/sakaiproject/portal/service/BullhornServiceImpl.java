@@ -118,12 +118,11 @@ public class BullhornServiceImpl implements Observer {
                         if (ProfileConstants.EVENT_WALL_ITEM_NEW.equals(event)) {
                             String to = pathParts[2];
                             if (!to.equals(from)) {
-                                String wallItemId = pathParts[5];
-                                WallItem wallItem
-                                    = profileWallLogic.getWallItem(Long.parseLong(wallItemId));
-                                String oldUserId = switchUser(to);
-                                String url = profileLinkLogic.getInternalDirectUrlToUserWall(to, wallItemId);
-                                switchUser(oldUserId);
+                                String siteId = "~" + to;
+                                Site site = siteService.getSite(siteId);
+                                String toolId = site.getToolForCommonId("sakai.profile2").getId();
+                                String url = serverConfigurationService.getPortalUrl() + "/site/" + siteId
+                                                                        + "/tool/" + toolId + "/profile/wall";
                                 doSocialInsert(from, to, event, ref, e.getEventTime(), url);
                                 countCache.remove(to);
                             }
@@ -158,14 +157,11 @@ public class BullhornServiceImpl implements Observer {
                             switchUser(oldUserId);
                         } else if (ProfileConstants.EVENT_FRIEND_REQUEST.equals(event)) {
                             String to = pathParts[2];
-                            String oldUserId = switchUser(to);
                             String siteId = "~" + to;
                             Site site = siteService.getSite(siteId);
                             String toolId = site.getToolForCommonId("sakai.profile2").getId();
-                            String url = serverConfigurationService.getPortalUrl() + "/site/"
-                                                                            + siteId + "/tool/" + toolId + "/connections";
-
-                            switchUser(oldUserId);
+                            String url = serverConfigurationService.getPortalUrl() + "/site/" + siteId
+                                                                        + "/tool/" + toolId + "/connections";
                             doSocialInsert(from, to, event, ref, e.getEventTime(), url);
                             countCache.remove(to);
                         } else if (ProfileConstants.EVENT_FRIEND_CONFIRM.equals(event)
@@ -180,13 +176,11 @@ public class BullhornServiceImpl implements Observer {
                             countCache.remove(from);
                         } else if (ProfileConstants.EVENT_MESSAGE_SENT.equals(event)) {
                             String to = pathParts[2];
-                            String oldUserId = switchUser(to);
                             String siteId = "~" + to;
                             Site site = siteService.getSite(siteId);
                             String toolId = site.getToolForCommonId("sakai.profile2").getId();
-                            String url = serverConfigurationService.getPortalUrl() + "/site/"
-                                                                            + siteId + "/tool/" + toolId + "/messages";
-                            switchUser(oldUserId);
+                            String url = serverConfigurationService.getPortalUrl() + "/site/" + siteId
+                                                                        + "/tool/" + toolId + "/messages";
                             doSocialInsert(from, to, event, ref, e.getEventTime(), url);
                             countCache.remove(to);
                         } else if (AnnouncementService.SECURE_ANNC_ADD.equals(event)) {
