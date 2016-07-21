@@ -53,9 +53,9 @@
     $(document).ready(function () {
 
         portal.socialBullhorn.qtip({
-            position: { viewport: $(window), adjust: { method: 'flipinvert none'} },
+            position: { adjust: { scroll: false }, my: 'top right', at: 'bottom left', target: portal.socialBullhorn },
             show: { event: 'click', delay: 0, solo: portal.academicBullhorn },
-            style: { classes: 'portal-bullhorns', width: '450px' },
+            style: { classes: 'portal-bullhorns' },
             hide: { event: 'click unfocus' },
             content: {
                 text: function (event, api) {
@@ -115,9 +115,9 @@
         });
 
         portal.academicBullhorn.qtip({
-            position: { viewport: $(window), adjust: { method: 'flipinvert none'} },
+            position: { adjust: { scroll: false }, my: 'top right', at: 'bottom left', target: portal.socialBullhorn },
             show: { event: 'click', delay: 0, solo: portal.socialBullhorn },
-            style: { classes: 'portal-bullhorns', width: '450px' },
+            style: { classes: 'portal-bullhorns' },
             hide: { event: 'click unfocus' },
             content: {
                 text: function (event, api) {

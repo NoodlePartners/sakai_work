@@ -38,7 +38,12 @@
 
 .portal-bullhorn-alerts {
     padding-bottom: 5px;
-    width: 450px;
+    @media #{$nonPhone} {
+        width: 450px;
+    }
+    @media #{$phone} {
+        width: 240px;
+    }
 
     .portal-bullhorn-alert {
         overflow: auto;
@@ -61,7 +66,12 @@
         }
         .portal-bullhorn-content {
             float: left;
-            width: 390px;
+            @media #{$nonPhone} {
+                width: 390px;
+            }
+            @media #{$phone} {
+                width: 180px;
+            }
 
             .portal-bullhorn-message {
                 margin-left: 7px;
