@@ -378,5 +378,33 @@
         <property name="sessionManager"            ><ref bean="org.sakaiproject.tool.api.SessionManager"                    /></property>
         <property name="userDirectoryService"      ><ref bean="org.sakaiproject.user.api.UserDirectoryService"              /></property>
     </bean>
-   
+
+    <bean id="org.sakaiproject.component.app.scheduler.jobs.MakeFriendsJob"
+        class="org.sakaiproject.component.app.scheduler.jobs.MakeFriendsJob"
+        init-method="init">
+            <property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService" /></property>
+    </bean>
+    
+    <bean id="org.sakaiproject.component.app.scheduler.jobs.MakeFriendsJobBeanWrapper"
+        class="org.sakaiproject.component.app.scheduler.jobs.SpringJobBeanWrapper"
+        init-method="init">
+        <property name="jobName" value="Make Friends" />
+        <property name="beanId" value="org.sakaiproject.component.app.scheduler.jobs.MakeFriendsJob" />
+        <property name="schedulerManager" ref="org.sakaiproject.api.app.scheduler.SchedulerManager" />
+    </bean>
+
+    <bean id="org.sakaiproject.component.app.scheduler.jobs.DeleteAdobeMtgsJob"
+        class="org.sakaiproject.component.app.scheduler.jobs.DeleteAdobeMtgsJob"
+        init-method="init">
+            <property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService" /></property>
+    </bean>
+    
+    <bean id="org.sakaiproject.component.app.scheduler.jobs.DeleteAdobeMtgsJobBeanWrapper"
+        class="org.sakaiproject.component.app.scheduler.jobs.SpringJobBeanWrapper"
+        init-method="init">
+        <property name="jobName" value="Delete Adobe Connect Meetings" />
+        <property name="beanId" value="org.sakaiproject.component.app.scheduler.jobs.DeleteAdobeMtgsJob" />
+        <property name="schedulerManager" ref="org.sakaiproject.api.app.scheduler.SchedulerManager" />
+    </bean>
+
 </beans>
