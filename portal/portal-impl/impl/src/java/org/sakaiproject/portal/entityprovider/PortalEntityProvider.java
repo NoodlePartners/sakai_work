@@ -77,11 +77,15 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 		VelocityEngine ve = new VelocityEngine();
 		ve.setProperty("resource.loader", "class");
 		ve.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		// No logging. (If you want to log, you need to set an approrpriate directory in an approrpriate
+		// velocity.properties file, or the log will be created in the directory in which tomcat is started, or
+		// throw an error if it can't create/write in that directory.)
+		ve.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.NullLogSystem");
 		try {
 			ve.init();
 			formattedProfileTemplate = ve.getTemplate("org/sakaiproject/portal/entityprovider/profile-popup.vm");
 		} catch (Exception e) {
-			log.error("Failed to load formatted_profile.vm", e);
+			log.error("Failed to load profile-popup.vm", e);
 		}
 	}
 
