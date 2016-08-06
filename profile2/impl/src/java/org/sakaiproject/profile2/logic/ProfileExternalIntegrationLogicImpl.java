@@ -52,6 +52,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public ExternalIntegrationInfo getExternalIntegrationInfo(String userUuid) {
 		ExternalIntegrationInfo info = dao.getExternalIntegrationInfo(userUuid);
 		if(info != null) {
@@ -63,6 +64,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean updateExternalIntegrationInfo(ExternalIntegrationInfo info) {
 		if(dao.updateExternalIntegrationInfo(info)){
 			log.info("ExternalIntegrationInfo updated for user: " + info.getUserUuid());
@@ -74,6 +76,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public Map<String,String> getTwitterOAuthConsumerDetails() {
 		
 		Map<String,String> map = new HashMap<String,String>();
@@ -86,6 +89,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public String getTwitterName(ExternalIntegrationInfo info) {
 		
 		if(info == null){
@@ -123,6 +127,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public boolean validateTwitterCredentials(ExternalIntegrationInfo info) {
 		return StringUtils.isNotBlank(getTwitterName(info));
 	}
@@ -130,6 +135,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public void sendMessageToTwitter(final String userUuid, String message){
 		//setup class thread to call later
 		class TwitterUpdater implements Runnable{
@@ -151,6 +157,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 			
 
 			//do it!
+			@Override
 			public synchronized void run() {
 				
 				//global config
@@ -202,6 +209,7 @@ public class ProfileExternalIntegrationLogicImpl implements ProfileExternalInteg
 	/**
  	 * {@inheritDoc}
  	 */
+	@Override
 	public String getGoogleAuthenticationUrl() {
 		
 		String clientId = sakaiProxy.getServerConfigurationParameter("profile2.integration.google.client-id", null);
