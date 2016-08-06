@@ -162,7 +162,6 @@ public class ProfileSearchLogicImpl implements ProfileSearchLogic {
 							.values());
 
 			Collections.sort(searchHistory);
-
 			return searchHistory;
 		} else {
 			return null;
