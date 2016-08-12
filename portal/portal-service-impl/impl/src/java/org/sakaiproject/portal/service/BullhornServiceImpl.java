@@ -165,7 +165,7 @@ public class BullhornServiceImpl implements Observer {
                         } else if (ProfileConstants.EVENT_FRIEND_CONFIRM.equals(event)
                                     || ProfileConstants.EVENT_FRIEND_IGNORE.equals(event)) {
                             String to = pathParts[2];
-                            sqlService.dbWrite("DELETE FROM SOCIAL_ALERTS WHERE EVENT = ? AND FROM_USER = ?"
+                            sqlService.dbWrite("DELETE FROM BULLHORN_ALERTS WHERE EVENT = ? AND FROM_USER = ?"
                                     , new Object[] {ProfileConstants.EVENT_FRIEND_REQUEST, to});
                             String oldUserId = switchUser(to);
                             String url = profileLinkLogic.getInternalDirectUrlToUserConnections();
