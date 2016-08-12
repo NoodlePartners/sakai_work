@@ -87,6 +87,8 @@
                                         markup += data.i18n.friendConfirm;
                                     } else if (alert.event === 'profile.message.sent') {
                                         markup += data.i18n.message;
+                                    } else {
+                                        markup += data.i18n.unrecognisedAlert;
                                     }
 
                                     var time = formatDate(alert.eventDate);
@@ -158,6 +160,8 @@
                                     } else if (alert.event === 'asn.grade.submission') {
                                         message
                                             = data.i18n.assignmentSubmissionGraded.replace('{0}', title).replace('{1}', siteTitle);
+                                    } else {
+                                        markup += data.i18n.unrecognisedAlert;
                                     }
 
                                     var time = formatDate(alert.eventDate);
