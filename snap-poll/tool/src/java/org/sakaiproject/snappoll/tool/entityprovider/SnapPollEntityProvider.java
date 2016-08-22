@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.email.api.EmailService;
@@ -39,7 +40,12 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
     private final static String SUPPORT_EMAIL_SUBJECT_PROP = "snappoll.supportEmailSubject";
     private final static String SUPPORT_EMAIL_MESSAGE_TEMPLATE_PROP = "snappoll.supportEmailMessageTemplate";
     private final static String THROTTLE_HOURS_PROP = "snappoll.throttleHours";
-    private final static String MAX_SHOWS_PER_COURSE_PROP = "snappoll.maxShowsPerCourse";
+    private final static String MOD_OF_SHOWS_IN_COURSE_PROP = "snappoll.modShowsInCourse";
+    // TODO: This should not be hard coded.  What is the appropriate way to do it?
+    private final static String SESSIONS_PAGE_TITLE_PROP = "snappoll.sessionsPageTitle";
+    private final static String SESSIONS_PAGE_TITLE_DEFAULT = "Sessions";
+    private final static String EXAM_PAGE_TITLE_PROP = "snappoll.examPageTitle";
+    private final static String EXAM_PAGE_TITLE_DEFAULT = "Exam";
 
     // Poll show timeouts are controlled by portal.snapPollTimeout in properties. See SkinnableCharonPortal.java.
 
@@ -76,26 +82,26 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
             throw new EntityException("Bad request", "", HttpServletResponse.SC_BAD_REQUEST);
         }
 
-        // Count shows for this user and site/course.
-        List<String> ids = sqlService.dbRead(
-                "SELECT ID FROM SNAP_POLL_SUBMISSION WHERE USER_ID = '" + userId + "' AND SITE_ID = '" + siteId + "'");
-
-        int numberOfShowsForCourse = ids.size();
-
         if (log.isDebugEnabled()) {
-            log.debug("Number shows for this user and site/course: " + numberOfShowsForCourse);
+            log.debug("handleShowPollNow('" + siteId + "','" + tool + "','" + context + "')");
         }
 
-        int maxShowsPerCourse = serverConfigurationService.getInt(MAX_SHOWS_PER_COURSE_PROP, 4);
-
-        if (numberOfShowsForCourse >= maxShowsPerCourse) {
+        // We only have an algorithm for the lessons tool, so do nothing anywhere else
+        if (!tool.equals("lessons")) {
+            if (log.isDebugEnabled()) {
+                log.debug("tool is " + tool);
+            }
             return "false";
         }
-
+        
         // Work out whether a poll has been shown to this user in the throttle period
-        List<Long> times = sqlService.dbRead(
-                "SELECT MAX(SUBMITTED_TIME) FROM SNAP_POLL_SUBMISSION WHERE USER_ID = ?"
-                    , new Object[] {userId}
+        // or we've already shown a poll on this page
+        int throttleHours = serverConfigurationService.getInt(THROTTLE_HOURS_PROP, 24);
+        long throttleStart = new Date().getTime()/1000L - throttleHours*3600;
+        List<Long> counts = sqlService.dbRead(
+                "SELECT COUNT(*) FROM SNAP_POLL_SUBMISSION WHERE USER_ID = ? " +
+                "AND (SUBMITTED_TIME > ? OR (SITE_ID = ? AND TOOL = ? AND CONTEXT = ?))"
+                    , new Object[] {userId, throttleStart, siteId, tool, context}
                     , new SqlReader<Long>() {
                         public Long readSqlResultRecord(ResultSet rs){
                             try {
@@ -106,41 +112,76 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
                         }
                     });
 
-        if (times.size() == 1) {
-            Long lastShow = times.get(0);
-            if (lastShow > 0L) {
-                int throttleHours = serverConfigurationService.getInt(THROTTLE_HOURS_PROP, 24);
-                if (lastShow > (new Date().getTime() - throttleHours*3600000) ) {
-                    return "false";
+        if (counts.size() == 1) {
+            if (counts.get(0) > 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Already shown");
                 }
-            }
-        } else {
-            log.warn("Only one max time should be returned. Something is wrong.");
-        }
-
-        // Now count shows for this tool and context, too.
-        ids = sqlService.dbRead(
-                "SELECT ID FROM SNAP_POLL_SUBMISSION WHERE USER_ID = '" + userId
-                    + "' AND SITE_ID = '" + siteId
-                    + "' AND TOOL = '" + tool
-                    + "' AND CONTEXT = '" + context + "'");
-
-        int numberOfShowsForToolContext = ids.size();
-
-        if (log.isDebugEnabled()) {
-            log.debug("Number shows for this tool and context: " + numberOfShowsForToolContext);
-        }
-
-        if (numberOfShowsForToolContext == 0) {
-            // No poll has been shown for this site-tool-context.
-            if (Math.random() <= 0.5D) {
-                return "true";
-            } else {
                 return "false";
             }
         } else {
+            log.error("Only one count should be returned. Something is wrong.");
+        }
+
+        // make sure that the page we're on is one of the sub-pages of "Sessions" lesson_builder_page
+        // Ignore any Sessions that are exams
+        String sessionsPageTitle = serverConfigurationService.getString(
+                SESSIONS_PAGE_TITLE_PROP, SESSIONS_PAGE_TITLE_DEFAULT);
+        String examPageTitle = serverConfigurationService.getString(
+                EXAM_PAGE_TITLE_PROP, EXAM_PAGE_TITLE_DEFAULT);
+
+        // TODO: we should find a way to cache this, as it is the same for everyone in the course,
+        // every time we show a lesson
+        List<String> sessionPageIds = sqlService.dbRead(
+                  "SELECT p2.pageId FROM lesson_builder_pages p1 " +
+                  "INNER JOIN lesson_builder_items i1 " +
+                  "ON i1.pageId = p1.pageId AND i1.type=2 " +
+                  "INNER JOIN lesson_builder_pages p2 " +
+                  "ON p2.pageId = i1.sakaiId " +
+                  "WHERE p1.siteId = ? " +
+                  "AND p1.title=? " +
+                  "AND p2.title NOT LIKE ? " +
+                  "AND p2.title NOT LIKE ? " +
+                  "AND p2.title NOT LIKE ? " +
+                  "AND p2.title NOT LIKE ? " +
+                  "ORDER BY i1.sequence",
+                new Object[] {siteId, sessionsPageTitle,
+                  examPageTitle, "% "+examPageTitle, examPageTitle+" %", "% "+examPageTitle+" %"},
+                null);
+
+        int position = -1;
+        int i = 0;
+        for (String spId : sessionPageIds) {
+            if (log.isDebugEnabled()) {
+                log.debug("checking: " + spId + " ==? " + context);
+            }
+            if (spId.equals(context)) {
+                position = i;
+                break;
+            }
+            i++;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("current page was found in list of lesson pages at position: " + position);
+        }
+        if (position < 0) {
             return "false";
         }
+
+        // Make a hash of the userId, and siteID, and then 
+        int modShowsInCourse = serverConfigurationService.getInt(MOD_OF_SHOWS_IN_COURSE_PROP, 3);
+        // Do an extra mod on the hashCode to avoid an int overflow
+        int showMod = (((userId+siteId).hashCode()%modShowsInCourse)+position)%modShowsInCourse;
+        
+        if (log.isDebugEnabled()) {
+            log.debug("showMod is " + showMod);
+        }
+        if (showMod == 0) {
+            return "true";
+        } else {
+            return "false";
+        }
+
     }
 
     @EntityCustomAction(action = "ignore", viewKey = EntityView.VIEW_LIST)
@@ -157,7 +198,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         }
 
         String id = UUID.randomUUID().toString();
-        long epochSeconds = new Date().getTime()/1000;
+        long epochSeconds = new Date().getTime()/1000L;
         boolean success = sqlService.dbWrite(
             "INSERT INTO SNAP_POLL_SUBMISSION (ID, USER_ID, SITE_ID, TOOL, CONTEXT, IGNORED, SUBMITTED_TIME) VALUES(?,?,?,?,?,?,?)"
                                 , new Object[] {id, userId, siteId, tool, context, "1", epochSeconds});
@@ -195,7 +236,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         }
 
         String id = UUID.randomUUID().toString();
-        long epochSeconds = new Date().getTime()/1000;
+        long epochSeconds = new Date().getTime()/1000L;
         boolean success = sqlService.dbWrite(
             "INSERT INTO SNAP_POLL_SUBMISSION (ID, USER_ID, SITE_ID, RESPONSE, REASON, TOOL, CONTEXT, SUBMITTED_TIME) VALUES(?,?,?,?,?,?,?,?)"
                                 , new Object[] {id, userId, siteId, response, reason, tool, context, epochSeconds});
@@ -221,10 +262,19 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
                     String displayName = user.getDisplayName();
                     String subject = serverConfigurationService.getString(SUPPORT_EMAIL_SUBJECT_PROP
                                                     , "Snappoll Response");
+                    // TODO: This sort of string replacement is sort of ugly.
                     String messageTemplate = serverConfigurationService.getString(SUPPORT_EMAIL_MESSAGE_TEMPLATE_PROP
-                                                    , "{0} responded to a snap poll with a {1}. Reason given: {2}");
+                                                    , "{0} responded to a snap poll on {1}: {2} with a {3}. Reason given: {4}");
                     String message
-                        = messageTemplate.replace("{0}", displayName).replace("{1}", response).replace("{2}", reason);
+                        = messageTemplate
+                            .replace("{0}", displayName)
+                            .replace("{1}", getSiteName(siteId))
+                            .replace("{2}", getPageName(tool, context))
+                            .replace("{3}", response)
+                            .replace("{4}", reason);
+                    if (log.isDebugEnabled()) {
+                        log.debug("email message is " + message);
+                    }
                     emailService.send(from, supportEmailAddress, subject, message, null, user.getEmail(), null);
                 } catch (UserNotDefinedException unde) {
                     log.error("Failed sending support email from snap poll. No user for user id '" + userId + "'.");
@@ -242,5 +292,36 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         }
 
         return userId;
+    }
+
+    // Get the name of a site by siteId
+    // Cloned from samigo/samigo-services/src/java/org/sakaiproject/tool/assessment/integration/helper/integrated/AgentHelperImpl.java
+    private String getSiteName(String siteId){
+        String siteName="";
+        try{
+            siteName = SiteService.getSite(siteId).getTitle();
+        }
+        catch (Exception ex){
+            log.warn("getSiteName : " + ex.getMessage());
+            log.warn("SiteService not available.  " +
+                  "This needs to be fixed if you are not running a unit test.");
+        }
+        return siteName;
+    }
+
+    // TODO: This can be done using the API, which will permit caching
+    private String getPageName(String tool, String context) {
+        if (!tool.equals("lessons")) {
+            return "";
+        }
+        List<String> titles = sqlService.dbRead(
+                "SELECT title FROM lesson_builder_pages WHERE pageId = ?",
+                new Object[] {context},
+                null);
+        if (titles.size() == 1) {
+            return titles.get(0);
+        }
+        log.error("Only one title should be returned. Something is wrong.");
+        return "";
     }
 }
