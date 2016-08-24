@@ -26,6 +26,8 @@ import org.sakaiproject.entitybroker.util.AbstractEntityProvider;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.exception.IdUnusedException;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -89,7 +91,14 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         // We only have an algorithm for the lessons tool, so do nothing anywhere else
         if (!tool.equals("lessons")) {
             if (log.isDebugEnabled()) {
-                log.debug("tool is " + tool);
+                log.debug("tool is " + tool + ", not allowed");
+            }
+            return "false";
+        }
+
+        if (!canTakePolls(siteId, userId)) {
+            if (log.isDebugEnabled()) {
+                log.debug("user can't take polls");
             }
             return "false";
         }
@@ -294,6 +303,32 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         return userId;
     }
 
+    // Figure out if the user is allowed to take polls
+    private boolean canTakePolls(String siteId, String userId) {
+        Site site = null;
+        try {
+            site = SiteService.getSite(siteId);
+        } catch (IdUnusedException ex) {
+            log.error("Unused site passed to canTakePolls: " + site);
+        }
+        if (site==null) {
+            return false;
+        }
+        // The site must be a course and the user must be a student
+        String siteType = site.getType();
+        if (log.isDebugEnabled()) {
+            log.debug("siteType is " + siteType);
+        }
+        if (!siteType.equals("course")) {
+            return false;
+        }
+        boolean isStudent = site.isAllowed(userId, "section.role.student");
+        if (log.isDebugEnabled()) {
+            log.debug("isStudent is " + isStudent);
+        }
+        return (isStudent);
+    }
+    
     // Get the name of a site by siteId
     // Cloned from samigo/samigo-services/src/java/org/sakaiproject/tool/assessment/integration/helper/integrated/AgentHelperImpl.java
     private String getSiteName(String siteId){
