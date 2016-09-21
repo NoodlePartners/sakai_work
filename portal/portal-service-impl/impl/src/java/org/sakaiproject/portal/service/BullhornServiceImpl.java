@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Observer;
 import java.util.Observable;
 
+import org.sakaiproject.announcement.api.AnnouncementMessage;
 import org.sakaiproject.announcement.api.AnnouncementMessageHeader;
 import org.sakaiproject.announcement.api.AnnouncementService;
 import org.sakaiproject.assignment.api.Assignment;
@@ -185,29 +186,34 @@ public class BullhornServiceImpl implements Observer {
                             String siteId = pathParts[3];
                             String announcementId = pathParts[pathParts.length - 1];
 
+                            SecurityAdvisor sa = unlock();
                             try {
-                                Site site = siteService.getSite(siteId);
-                                String toolId = site.getToolForCommonId("sakai.announcements").getId();
-                                String url = serverConfigurationService.getPortalUrl() + "/directtool/" + toolId
-                                                    + "?itemReference=" + ref + "&sakai_action=doShowmetadata";
+                                AnnouncementMessage message
+                                    = (AnnouncementMessage) announcementService.getMessage(
+                                                                    entityManager.newReference(ref));
 
-                                SecurityAdvisor sa = unlock();
+                                if (announcementService.isMessageViewable(message)) {
+                                    Site site = siteService.getSite(siteId);
+                                    String toolId = site.getToolForCommonId("sakai.announcements").getId();
+                                    String url = serverConfigurationService.getPortalUrl() + "/directtool/" + toolId
+                                                        + "?itemReference=" + ref + "&sakai_action=doShowmetadata";
 
-                                // In this case title = announcement subject
-                                String title
-                                    = ((AnnouncementMessageHeader) announcementService.getMessage(entityManager.newReference(ref)).getHeader()).getSubject();
+                                    // In this case title = announcement subject
+                                    String title
+                                        = ((AnnouncementMessageHeader) message.getHeader()).getSubject();
 
-                                lock(sa);
-
-                                // Get all the members of the site with read ability
-                                for (String  to : site.getUsersIsAllowed(AnnouncementService.SECURE_ANNC_READ)) {
-                                    if (!from.equals(to) && !securityService.isSuperUser(to)) {
-                                        doAcademicInsert(from, to, event, ref, title, siteId, e.getEventTime(), url);
-                                        countCache.remove(to);
+                                    // Get all the members of the site with read ability
+                                    for (String  to : site.getUsersIsAllowed(AnnouncementService.SECURE_ANNC_READ)) {
+                                        if (!from.equals(to) && !securityService.isSuperUser(to)) {
+                                            doAcademicInsert(from, to, event, ref, title, siteId, e.getEventTime(), url);
+                                            countCache.remove(to);
+                                        }
                                     }
                                 }
                             } catch (IdUnusedException idue) {
                                 log.error("No site with id '" + siteId + "'", idue);
+                            } finally {
+                                lock(sa);
                             }
                         } else if (AssignmentConstants.EVENT_ADD_ASSIGNMENT.equals(event)) {
                             String siteId = pathParts[3];
