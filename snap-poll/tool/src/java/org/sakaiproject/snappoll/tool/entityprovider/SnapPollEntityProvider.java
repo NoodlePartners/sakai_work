@@ -14,6 +14,8 @@ import org.sakaiproject.site.cover.SiteService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.email.api.EmailService;
+import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
+import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entitybroker.EntityView;
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityCustomAction;
 import org.sakaiproject.entitybroker.entityprovider.capabilities.ActionsExecutable;
@@ -321,6 +323,18 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         }
         if (!siteType.equals("course")) {
             return false;
+        }
+        try {
+            if (site.getProperties().getBooleanProperty("snappoll.disabled")) {
+                log.debug("snappoll.disabled is true");
+                return false;
+            } else {
+                log.debug("snappoll.disabled is false");
+            }
+        } catch (EntityPropertyNotDefinedException nde) {
+            log.debug("snappoll.disabled not defined");
+        } catch (EntityPropertyTypeException pte) {
+            log.error("snappoll.disabled set for site id " + siteId + ", but is not a boolean.");
         }
         boolean isStudent = site.isAllowed(userId, "section.role.student");
         if (log.isDebugEnabled()) {
