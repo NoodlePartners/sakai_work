@@ -325,16 +325,18 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
             return false;
         }
         try {
-            if (site.getProperties().getBooleanProperty("snappoll.disabled")) {
-                log.debug("snappoll.disabled is true");
-                return false;
+            if (site.getProperties().getBooleanProperty("snappoll.enabled")) {
+                log.debug("snappoll.enabled is true");
             } else {
-                log.debug("snappoll.disabled is false");
+                log.debug("snappoll.enabled is false");
+                return false;
             }
         } catch (EntityPropertyNotDefinedException nde) {
-            log.debug("snappoll.disabled not defined");
+            log.debug("snappoll.enabled not defined");
+			return false;
         } catch (EntityPropertyTypeException pte) {
-            log.error("snappoll.disabled set for site id " + siteId + ", but is not a boolean.");
+            log.error("snappoll.enabled set for site id " + siteId + ", but is not a boolean.");
+			return false;
         }
         boolean isStudent = site.isAllowed(userId, "section.role.student");
         if (log.isDebugEnabled()) {
