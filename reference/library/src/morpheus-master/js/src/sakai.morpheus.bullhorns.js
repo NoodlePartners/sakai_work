@@ -87,6 +87,8 @@
                                         markup += data.i18n.friendConfirm;
                                     } else if (alert.event === 'profile.message.sent') {
                                         markup += data.i18n.message;
+                                    } else if (alert.event === 'commons.comment.created') {
+                                        markup += data.i18n.commentCreated;
                                     } else {
                                         markup += data.i18n.unrecognisedAlert;
                                     }
