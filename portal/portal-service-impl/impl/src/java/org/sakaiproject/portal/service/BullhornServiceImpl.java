@@ -1,5 +1,6 @@
 package org.sakaiproject.portal.service;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -18,6 +19,7 @@ import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.component.api.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.event.api.Event;
@@ -60,6 +62,7 @@ public class BullhornServiceImpl implements Observer {
     private static final List<String> HANDLED_EVENTS = new ArrayList();
 
     private final static String ASSESSMENT_PUBLISH = "sam.assessment.publish";
+    private final static String COMMONS_COMMENT_CREATED = "commons.comment.created";
 
     private AnnouncementService announcementService;
     //private SamigoApi samigoApi;
@@ -77,8 +80,34 @@ public class BullhornServiceImpl implements Observer {
     private ServerConfigurationService serverConfigurationService;
     private SiteService siteService;
     private SqlService sqlService;
+    private Object commonsManager;
+    private Method commonsManagerGetPostMethod;
+    private Method commonsPostGetCreatorIdMethod;
+    private Method commonsPostGetSiteIdMethod;
+
+    private boolean commonsInstalled = false;
 
     public void init() {
+
+        try {
+            Class postClass = Class.forName("org.sakaiproject.commons.api.datamodel.Post");
+            if (postClass != null) {
+                log.debug("Found commons Post class. Commons IS installed.");
+                commonsInstalled = true;
+                commonsPostGetCreatorIdMethod = postClass.getMethod("getCreatorId", new Class[] {});
+                commonsPostGetSiteIdMethod = postClass.getMethod("getSiteId", new Class[] {});
+                ComponentManager componentManager = org.sakaiproject.component.cover.ComponentManager.getInstance();
+                commonsManager = componentManager.get("org.sakaiproject.commons.api.CommonsManager");
+                if (commonsManager != null) {
+                    commonsManagerGetPostMethod
+                        = commonsManager.getClass().getMethod("getPost", new Class[] { String.class, boolean.class });
+                }
+            } else {
+                log.debug("Commons IS NOT installed.");
+            }
+        } catch (Exception e) {
+            log.debug("Failed to setup stubs for commons tool", e);
+        }
 
         if (serverConfigurationService.getBoolean("useBullhornAlerts", true)) {
             HANDLED_EVENTS.add(ProfileConstants.EVENT_WALL_ITEM_NEW);
@@ -92,6 +121,7 @@ public class BullhornServiceImpl implements Observer {
             HANDLED_EVENTS.add(AssignmentConstants.EVENT_ADD_ASSIGNMENT);
             HANDLED_EVENTS.add(AssignmentConstants.EVENT_GRADE_ASSIGNMENT_SUBMISSION);
             HANDLED_EVENTS.add(ASSESSMENT_PUBLISH);
+            HANDLED_EVENTS.add(COMMONS_COMMENT_CREATED);
             eventTrackingService.addObserver(this);
         }
 
@@ -182,6 +212,25 @@ public class BullhornServiceImpl implements Observer {
                                                                         + "/tool/" + toolId + "/messages";
                             doSocialInsert(from, to, event, ref, e.getEventTime(), url);
                             countCache.remove(to);
+                        } else if (commonsInstalled && COMMONS_COMMENT_CREATED.equals(event)) {
+                            String type = pathParts[2];
+                            String postId = pathParts[4];
+                            // To is always going to be the author of the original post
+                            Object post = commonsManagerGetPostMethod.invoke(commonsManager, new Object[] { postId, false });
+                            String to = (String) commonsPostGetCreatorIdMethod.invoke(post, new Object[] {});
+                            // If we're commenting on our own post, no alert needed
+                            if (!from.equals(to)) {
+                                String siteId = (String) commonsPostGetSiteIdMethod.invoke(post, new Object[] {});
+                                if (siteId.equals("SOCIAL")) {
+                                    siteId = "~" + to;
+                                }
+                                Site site = siteService.getSite(siteId);
+                                String toolId = site.getToolForCommonId("sakai.commons").getId();
+                                String url = serverConfigurationService.getPortalUrl() + "/directtool/"
+                                                                                        + toolId + "/posts/" + postId;
+                                doSocialInsert(from, to, event, ref, e.getEventTime(), url);
+                                countCache.remove(to);
+                            }
                         } else if (AnnouncementService.SECURE_ANNC_ADD.equals(event)) {
                             String siteId = pathParts[3];
                             String announcementId = pathParts[pathParts.length - 1];
