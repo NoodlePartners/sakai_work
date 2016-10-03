@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -21,6 +24,7 @@ import org.sakaiproject.entitybroker.entityprovider.annotations.EntityCustomActi
 import org.sakaiproject.entitybroker.entityprovider.capabilities.ActionsExecutable;
 import org.sakaiproject.entitybroker.entityprovider.capabilities.AutoRegisterEntityProvider;
 import org.sakaiproject.entitybroker.entityprovider.capabilities.Describeable;
+import org.sakaiproject.entitybroker.entityprovider.capabilities.Outputable;
 import org.sakaiproject.entitybroker.entityprovider.extension.ActionReturn;
 import org.sakaiproject.entitybroker.entityprovider.extension.Formats;
 import org.sakaiproject.entitybroker.exception.EntityException;
@@ -37,7 +41,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Setter @Slf4j
-public class SnapPollEntityProvider extends AbstractEntityProvider implements AutoRegisterEntityProvider, Describeable, ActionsExecutable {
+public class SnapPollEntityProvider extends AbstractEntityProvider implements AutoRegisterEntityProvider, Outputable, Describeable, ActionsExecutable {
 
     public final static String ENTITY_PREFIX = "snap-poll";
     private final static String SUPPORT_EMAIL_PROP = "snappoll.supportEmailAddress";
@@ -50,8 +54,13 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
     private final static String SESSIONS_PAGE_TITLE_DEFAULT = "Sessions";
     private final static String EXAM_PAGE_TITLE_PROP = "snappoll.examPageTitle";
     private final static String EXAM_PAGE_TITLE_DEFAULT = "Exam";
+    private final static String REPORT_USER_ID_PROP = "api.user";
+    private final static String LESSONS = "lessons";
+    private final static String FALSE = "false";
+    private final static String TRUE = "true";
 
-    // Poll show timeouts are controlled by portal.snapPollTimeout in properties. See SkinnableCharonPortal.java.
+    // Poll show timeouts are controlled by portal.snapPollTimeout in properties.
+	// See SkinnableCharonPortal.java.
 
     private EmailService emailService;
     private ServerConfigurationService serverConfigurationService;
@@ -70,7 +79,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
     }
 
     public String[] getHandledOutputFormats() {
-        return new String[] { Formats.TXT };
+        return new String[] { Formats.JSON, Formats.TXT };
     }
 
     @EntityCustomAction(action = "showPollNow", viewKey = EntityView.VIEW_LIST)
@@ -91,18 +100,18 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         }
 
         // We only have an algorithm for the lessons tool, so do nothing anywhere else
-        if (!tool.equals("lessons")) {
+        if (!tool.equals(LESSONS)) {
             if (log.isDebugEnabled()) {
                 log.debug("tool is " + tool + ", not allowed");
             }
-            return "false";
+            return FALSE;
         }
 
         if (!canTakePolls(siteId, userId)) {
             if (log.isDebugEnabled()) {
                 log.debug("user can't take polls");
             }
-            return "false";
+            return FALSE;
         }
         
         // Work out whether a poll has been shown to this user in the throttle period
@@ -126,9 +135,10 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         if (counts.size() == 1) {
             if (counts.get(0) > 0) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Already shown");
+                    log.debug("This poll already shown, or other shown within " + throttleHours +
+                        " hours.");
                 }
-                return "false";
+                return FALSE;
             }
         } else {
             log.error("Only one count should be returned. Something is wrong.");
@@ -176,7 +186,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
             log.debug("current page was found in list of lesson pages at position: " + position);
         }
         if (position < 0) {
-            return "false";
+            return FALSE;
         }
 
         // Make a hash of the userId, and siteID, and then 
@@ -188,9 +198,9 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
             log.debug("showMod is " + showMod);
         }
         if (showMod == 0) {
-            return "true";
+            return TRUE;
         } else {
-            return "false";
+            return FALSE;
         }
 
     }
@@ -294,6 +304,71 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         }
     }
 
+    @EntityCustomAction(action = "report", viewKey = EntityView.VIEW_LIST)
+    public ActionReturn handleReport(EntityView view, Map<String, Object> params) {
+
+        String reportUserId = serverConfigurationService.getString(REPORT_USER_ID_PROP, null);
+
+        if (reportUserId == null) {
+            log.warn(REPORT_USER_ID_PROP + " is not defined. Aborting the report ...");
+            throw new EntityException("Report user not defined in properties.", "", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+
+        String userId = getCheckedUserId();
+
+        String userEid = null;
+        try {
+            userEid = userDirectoryService.getUser(userId).getEid();
+        } catch (UserNotDefinedException unde) { /* Impossible? Should be. We've just checked the current user.*/ }
+
+        if (!userEid.equals(reportUserId)) {
+            log.warn("Current user is not the report user. Aborting the report ...");
+            throw new EntityException("Not logged in as report user", "", HttpServletResponse.SC_UNAUTHORIZED);
+        }
+
+        String siteIdsString = (String) params.get("siteIds");
+
+        boolean bySite = !StringUtils.isEmpty(siteIdsString);
+        boolean includeIgnored = TRUE.equals(((String) params.get("includeIgnored")));
+
+        List<SnapPollSubmission> submissions = new ArrayList();
+
+        if (bySite) {
+            String siteIds
+                = Stream.of(siteIdsString.split(",")).map(id -> "'" + id + "'").collect(Collectors.joining(","));
+
+            StringBuilder sb = new StringBuilder("SELECT * FROM SNAP_POLL_SUBMISSION WHERE ");
+
+            if (!includeIgnored) {
+                sb.append("IGNORED IS NULL AND ");
+            }
+
+            sb.append("SITE_ID IN (").append(siteIds).append(")");
+            submissions = sqlService.dbRead(
+                    sb.toString()
+                    , new Object[] {}
+                    , new SqlReader<SnapPollSubmission>() {
+
+                        public SnapPollSubmission readSqlResultRecord(ResultSet rs) {
+                            try {
+                                return new SnapPollSubmission(rs);
+                            } catch (SQLException sqle) {
+                                log.error("Error reading SnapPollSubmission:", sqle);
+                                return null;
+                            }
+                        }
+                    });
+        }
+
+        for (SnapPollSubmission submission : submissions) {
+            if (submission.tool.equals(LESSONS)) {
+                submission.title = getPageName(submission.tool, submission.context);
+            }
+        }
+
+        return new ActionReturn(submissions);
+    }
+
     private String getCheckedUserId() throws EntityException {
 
         String userId = developerHelperService.getCurrentUserId();
@@ -347,12 +422,12 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
     
     // Get the name of a site by siteId
     // Cloned from samigo/samigo-services/src/java/org/sakaiproject/tool/assessment/integration/helper/integrated/AgentHelperImpl.java
-    private String getSiteName(String siteId){
+    private String getSiteName(String siteId) {
         String siteName="";
-        try{
+        try {
             siteName = SiteService.getSite(siteId).getTitle();
         }
-        catch (Exception ex){
+        catch (Exception ex) {
             log.warn("getSiteName : " + ex.getMessage());
             log.warn("SiteService not available.  " +
                   "This needs to be fixed if you are not running a unit test.");
@@ -362,7 +437,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
 
     // TODO: This can be done using the API, which will permit caching
     private String getPageName(String tool, String context) {
-        if (!tool.equals("lessons")) {
+        if (!tool.equals(LESSONS)) {
             return "";
         }
         List<String> titles = sqlService.dbRead(
@@ -375,4 +450,33 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         log.error("Only one title should be returned. Something is wrong.");
         return "";
     }
+
+    public class SnapPollSubmission {
+
+        public String id = "";
+        public String userId = "";
+        public String siteId = "";
+        public String response = "";
+        public String reason = "";
+        public String tool = "";
+        public String context = "";
+        public String ignored = "";
+        public long pollDate = 0L;
+        public String title = "";
+
+        public SnapPollSubmission(ResultSet rs) throws SQLException {
+
+            id = rs.getString("ID");
+            userId = rs.getString("USER_ID");
+            siteId = rs.getString("SITE_ID");
+            reason = rs.getString("REASON");
+            response = rs.getString("RESPONSE");
+            tool = rs.getString("TOOL");
+            context = rs.getString("CONTEXT");
+            ignored = rs.getString("IGNORED");
+            pollDate = rs.getLong("SUBMITTED_TIME");
+        }
+    }
+
+
 }
