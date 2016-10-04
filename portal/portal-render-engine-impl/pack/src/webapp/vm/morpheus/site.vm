@@ -15,7 +15,7 @@
             ${sakai_html_head_js}
         #end ## END of IF ( ${bufferedResponse} && ${responseHead} )
 
-        <div id="snap-poll">
+        <div id="snap-poll" style="display:none;">
             <div id="snap-poll-question">${rloader.snap_poll_question1}</div>
             <div id="snap-poll-options">
                 <span class="snap-poll-option fa fa-2x fa-frown-o" style="color: #88114A;" data-option="1"></span>
