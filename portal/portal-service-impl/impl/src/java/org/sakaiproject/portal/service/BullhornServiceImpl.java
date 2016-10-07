@@ -93,7 +93,6 @@ public class BullhornServiceImpl implements Observer {
             Class postClass = Class.forName("org.sakaiproject.commons.api.datamodel.Post");
             if (postClass != null) {
                 log.debug("Found commons Post class. Commons IS installed.");
-                commonsInstalled = true;
                 commonsPostGetCreatorIdMethod = postClass.getMethod("getCreatorId", new Class[] {});
                 commonsPostGetSiteIdMethod = postClass.getMethod("getSiteId", new Class[] {});
                 ComponentManager componentManager = org.sakaiproject.component.cover.ComponentManager.getInstance();
@@ -101,6 +100,11 @@ public class BullhornServiceImpl implements Observer {
                 if (commonsManager != null) {
                     commonsManagerGetPostMethod
                         = commonsManager.getClass().getMethod("getPost", new Class[] { String.class, boolean.class });
+                    // This must be the last thing we do in here.
+                    commonsInstalled = true;
+                }
+                else {
+                    log.error("Commons is installed, but we're unable to get commonsManager");
                 }
             } else {
                 log.debug("Commons IS NOT installed.");
@@ -217,19 +221,28 @@ public class BullhornServiceImpl implements Observer {
                             String postId = pathParts[4];
                             // To is always going to be the author of the original post
                             Object post = commonsManagerGetPostMethod.invoke(commonsManager, new Object[] { postId, false });
-                            String to = (String) commonsPostGetCreatorIdMethod.invoke(post, new Object[] {});
-                            // If we're commenting on our own post, no alert needed
-                            if (!from.equals(to)) {
-                                String siteId = (String) commonsPostGetSiteIdMethod.invoke(post, new Object[] {});
-                                if (siteId.equals("SOCIAL")) {
-                                    siteId = "~" + to;
+                            if(post != null) {
+                                String to = (String) commonsPostGetCreatorIdMethod.invoke(post, new Object[] {});
+                                // If we're commenting on our own post, no alert needed
+                                if (!from.equals(to)) {
+                                    String siteId = (String) commonsPostGetSiteIdMethod.invoke(post, new Object[] {});
+                                    boolean isSocial = false;
+                                    if (siteId.equals("SOCIAL")) {
+                                        siteId = "~" + to;
+                                        isSocial = true;
+                                    }
+                                    Site site = siteService.getSite(siteId);
+                                    String toolId = site.getToolForCommonId("sakai.commons").getId();
+                                    String url = serverConfigurationService.getPortalUrl() + "/directtool/"
+                                                   + toolId + "/posts/" + postId;
+                                    if(isSocial) {
+                                        doSocialInsert(from, to, event, ref, e.getEventTime(), url);
+                                    } else {
+                                        String title = "";
+                                        doAcademicInsert(from, to, event, ref, title, siteId, e.getEventTime(), url);
+                                    }
+                                    countCache.remove(to);
                                 }
-                                Site site = siteService.getSite(siteId);
-                                String toolId = site.getToolForCommonId("sakai.commons").getId();
-                                String url = serverConfigurationService.getPortalUrl() + "/directtool/"
-                                                                                        + toolId + "/posts/" + postId;
-                                doSocialInsert(from, to, event, ref, e.getEventTime(), url);
-                                countCache.remove(to);
                             }
                         } else if (AnnouncementService.SECURE_ANNC_ADD.equals(event)) {
                             String siteId = pathParts[3];
