@@ -162,6 +162,8 @@
                                     } else if (alert.event === 'asn.grade.submission') {
                                         message
                                             = data.i18n.assignmentSubmissionGraded.replace('{0}', title).replace('{1}', siteTitle);
+                                    } else if (alert.event === 'commons.comment.created') {
+                                        markup += data.i18n.academicCommentCreated.replace('{0}', siteTitle);
                                     } else {
                                         markup += data.i18n.unrecognisedAlert;
                                     }
