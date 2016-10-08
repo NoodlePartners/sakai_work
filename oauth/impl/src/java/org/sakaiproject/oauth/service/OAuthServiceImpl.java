@@ -31,7 +31,9 @@ import org.sakaiproject.oauth.dao.ConsumerDao;
 import org.sakaiproject.oauth.domain.Accessor;
 import org.sakaiproject.oauth.domain.Consumer;
 import org.sakaiproject.oauth.exception.*;
-
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.user.api.UserDirectoryService;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -50,6 +52,22 @@ public class OAuthServiceImpl implements OAuthService {
     private boolean keepOldAccessors;
     private SiteService siteService;
     private SecurityService securityService;
+    private static final String apiUserEid = ServerConfigurationService.getString("api.user", null);
+    private static String apiUserId  = getUserIdByEid(apiUserEid);
+
+    public static String getUserIdByEid(String eid){
+        try{
+            if (eid != null){
+                UserDirectoryService userDirectoryService = (UserDirectoryService) ComponentManager.getInstance().get(UserDirectoryService.class);
+                apiUserId = userDirectoryService.getUserByEid(eid).getId();
+                return apiUserId;
+            }
+        } catch (Exception e) {
+                //pass
+        }
+        return null;
+    }
+    
 
     private static String generateToken(Accessor accessor) {
         // TODO Need a better way of generating tokens in the long run.
@@ -189,7 +207,7 @@ public class OAuthServiceImpl implements OAuthService {
         Accessor accessor = getAccessor(accessorId, Accessor.Type.REQUEST_AUTHORISING);
         if (!accessor.getVerifier().equals(verifier))
             throw new OAuthException("Accessor verifier invalid.");
-        if (securityService.isSuperUser(userId))
+        if (securityService.isSuperUser(userId) && !userId.equals(apiUserId))
             throw new OAuthException("Super users can't use OAuth for security reasons.");
         accessor.setVerifier(generateVerifier(accessor));
         accessor.setType(Accessor.Type.REQUEST_AUTHORISED);
