@@ -35,6 +35,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 
+import org.sakaiproject.oauth.exception.OAuthException;
+import org.sakaiproject.component.cover.ServerConfigurationService;
+import org.sakaiproject.user.api.UserDirectoryService;
+import java.util.List;
+import java.util.Arrays;
 /**
  * First filter to apply with OAuth protocol
  * <p>
@@ -49,6 +54,9 @@ public class OAuthPreFilter implements Filter {
     private OAuthHttpService oAuthHttpService;
     private OAuthService oAuthService;
     private SecurityService securityService;
+    private UserDirectoryService userDirectoryService;
+    private static Boolean isApiUserInit = false;
+    private static String apiUserId = null;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -57,6 +65,7 @@ public class OAuthPreFilter implements Filter {
         this.securityService = (SecurityService) ComponentManager.getInstance().get(SecurityService.class);
         String initEncoding = filterConfig.getInitParameter(RequestFilter.CONFIG_CHARACTER_ENCODING);
         this.encoding = initEncoding != null ? initEncoding : "UTF-8";
+        this.userDirectoryService = (UserDirectoryService) ComponentManager.getInstance().get(UserDirectoryService.class);
     }
 
     @Override
@@ -78,6 +87,35 @@ public class OAuthPreFilter implements Filter {
         try {
             String oAuthToken = oAuthHttpService.getOAuthAccessToken(req);
             final Accessor accessor = oAuthService.getAccessor(oAuthToken, Accessor.Type.ACCESS);
+
+            // Determine the apiUser if we don't already know
+            if (isApiUserInit == false) {
+                String apiUserEid = ServerConfigurationService.getString("api.user", null);
+                try{
+                    if (apiUserEid != null){
+                        apiUserId = this.userDirectoryService.getUserByEid(apiUserEid).getId();
+                    }
+                } catch (Exception e)  {
+                    // Didn't find user, ignore the setting
+                }
+                isApiUserInit = true;
+            }
+
+            if (apiUserId != null && accessor.getUserId().equals(apiUserId)) {
+                // This is a bit of a hack: determine if the request method and path are allowed to
+                // the api user. (Mitch Golden 2016-10-25)
+                String reqMethod = req.getMethod();
+                String reqPath = req.getRequestURI();
+                List allowedURI = Arrays.asList("gradebook", "membership", "snap-poll", "engagement", "user");
+                String[] reqPathList = reqPath.split("/");
+                boolean isAllowedURI = false;
+                if (reqPathList.length >= 3) {
+                    isAllowedURI = "direct".equals(reqPathList[1]) && allowedURI.contains(reqPathList[2]);
+                }
+                if (!"GET".equals(reqMethod) || !isAllowedURI ) {
+                    throw new InvalidAccessorException("API user only allowed GET for " + allowedURI.toString());
+                }
+            }
 
             HttpServletRequest wrappedRequest = new HttpServletRequestWrapper(req) {
                 @Override
