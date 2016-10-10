@@ -9,6 +9,6 @@ CREATE TABLE SNAP_POLL_SUBMISSION
     CONTEXT varchar(255) NOT NULL,
     IGNORED char(1),
     SUBMITTED_TIME bigint NOT NULL,
-    INDEX user_id_site_id (USER_ID,SITE_ID)
+    INDEX user_id_site_id (USER_ID,SITE_ID),
     PRIMARY KEY(ID)
 );
