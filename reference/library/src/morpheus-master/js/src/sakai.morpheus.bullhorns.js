@@ -221,5 +221,5 @@
 
     updateCounts();
 
-    if (portal.loggedIn) { setInterval(updateCounts, 5000); }
+    if (portal.loggedIn) { setInterval(updateCounts, 30000); }
 }) ($PBJQ);
