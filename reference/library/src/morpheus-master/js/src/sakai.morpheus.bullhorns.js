@@ -202,6 +202,8 @@
                 cache: false,
                 }).done(function (data) {
 
+                    portal.failedBullhornCounts = 0;
+
                     if (data.academic > 0) {
                         setCounter('academic', data.academic);
                     } else {
@@ -216,10 +218,16 @@
                 }).fail(function (xhr, status, error) {
                     console.log('Failed to get the bullhorn counts. Status: ' + status);
                     console.log('FAILED ERROR: ' + error);
+                    portal.failedBullhornCounts = portal.failedBullhornCounts || 0;
+                    portal.failedBullhornCounts += 1;
+                    if (portal.failedBullhornCounts == 3) {
+                        clearInterval(portal.bullhornCountIntervalId);
+                    }
                 });
         };
 
-    updateCounts();
-
-    if (portal.loggedIn) { setInterval(updateCounts, 5000); }
+    if (portal.loggedIn) {
+        updateCounts();
+        portal.bullhornCountIntervalId = setInterval(updateCounts, 60000);
+    }
 }) ($PBJQ);
