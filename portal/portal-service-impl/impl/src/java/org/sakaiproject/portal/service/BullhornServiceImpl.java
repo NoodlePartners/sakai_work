@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Observer;
 import java.util.Observable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.sakaiproject.announcement.api.AnnouncementMessage;
 import org.sakaiproject.announcement.api.AnnouncementMessageHeader;
@@ -80,10 +82,12 @@ public class BullhornServiceImpl implements Observer {
     private ServerConfigurationService serverConfigurationService;
     private SiteService siteService;
     private SqlService sqlService;
-    private Object commonsManager;
-    private Method commonsManagerGetPostMethod;
-    private Method commonsPostGetCreatorIdMethod;
-    private Method commonsPostGetSiteIdMethod;
+    private Object commonsManager = null;
+    private Method commonsManagerGetPostMethod = null;
+    private Method commonsPostGetCreatorIdMethod = null;
+    private Method commonsPostGetSiteIdMethod = null;
+    private Method commonsPostGetCommentsMethod = null;
+    private Method commonsCommentGetCreatorIdMethod = null;
 
     private boolean commonsInstalled = false;
 
@@ -91,20 +95,27 @@ public class BullhornServiceImpl implements Observer {
 
         try {
             Class postClass = Class.forName("org.sakaiproject.commons.api.datamodel.Post");
-            if (postClass != null) {
-                log.debug("Found commons Post class. Commons IS installed.");
+            Class commentClass = Class.forName("org.sakaiproject.commons.api.datamodel.Comment");
+            if (postClass != null && commentClass != null) {
+                log.debug("Found commons Post and Comment classes. Commons IS installed.");
                 commonsPostGetCreatorIdMethod = postClass.getMethod("getCreatorId", new Class[] {});
                 commonsPostGetSiteIdMethod = postClass.getMethod("getSiteId", new Class[] {});
+                commonsPostGetCommentsMethod = postClass.getMethod("getComments", new Class[] {});
+                commonsCommentGetCreatorIdMethod = commentClass.getMethod("getCreatorId", new Class[] {});
                 ComponentManager componentManager = org.sakaiproject.component.cover.ComponentManager.getInstance();
                 commonsManager = componentManager.get("org.sakaiproject.commons.api.CommonsManager");
                 if (commonsManager != null) {
                     commonsManagerGetPostMethod
                         = commonsManager.getClass().getMethod("getPost", new Class[] { String.class, boolean.class });
-                    // This must be the last thing we do in here.
-                    commonsInstalled = true;
                 }
-                else {
-                    log.error("Commons is installed, but we're unable to get commonsManager");
+                if (commonsManager != null &&
+                    commonsManagerGetPostMethod != null && commonsPostGetCommentsMethod != null &&
+                    commonsPostGetCreatorIdMethod != null && commonsPostGetSiteIdMethod != null && 
+                    commonsCommentGetCreatorIdMethod != null) {
+                    log.debug("All good, got everything");
+                    commonsInstalled = true;
+                } else {
+                    log.error("Commons is installed, but we're unable to get one of the methods");
                 }
             } else {
                 log.debug("Commons IS NOT installed.");
@@ -220,29 +231,18 @@ public class BullhornServiceImpl implements Observer {
                             String type = pathParts[2];
                             String postId = pathParts[4];
                             // To is always going to be the author of the original post
-                            Object post = commonsManagerGetPostMethod.invoke(commonsManager, new Object[] { postId, false });
+                            Object post = commonsManagerGetPostMethod.invoke(commonsManager, new Object[] { postId, true });
                             if(post != null) {
+                                Set<String> tos = new HashSet<String>();
+                                String siteId = (String) commonsPostGetSiteIdMethod.invoke(post, new Object[] {});
                                 String to = (String) commonsPostGetCreatorIdMethod.invoke(post, new Object[] {});
-                                // If we're commenting on our own post, no alert needed
-                                if (!from.equals(to)) {
-                                    String siteId = (String) commonsPostGetSiteIdMethod.invoke(post, new Object[] {});
-                                    boolean isSocial = false;
-                                    if (siteId.equals("SOCIAL")) {
-                                        siteId = "~" + to;
-                                        isSocial = true;
-                                    }
-                                    Site site = siteService.getSite(siteId);
-                                    String toolId = site.getToolForCommonId("sakai.commons").getId();
-                                    String url = serverConfigurationService.getPortalUrl() + "/directtool/"
-                                                   + toolId + "/posts/" + postId;
-                                    if(isSocial) {
-                                        doSocialInsert(from, to, event, ref, e.getEventTime(), url);
-                                    } else {
-                                        String title = "";
-                                        doAcademicInsert(from, to, event, ref, title, siteId, e.getEventTime(), url);
-                                    }
-                                    countCache.remove(to);
+                                tos.add(to);
+                                List<Object> comments = (List <Object>) commonsPostGetCommentsMethod.invoke(post, new Object[] {});
+                                for(Object comment : comments) {
+                                    to = (String) commonsCommentGetCreatorIdMethod.invoke(comment, new Object[] {});
+                                    tos.add(to);
                                 }
+                                sendCommentAlerts(from, event, ref, e, siteId, postId, countCache, tos);
                             }
                         } else if (AnnouncementService.SECURE_ANNC_ADD.equals(event)) {
                             String siteId = pathParts[3];
@@ -386,5 +386,37 @@ public class BullhornServiceImpl implements Observer {
             , BULLHORN_INSERT_SQL
             , new Object[] {PortalService.SOCIAL, from, to, event, ref, "", "", eventTime, url}
             , "ID");
+    }
+
+    private void sendCommentAlerts(String from, String event, String ref, Event e, String siteId, String postId, Cache countCache, Set<String> tos) {
+        log.debug("sending comment alerts: from is {}, tos is {}, siteId is {}", from, tos, siteId);
+        boolean isSocial = siteId.equals("SOCIAL");
+        for (String to : tos) {
+            // If we're commenting on our own post, no alert needed
+            if (!from.equals(to)) {
+                String mySiteId = siteId;
+                if (isSocial) {
+                    mySiteId = "~" + to;
+                }
+                Site site = null;
+                try {
+                    site = siteService.getSite(mySiteId);
+                } catch (IdUnusedException ex) {
+                    log.error("Couldn't find site " + mySiteId, ex);
+                }
+                if (site != null) {
+                    String toolId = site.getToolForCommonId("sakai.commons").getId();
+                    String url = serverConfigurationService.getPortalUrl() + "/directtool/"
+                                 + toolId + "/posts/" + postId;
+                    if (isSocial) {
+                        doSocialInsert(from, to, event, ref, e.getEventTime(), url);
+                    } else {
+                        String title = "";
+                        doAcademicInsert(from, to, event, ref, title, siteId, e.getEventTime(), url);
+                    }
+                    countCache.remove(to);
+                }
+            }
+        }
     }
 }
