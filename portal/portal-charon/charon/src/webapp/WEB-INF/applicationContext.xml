@@ -11,6 +11,7 @@
 	        <property name="portalService" ref="org.sakaiproject.portal.api.PortalService" />
 	        <property name="profileConnectionsLogic" ref="org.sakaiproject.profile2.logic.ProfileConnectionsLogic" />
 	        <property name="profileLogic" ref="org.sakaiproject.profile2.logic.ProfileLogic" />
+	        <property name="profileLinkLogic" ref="org.sakaiproject.profile2.logic.ProfileLinkLogic" />
 	</bean>
 	<!-- ENTITY PROVIDERS END -->
        
