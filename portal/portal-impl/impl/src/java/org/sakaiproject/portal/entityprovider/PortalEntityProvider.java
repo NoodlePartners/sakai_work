@@ -31,6 +31,7 @@ import org.sakaiproject.entitybroker.exception.EntityException;
 
 import org.sakaiproject.profile2.logic.ProfileConnectionsLogic;
 import org.sakaiproject.profile2.logic.ProfileLogic;
+import org.sakaiproject.profile2.logic.ProfileLinkLogic;
 import org.sakaiproject.profile2.model.UserProfile;
 import org.sakaiproject.profile2.util.ProfileConstants;
 
@@ -66,6 +67,9 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 
 	@Setter
 	private ProfileLogic profileLogic;
+
+	@Setter
+	private ProfileLinkLogic profileLinkLogic;
 
 	@Setter
 	private ServerConfigurationService serverConfigurationService;
@@ -253,6 +257,7 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 
 		VelocityContext context = new VelocityContext();
 		context.put("displayName", userProfile.getDisplayName());
+		context.put("profileUrl", profileLinkLogic.getInternalDirectUrlToUserProfile(connectionUserId));
 		context.put("email", userProfile.getEmail());
 		context.put("currentUserId", currentUserId);
 		context.put("connectionUserId", connectionUserId);
