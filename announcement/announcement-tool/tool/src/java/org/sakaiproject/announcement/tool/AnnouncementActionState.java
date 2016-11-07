@@ -610,6 +610,8 @@ public class AnnouncementActionState extends ControllerState implements SessionB
 	// temporary storage for announce to groups selection
 	private Collection m_tempAnnounceToGroups;
 
+	private boolean m_postToCommons;
+
 	// temporary storage for local file inputStream, contentType and display name
 	private HashMap m_fileProperties = new HashMap();
 
@@ -691,6 +693,14 @@ public class AnnouncementActionState extends ControllerState implements SessionB
 		m_tempAnnounceToGroups = tempAnnounceToGroups;
 
 	} // setTempAnnounceTo()
+
+	public boolean getPostToCommons() {
+		return m_postToCommons;
+	}
+
+	public void setPostToCommons(boolean postToCommons) {
+		m_postToCommons = postToCommons;
+	}
 
 	/**
 	 * Get
