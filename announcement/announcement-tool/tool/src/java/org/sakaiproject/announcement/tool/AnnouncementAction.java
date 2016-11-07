@@ -61,8 +61,6 @@ import org.sakaiproject.cheftool.api.MenuItem;
 import org.sakaiproject.cheftool.menu.MenuDivider;
 import org.sakaiproject.cheftool.menu.MenuEntry;
 import org.sakaiproject.cheftool.menu.MenuImpl;
-import org.sakaiproject.commons.api.CommonsManager;
-import org.sakaiproject.commons.api.datamodel.Post;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.FilePickerHelper;
@@ -247,16 +245,18 @@ public class AnnouncementAction extends PagedResourceActionII
 
    private ServerConfigurationService serverConfigurationService;
 
-   private CommonsManager commonsManager;
+   private CommonsManagerWrapper commonsManagerWrapper;
+
+   private boolean commonsAvailable = false;
 
    
    private static final String DEFAULT_TEMPLATE="announcement/chef_announcements";
 
-
     public AnnouncementAction() {
         super();
         aliasService = ComponentManager.get(AliasService.class);
-        commonsManager = (CommonsManager) ComponentManager.get(CommonsManager.class);
+        commonsManagerWrapper = new CommonsManagerWrapper(ComponentManager.get("org.sakaiproject.commons.api.CommonsManager"));
+        commonsAvailable = !commonsManagerWrapper.isNull();
         userDirectoryService = ComponentManager.get(UserDirectoryService.class);
 		serverConfigurationService = ComponentManager.get(ServerConfigurationService.class);
     }
@@ -2154,7 +2154,7 @@ public class AnnouncementAction extends PagedResourceActionII
 				notification = serverConfigurationService.getString("announcement.default.notification", "n");
 			}
 			context.put("noti", notification);
-
+			context.put("commonsAvailable", commonsAvailable);
 			context.put("postToCommonsChecked", serverConfigurationService.getBoolean("announcement.allowPostToCommons", true));
 
 			}
@@ -2212,6 +2212,7 @@ public class AnnouncementAction extends PagedResourceActionII
 
 			context.put(AnnouncementService.RETRACT_DATE, retractDate);
 
+			context.put("commonsAvailable", commonsAvailable);
 			context.put("postToCommonsChecked", edit.getProperties().getProperty("commonsPostId") != null);
 
 			context.put(SPECIFY_DATES, specify);
@@ -3205,41 +3206,43 @@ public class AnnouncementAction extends PagedResourceActionII
 					msg.getPropertiesEdit().addPropertyToList("noti_history", now.toStringLocalFull()+"_"+notiLevel);
 				}
 
-				String commonsPostId = msg.getPropertiesEdit().getProperty("commonsPostId");
+				if (commonsAvailable) {
+					String commonsPostId = msg.getPropertiesEdit().getProperty("commonsPostId");
 
-				if (postToCommons && !tempHidden) {
-					StringBuilder sb = new StringBuilder();
-					sb.append("<h4>").append(header.getSubject()).append("</h4>")
-						.append("<div>").append(body).append("</div>");
+					if (postToCommons && !tempHidden) {
+						StringBuilder sb = new StringBuilder();
+						sb.append("<h4>").append(header.getSubject()).append("</h4>")
+							.append("<div>").append(body).append("</div>");
 
-					Post commonsPost = null;
-					if (commonsPostId != null) {
-						commonsPost = commonsManager.getPost(commonsPostId, false);
-						if  (commonsPost == null) {
-							// The post may have been deleted in the Commons tool.
-							commonsPost = new Post();
+						CommonsPostWrapper commonsPost = null;
+						if (commonsPostId != null) {
+							commonsPost = commonsManagerWrapper.getPost(commonsPostId);
+							if (commonsPost.isNull()) {
+								// The post may have been deleted in the Commons tool.
+								commonsPost = new CommonsPostWrapper();
+							} else {
+								commonsPost.setModifiedDate(new Date().getTime());
+							}
 						} else {
-							commonsPost.setModifiedDate(new Date().getTime());
+							commonsPost = new CommonsPostWrapper();
+						}
+						commonsPost.setContent(sb.toString());
+						commonsPost.setCreatorId(header.getFrom().getId());
+						commonsPost.setSiteId(channel.getContext());
+						commonsPost.setEmbedder("SITE");
+						commonsPost.setCommonsId(channel.getContext());
+						if (releaseDate != null) {
+							commonsPost.setReleaseDate(releaseDate.getTime());
+						}
+						CommonsPostWrapper savedCommonsPost = commonsManagerWrapper.savePost(commonsPost);
+						if (commonsPostId == null) {
+							msg.getPropertiesEdit().addProperty("commonsPostId", savedCommonsPost.getId());
 						}
 					} else {
-						commonsPost = new Post();
-					}
-					commonsPost.setContent(sb.toString());
-					commonsPost.setCreatorId(header.getFrom().getId());
-					commonsPost.setSiteId(channel.getContext());
-					commonsPost.setEmbedder("SITE");
-					commonsPost.setCommonsId(channel.getContext());
-					if (releaseDate != null) {
-						commonsPost.setReleaseDate(releaseDate.getTime());
-					}
-					Post savedPost = commonsManager.savePost(commonsPost);
-					if (commonsPostId == null) {
-						msg.getPropertiesEdit().addProperty("commonsPostId", savedPost.getId());
-					}
-				} else {
-					if (commonsPostId != null) {
-						if (commonsManager.deletePost(commonsPostId)) {
-							msg.getPropertiesEdit().removeProperty("commonsPostId");
+						if (commonsPostId != null) {
+							if (commonsManagerWrapper.deletePost(commonsPostId)) {
+								msg.getPropertiesEdit().removeProperty("commonsPostId");
+							}
 						}
 					}
 				}
@@ -3377,10 +3380,10 @@ public class AnnouncementAction extends PagedResourceActionII
 					//channel.removeMessage(edit); 
 					channel.removeAnnouncementMessage(message.getId());
 
-                    String commonsPostId = message.getProperties().getProperty("commonsPostId");
-                    if (commonsPostId != null) {
-                        commonsManager.deletePost(commonsPostId);
-                    }
+					String commonsPostId = message.getProperties().getProperty("commonsPostId");
+					if (commonsPostId != null) {
+						commonsManagerWrapper.deletePost(commonsPostId);
+					}
 
 					// make sure auto-updates are enabled
 					enableObservers(sstate);
