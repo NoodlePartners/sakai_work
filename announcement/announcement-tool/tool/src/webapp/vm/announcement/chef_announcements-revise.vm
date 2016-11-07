@@ -314,7 +314,7 @@ function resizeFrame(){
 		        </div>
 		    </div>
 
-		    #if($allowPostToCommons)
+		    #if( $commonsAvailable && $allowPostToCommons)
 			<div class="row">
 				<div class="col-md-12">
 				<fieldset>
