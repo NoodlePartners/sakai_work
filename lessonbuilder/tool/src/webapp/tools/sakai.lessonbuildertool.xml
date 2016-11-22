@@ -5,6 +5,7 @@
 		description="[Lessons] For creating content modules and sequences; can be organized by week or unit" >
 		<category name="course" />
 		<category name="project" />
+		<category name="group" />
 		<!-- <category name="myworkspace" /> -->
 		<!-- <category name="sakai.admin" /> -->
 

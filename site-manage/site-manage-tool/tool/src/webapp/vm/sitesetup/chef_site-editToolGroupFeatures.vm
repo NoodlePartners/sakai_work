@@ -12,6 +12,10 @@
         <h3>
             $tlang.getString("feat.course.tools")
         </h3>
+    #elseif ($type && $type=='group')
+        <h3>
+            $tlang.getString("feat.group.tools")
+        </h3>
     #else
         <h3>
             $tlang.getString("feat.other.tools")
