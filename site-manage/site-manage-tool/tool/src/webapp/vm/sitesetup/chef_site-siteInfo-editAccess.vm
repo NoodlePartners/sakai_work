@@ -78,6 +78,10 @@
 			<h3>
 				$tlang.getString("ediacc.course.setsitacc")
 			</h3>
+		#elseif ($type && $type=='group')
+			<h3>
+				$tlang.getString("ediacc.group.setsitacc")
+			</h3>
 		#else
 			<h3>
 				$tlang.getString("ediacc.other.setsitacc")
