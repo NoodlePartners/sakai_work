@@ -13,6 +13,7 @@
 
 		<category name="course" />
 		<category name="project" />
+		<category name="group" />
 		<category name="portfolio" />
 		<category name="myworkspace" />
 		<category name="GradToolsStudent" />
