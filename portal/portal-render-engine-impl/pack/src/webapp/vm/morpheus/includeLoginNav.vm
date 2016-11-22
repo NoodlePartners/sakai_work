@@ -44,9 +44,15 @@
                 <a id="Mrphs-social-bullhorn" href="javascript:void(0);"><span class="icon-sakai--social-bullhorn"></span></a>
             </div>
         #end
-            <div class="Mrphs-sitesNav__menuitem view-all-sites-btn">
+
+            <div class="Mrphs-sitesNav__menuitem view-sites-btn" id="view-course-sites-btn">
                 <a href="javascript:void(0);" title="${rloader.sit_allsites}" role="menuitem" aria-haspopup="true">
-                    <i class="fa fa-th all-sites-icon"></i> <span class="all-sites-label">${rloader.sit_worksites}</span>
+                    <i class="fa fa-th all-sites-icon"></i> <span class="all-sites-label">${rloader.sit_coursesites}</span>
+                </a>
+            </div>
+            <div class="Mrphs-sitesNav__menuitem view-sites-btn" id="view-other-sites-btn">
+                <a href="javascript:void(0);" title="${rloader.sit_allsites}" role="menuitem" aria-haspopup="true">
+                    <i class="fa fa-th all-sites-icon"></i> <span class="all-sites-label">${rloader.sit_othersites}</span>
                 </a>
             </div>
         #end
