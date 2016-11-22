@@ -8,6 +8,10 @@
 			<h3>
 				$tlang.getString("newsc.course.confirm")
 			</h3>
+		#elseif ($type && $type=='group')
+			<h3>
+				$tlang.getString("newsc.group.confirm")
+			</h3>
 		#else
 			<h3>
 				$tlang.getString("newsc.other.confirm")
