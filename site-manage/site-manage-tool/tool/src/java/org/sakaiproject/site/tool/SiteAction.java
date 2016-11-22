@@ -1862,6 +1862,7 @@ public class SiteAction extends PagedResourceActionII {
 			 */
 			siteInfo = (SiteInfo) state.getAttribute(STATE_SITE_INFO);
 			String siteType = (String) state.getAttribute(STATE_SITE_TYPE);
+			context.put("type", siteType);
 			if (SiteTypeUtil.isCourseSite(siteType)) {
 				context.put("isCourseSite", Boolean.TRUE);
 				context.put("disableCourseSelection", ServerConfigurationService.getString("disable.course.site.skin.selection", "false").equals("true")?Boolean.TRUE:Boolean.FALSE);
@@ -6019,6 +6020,7 @@ public class SiteAction extends PagedResourceActionII {
 	 * @return	courseSiteType	type of 'course'
 	 */	
 	private void setTypeIntoContext(Context context, String type) {
+		context.put("type", type);
 		if (type != null && SiteTypeUtil.isCourseSite(type)) {
 			context.put("isCourseSite", Boolean.TRUE);
 			context.put("isProjectSite", Boolean.FALSE);
