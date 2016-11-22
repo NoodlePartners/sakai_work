@@ -242,7 +242,7 @@ public class MoreSiteViewImpl extends AbstractSiteViewImpl
 				moresitesExternalSiteTypes.put(moresitesExternalSites[i], moresitesExternalPrefix+moresitesExternalSites[i]);
 			}
 		}
-		
+
 		for (int i = 0; i < allSites.size(); i++)
 		{
 			Site site = allSites.get(i);
@@ -274,6 +274,10 @@ public class MoreSiteViewImpl extends AbstractSiteViewImpl
 			else if ("admin".equals(type))
 			{
 				term = rb.getString("moresite_administration");
+			}
+			else if ("group".equals(type))
+			{
+				term = rb.getString("moresite_groups");
 			}
 			else
 			{
