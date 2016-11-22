@@ -6,5 +6,6 @@
 		description="For anonymous polls or voting">
 		<category name="course" />
 		<category name="project" />
+		<category name="group" />
 	</tool>	
 </registration>

@@ -552,7 +552,7 @@ body.is-logged-out{
 	display: inline-block; /* Sakai 11.1 makes it flex, which is wrong */
 }
 
-.view-all-sites-btn{
+.view-sites-btn{
 	position: relative;
 	display: inline-block;
 	padding: 0 1em;
@@ -562,7 +562,7 @@ body.is-logged-out{
 	}
 }
 
-.view-all-sites-btn a{
+.view-sites-btn a{
 	text-decoration: none;
 	&:hover, &:active
 	{

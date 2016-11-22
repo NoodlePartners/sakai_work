@@ -24,6 +24,7 @@
 
 		<category name="course" />
 		<category name="project" />
+		<category name="group" />
 		<category name="portfolio" />
 
 		<!-- It would be good to separate "site.visit" and "site.read" so site.visit controls

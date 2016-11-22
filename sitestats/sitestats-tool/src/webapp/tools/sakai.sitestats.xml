@@ -7,6 +7,7 @@
     	
     	<category name="course" />
 		<category name="project" />
+		<category name="group" />
 
 		<!-- Sakai 2.2.x: For use with custom SAK-4120 patch -->
 		<configuration name="roles.allow" value="maintain,Instructor" />

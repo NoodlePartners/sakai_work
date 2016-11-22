@@ -7,6 +7,7 @@
 
 		<category name="course" />
 		<category name="project" />
+		<category name="group" />
 
 		<configuration name="help.id" value="sakai.mailsender" />
 		<!-- 
