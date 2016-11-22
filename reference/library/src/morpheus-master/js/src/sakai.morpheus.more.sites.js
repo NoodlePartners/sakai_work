@@ -2,14 +2,24 @@
  * For More Sites in Morpheus
  */
 
-var dhtml_view_sites = function(){
+var dhtml_view_sites = function(buttonType){
 
   // first time through set up the DOM
   $PBJQ('#selectSiteModal').addClass('dhtml_more_tabs'); // move the selectSite in the DOM
   $PBJQ('.more-tab').position();
 
   // then recast the function to the post initialized state which will run from then on
-  dhtml_view_sites = function(){
+  dhtml_view_sites = function (buttonType){
+
+    if (!buttonType) buttonType = 'course';
+
+    if (buttonType === 'other') {
+        $PBJQ('.moresites-left-col').hide();
+        $PBJQ('.moresites-right-col').show();
+    } else if (buttonType === 'course') {
+        $PBJQ('.moresites-right-col').hide();
+        $PBJQ('.moresites-left-col').show();
+    }
 
     var modal = $PBJQ('#selectSiteModal');
     
@@ -20,7 +30,7 @@ var dhtml_view_sites = function(){
       $PBJQ('body').toggleClass('active-more-sites');
 
       // Align with the bottom of the main header in desktop mode
-      var allSitesButton = $PBJQ('.view-all-sites-btn:visible');
+      var allSitesButton = $PBJQ('#view-' + buttonType + '-sites-btn:visible');
 
       var topPadding = 10;
 
@@ -68,7 +78,8 @@ var dhtml_view_sites = function(){
       $PBJQ('#selectSiteModal').toggleClass('outscreen'); //hide the box
 
       // Restore the button's zIndex so it doesn't hover over other overlays
-      var allSitesButton = $PBJQ('.view-all-sites-btn');
+      var allSitesButton = $PBJQ('#view-' + buttonType + '-sites-btn');
+      //var allSitesButton = $PBJQ('#view-course-sites-btn');
       allSitesButton.css('z-index', 'auto');
 
       $PBJQ('#selectSite').attr('tabindex', '-1');
@@ -79,7 +90,7 @@ var dhtml_view_sites = function(){
   }
 
   // finally run the inner function, first time through
-  dhtml_view_sites();
+  dhtml_view_sites(buttonType);
 }
 
 function closeDrawer() {
@@ -197,10 +208,17 @@ $PBJQ(document).ready(function(){
   }
 
   // Open all Sites with mobile view
-   $PBJQ(".js-toggle-sites-nav", "#skipNav").on("click", dhtml_view_sites);
+   $PBJQ(".js-toggle-sites-nav", "#skipNav").on("click", function (e) {
+       dhtml_view_sites()
+   });
 
   // Open all Sites with Desktop view
-  $PBJQ("#show-all-sites, .view-all-sites-btn").on("click", dhtml_view_sites);
+  $PBJQ("#show-all-sites, #view-course-sites-btn").click(function (e) { dhtml_view_sites(); });
+
+  $PBJQ("#view-other-sites-btn").click(function (e) {
+
+      dhtml_view_sites('other');
+  });
 
   // prepend site title to tool title
   // here as reminder to work on an actual breadcrumb integrated with neo style tool updates
