@@ -2154,8 +2154,10 @@ public class AnnouncementAction extends PagedResourceActionII
 				notification = serverConfigurationService.getString("announcement.default.notification", "n");
 			}
 			context.put("noti", notification);
- 
-		}
+
+			context.put("postToCommonsChecked", serverConfigurationService.getBoolean("announcement.allowPostToCommons", true));
+
+			}
 		// if this is an existing one
 		else if (state.getStatus().equals("goToReviseAnnouncement"))
 		{
