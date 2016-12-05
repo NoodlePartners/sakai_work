@@ -64,12 +64,12 @@
             <groupId>org.sakaiproject.velocity</groupId>
             <artifactId>sakai-velocity-tool</artifactId>
         </dependency>
-        <!-- dependency>
+        <dependency>
             <groupId>org.sakaiproject.commons</groupId>
             <artifactId>commons-api</artifactId>
             <version>11-SNAPSHOT</version>
             <scope>provided</scope>
-        </dependency -->
+        </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>

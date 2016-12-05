@@ -66,8 +66,8 @@ import org.sakaiproject.cheftool.api.MenuItem;
 import org.sakaiproject.cheftool.menu.MenuDivider;
 import org.sakaiproject.cheftool.menu.MenuEntry;
 import org.sakaiproject.cheftool.menu.MenuImpl;
-// import org.sakaiproject.commons.api.CommonsManager;
-// import org.sakaiproject.commons.api.datamodel.Post;
+import org.sakaiproject.commons.api.CommonsManager;
+import org.sakaiproject.commons.api.datamodel.Post;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.FilePickerHelper;
@@ -260,7 +260,7 @@ public class AnnouncementAction extends PagedResourceActionII
 
    private ServerConfigurationService serverConfigurationService;
 
-//   private CommonsManager commonsManager;
+   private CommonsManager commonsManager;
 
    private RuleBasedCollator collator_ini = (RuleBasedCollator)Collator.getInstance();
 
@@ -272,7 +272,7 @@ public class AnnouncementAction extends PagedResourceActionII
     public AnnouncementAction() {
         super();
         aliasService = ComponentManager.get(AliasService.class);
-//        commonsManager = (CommonsManager) ComponentManager.get(CommonsManager.class);
+        commonsManager = (CommonsManager) ComponentManager.get(CommonsManager.class);
         userDirectoryService = ComponentManager.get(UserDirectoryService.class);
 		serverConfigurationService = ComponentManager.get(ServerConfigurationService.class);
     }
@@ -3237,7 +3237,7 @@ public class AnnouncementAction extends PagedResourceActionII
 				}
 
 				String commonsPostId = msg.getPropertiesEdit().getProperty("commonsPostId");
-/*
+
 				if (postToCommons && !tempHidden) {
 					StringBuilder sb = new StringBuilder();
 					sb.append("<h4>").append(header.getSubject()).append("</h4>")
@@ -3274,7 +3274,7 @@ public class AnnouncementAction extends PagedResourceActionII
 						}
 					}
 				}
-*/
+
 				channel.commitMessage(msg, noti, "org.sakaiproject.announcement.impl.SiteEmailNotificationAnnc");
 
 				if (!state.getIsNewAnnouncement())
@@ -3407,12 +3407,12 @@ public class AnnouncementAction extends PagedResourceActionII
 					//AnnouncementMessageEdit edit = channel.editAnnouncementMessage(message.getId());
 					//channel.removeMessage(edit); 
 					channel.removeAnnouncementMessage(message.getId());
-/*
+
                     String commonsPostId = message.getProperties().getProperty("commonsPostId");
                     if (commonsPostId != null) {
                         commonsManager.deletePost(commonsPostId);
                     }
-*/
+
 					// make sure auto-updates are enabled
 					enableObservers(sstate);
 				}
