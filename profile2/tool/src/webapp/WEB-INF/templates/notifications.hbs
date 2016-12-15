@@ -1,0 +1,53 @@
+<h3 class="header icon notifications">{{translate 'heading.notifications'}}</h3>
+<p class="instruction">{{translate 'instruction.notifications'}}</p>
+<form id="profile-notifications-form" action="/direct/profile/updateNotifications" method="POST">
+    {{#each registrations}}
+        <fieldset>
+            <legend>
+                <a role="button" class="profile-notifications-title-button" data-tool="{{tool}}" href="javascript:;">{{title}}</a>
+            </legend>
+            <div id="profile-notifications-block-{{tool}}" class="profile-notifications-block">
+                {{#if description}}<span class="instruction indnt2">{{description}}</span>{{/if}}
+                {{#each options}}
+                <div>
+                    <label for="{{../tool}}-{{value}}">
+                        <input type="radio" id="{{../tool}}-{{value}}" name="{{../tool}}-registration" value="{{value}}" />
+                        {{display}}
+                    </label>
+                </div>
+                {{/each}}
+                {{#if canOverrideBySite}}
+                <h4 class="indnt2">
+                    {{translate 'notifications.override' title}}
+                    <a id="profile-addsiteoverride-link-{{tool}}" class="profile-addsiteoverride-link" data-tool="{{tool}}" href="javascript:;">{{translate 'notifications.addasite.link'}}</a>
+                </h4>
+
+                <!-- Current site overrides -->
+                <div id="profile-notification-overrides-table-for-{{tool}}" class="profile-notification-overrides-table">
+                {{#each overrides}}
+                    {{> override overrideOptions=../../overrideOptions}}
+                {{/each}}
+                </div>
+                <!-- / Current site overrides -->
+
+                <!-- This goes into the qtip popup for this tool registration -->
+                <div id="profile-sitepicker-for-{{tool}}" style="display: none;">
+                    <h3>{{translate 'notifications.sitepicker.title'}}</h3>
+                    <div class="instruction">{{translate 'notifications.sitepicker.instruction'}}</div>
+                    <div class="profile-sitepicker-list">
+                        {{#each overridableBy}}
+                        <input type="checkbox" class="profile-overriding-site-{{../tool}}" id="profile-overridable-{{../tool}}-{{id}}" data-site-id="{{id}}" data-site-title="{{title}}"/><span class="profile-sitepicker-sitetitle">{{title}}</span><br />
+                        {{/each}}
+                    </div>
+                    <button id="profile-sitepicker-donebutton-{{tool}}" data-tool="{{tool}}">{{translate 'notifications.sitepicker.donebutton'}}</button>
+                    <button id="profile-sitepicker-cancelbutton-{{tool}}">{{translate 'button.cancel'}}</button>
+                </div>
+                {{/if}}
+            </div> <!-- / profile-notifications-block-{{tool}} -->
+        </fieldset>
+
+    {{/each}} <!-- / registrations -->
+    <input type="submit" value="{{translate 'notifications.updatebutton'}}" />
+    <input type="button" value="{{translate 'button.cancel'}}" />
+    <span id="profile-notifications-update-success" class="profile-update-success" style="display: none;">{{translate 'message.notifications.updated'}}</span>
+</form>

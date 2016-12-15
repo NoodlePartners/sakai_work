@@ -99,6 +99,9 @@ public class BasePage extends WebPage implements IHeaderContributor {
 	Link<Void> myPrivacyLink;
 	Link<Void> searchLink;
 	Link<Void> preferencesLink;
+	Link<Void> notificationsLink;
+	Link<Void> timezoneLink;
+	Link<Void> languageLink;
 
 	public BasePage() {
 		// super();
@@ -163,6 +166,7 @@ public class BasePage extends WebPage implements IHeaderContributor {
 
 		add(this.myPicturesLink);
 
+		/*
 		// my friends link
 		this.myFriendsLink = new Link<Void>("myFriendsLink") {
 			private static final long serialVersionUID = 1L;
@@ -189,6 +193,7 @@ public class BasePage extends WebPage implements IHeaderContributor {
 		}
 
 		add(this.myFriendsLink);
+		*/
 
 		// messages link
 		this.myMessagesLink = new Link<Void>("myMessagesLink") {
@@ -234,6 +239,7 @@ public class BasePage extends WebPage implements IHeaderContributor {
 
 		add(this.myPrivacyLink);
 
+		/*
 		// search link
 		this.searchLink = new Link<Void>("searchLink") {
 			private static final long serialVersionUID = 1L;
@@ -251,6 +257,7 @@ public class BasePage extends WebPage implements IHeaderContributor {
 		}
 
 		add(this.searchLink);
+		*/
 
 		// preferences link
 		this.preferencesLink = new Link<Void>("preferencesLink") {
@@ -268,6 +275,48 @@ public class BasePage extends WebPage implements IHeaderContributor {
 			this.preferencesLink.setVisible(false);
 		}
 		add(this.preferencesLink);
+
+		// notifications link
+		this.notificationsLink = new Link<Void>("notificationsLink") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick() {
+				setResponsePage(new MyNotifications());
+			}
+		};
+		this.notificationsLink.add(new Label("notificationsLabel", new ResourceModel("link.my.notifications")));
+		this.notificationsLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.notifications.tooltip")));
+
+		add(this.notificationsLink);
+
+        // timezone link
+		this.timezoneLink = new Link<Void>("timezoneLink") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick() {
+				setResponsePage(new MyTimezone());
+			}
+		};
+		this.timezoneLink.add(new Label("timezoneLabel", new ResourceModel("link.my.timezone")));
+		this.timezoneLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.timezone.tooltip")));
+
+		add(this.timezoneLink);
+
+		// language link
+		this.languageLink = new Link<Void>("languageLink") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick() {
+				setResponsePage(new MyLanguage());
+			}
+		};
+		this.languageLink.add(new Label("languageLabel", new ResourceModel("link.my.language")));
+		this.languageLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.language.tooltip")));
+
+		add(this.languageLink);
 
 		// rss link
 		/*
@@ -293,9 +342,6 @@ public class BasePage extends WebPage implements IHeaderContributor {
 
 		// Tool additions (at end so we can override if required)
 		response.render(StringHeaderItem.forString("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"));
-		response.render(CssHeaderItem.forUrl("/profile2-tool/css/profile2.css"));
-		response.render(JavaScriptHeaderItem.forUrl("/profile2-tool/javascript/profile2.js"));
-
 	}
 
 	/*

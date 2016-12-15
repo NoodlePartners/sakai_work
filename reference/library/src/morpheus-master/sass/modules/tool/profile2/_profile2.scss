@@ -99,4 +99,16 @@
 	    max-width: 65em;
 	}
 
+	.profile-update-success {
+		display: none;
+		color: $ok-color;
+		background-color: $ok-background-color;
+		margin: 20px 0;
+		padding: 8px 15px 8px 15px;
+		border: 1px solid;
+		border-left-width: 5px;
+		border-color: lighten($ok-color, 25%);
+		border-left-color: $ok-color;
+		color: darken($ok-color, 30%);
+	}
 }

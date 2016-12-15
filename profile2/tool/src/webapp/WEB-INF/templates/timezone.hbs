@@ -1,0 +1,13 @@
+<h3 class="header icon timezone">{{translate 'heading.timezone'}}</h3>
+<p id="profile-timezone-instruction" class="instruction">{{translate 'instruction.timezone' currentTimezone}}</p>
+<form id="profile-timezone-form" action="/direct/profile/updateTimezone" method="POST">
+    <select name="timezone" size="20" style="background: none;">
+        {{#each timezones}}
+        <option id="profile-{{timezone}}" value="{{timezone}}">{{timezone}}</option>
+        {{/each}}
+    </select>
+	<br />
+    <input type="submit" value="{{translate 'timezone.updatebutton'}}" />
+    <input type="button" value="{{translate 'button.cancel'}}" />
+    <span id="profile-timezone-update-success" class="profile-update-success" style="display: none;">{{translate 'timezone.message.updated'}}</span>
+</form>

@@ -20,6 +20,8 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -71,6 +73,8 @@ import org.sakaiproject.profile2.util.ProfileUtils;
 public class ProfileEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, AutoRegisterEntityProvider, Outputable, Resolvable, Sampleable, Describeable, Redirectable, ActionsExecutable, RequestAware {
 
 	public final static String ENTITY_PREFIX = "profile";
+
+	private  final static Pattern OVERRIDEREGEX = Pattern.compile("^override:([\\w:]*):([\\w\\d-]*)$");
 	
 	@Override
 	public String getEntityPrefix() {
@@ -701,8 +705,78 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 		
 		return sb.toString();
 	}
-	
-	
+
+	@EntityCustomAction(action="updateNotifications", viewKey=EntityView.VIEW_NEW)
+	public boolean updateNotifications(EntityView view, Map<String, Object> params) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to update notifications.");
+		}
+
+		String currentUserId = sakaiProxy.getCurrentUserId();
+
+		Map<String, Map<String, String>> overrides = new HashMap();
+
+		for (String key : params.keySet()) {
+			if (key.endsWith("registration")) {
+				String pref = key.split("-")[0];
+				sakaiProxy.savePreferences(currentUserId, pref, (String) params.get(key));
+			} else {
+				Matcher matcher = OVERRIDEREGEX.matcher(key);
+				if (matcher.matches()) {
+					String tool = matcher.group(1);
+					String siteId = matcher.group(2);
+					String value = (String) params.get(key);
+					if (!overrides.containsKey(tool)) {
+						Map<String, String> siteMap = new HashMap();
+						siteMap.put(siteId, value);
+						overrides.put(tool, siteMap);
+					} else {
+						overrides.get(tool).put(siteId, value);
+					}
+				}
+			}
+		}
+
+		sakaiProxy.saveNotificationSiteOverrides(currentUserId, overrides);
+		return true;
+	}
+
+	@EntityCustomAction(action="updateTimezone", viewKey=EntityView.VIEW_NEW)
+	public boolean updateTimezone(EntityView view, Map<String, Object> params) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to update your timezone.");
+		}
+
+		String timeZone = (String) params.get("timezone");
+
+		if (StringUtils.isEmpty(timeZone)) {
+			throw new EntityException("You must supply a timezone", "", HttpServletResponse.SC_BAD_REQUEST);
+		}
+
+		sakaiProxy.setTimezoneForCurrentUser(timeZone);
+
+		return true;
+	}
+
+	@EntityCustomAction(action="updateLanguage", viewKey=EntityView.VIEW_NEW)
+	public boolean updateLanguage(EntityView view, Map<String, Object> params) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to update your language.");
+		}
+
+		String language = (String) params.get("language");
+
+		if (StringUtils.isEmpty(language)) {
+			throw new EntityException("You must supply a language", "", HttpServletResponse.SC_BAD_REQUEST);
+		}
+
+		sakaiProxy.setLanguageForCurrentUser(language);
+
+		return true;
+	}
 	
 	
 	
