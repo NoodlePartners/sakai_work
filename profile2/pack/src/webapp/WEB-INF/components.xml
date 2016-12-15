@@ -21,6 +21,8 @@
 		<property name="emailTemplateService" ref="org.sakaiproject.emailtemplateservice.service.EmailTemplateService" />
 		<property name="idManager" ref="org.sakaiproject.id.api.IdManager" />
 		<property name="activityService" ref="org.sakaiproject.event.api.ActivityService" />
+		<property name="userNotificationPreferencesRegistrationService" ref="org.sakaiproject.user.api.UserNotificationPreferencesRegistrationService" />
+		<property name="preferencesService" ref="org.sakaiproject.user.api.PreferencesService" />
 		
 		<!-- inject other resources -->
 		<property name="emailTemplates" ref="org.sakaiproject.profile2.emailtemplates.List" />

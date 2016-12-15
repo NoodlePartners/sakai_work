@@ -13,6 +13,7 @@
 		<property name="connectionsLogic" ref="org.sakaiproject.profile2.logic.ProfileConnectionsLogic" />
 		<property name="linkLogic" ref="org.sakaiproject.profile2.logic.ProfileLinkLogic" />
 		<property name="messagingLogic" ref="org.sakaiproject.profile2.logic.ProfileMessagingLogic" />
+		<property name="preferencesService" ref="org.sakaiproject.user.api.PreferencesService" />
 	</bean>
 	
 	
