@@ -28,8 +28,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.resource.loader.IStringResourceLoader;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
 import org.sakaiproject.profile2.tool.pages.MyFriends;
+import org.sakaiproject.profile2.tool.pages.MyLanguage;
 import org.sakaiproject.profile2.tool.pages.MyMessages;
 import org.sakaiproject.profile2.tool.pages.MyProfile;
+import org.sakaiproject.profile2.tool.pages.MyTimezone;
 import org.sakaiproject.profile2.tool.pages.ViewProfile;
 import org.sakaiproject.util.ResourceLoader;
 
@@ -71,6 +73,8 @@ public class ProfileApplication extends WebApplication {
 		mountPage("/messages", MyMessages.class);
 		mountPage("/profile", MyProfile.class);
 		mountPage("/viewprofile/${id}", ViewProfile.class);
+		mountPage("/language", MyLanguage.class);
+		mountPage("/timezone", MyTimezone.class);
 
 	}
 

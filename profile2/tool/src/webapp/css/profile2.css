@@ -1379,3 +1379,38 @@ img.ui-datepicker-trigger {
 input[type="submit"].secondary {
     color: #555 !important
 }
+
+.qtip.profile-qtip {
+    border: 1px #E0E0E0 solid !important;
+    background-color: #F8F8F8 !important;
+}
+
+.profile-sitepicker-sitetitle {
+    padding-left: 10px;
+    font-weight: bold;
+}
+
+.profile-sitepicker-list {
+    max-height: 200px;
+    padding-bottom: 20px;
+}
+
+.profile-site-title {
+    padding-right: 10px;
+}
+
+.profile-notifications-block {
+    padding-top: 10px;
+    padding-left: 20px;
+}
+
+.profile-notification-overrides-table {
+    display: table;
+}
+.profile-notification-override-row {
+    display: table-row;
+}
+.profile-notification-override-column {
+    display: table-cell;
+    padding-bottom: 5px;
+}

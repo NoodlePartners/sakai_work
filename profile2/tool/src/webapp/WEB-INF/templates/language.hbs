@@ -1,0 +1,13 @@
+<h3 class="header icon language">{{translate 'language.tab'}}</h3>
+<p  class="instruction">{{translate 'language.instruction' currentLocaleDisplay}}</p>
+<form id="profile-language-form" action="/direct/profile/updateLanguage" method="POST">
+    <select name="language" size="20" style="background: none;">
+        {{#each locales}}
+        <option id="profile-{{locale}}" value="{{locale}}">{{display}}</option>
+        {{/each}}
+    </select>
+	<br />
+    <input type="submit" value="{{translate 'language.updatebutton'}}" />
+    <input type="button" value="{{translate 'button.cancel'}}" />
+    <span id="profile-language-update-success" class="profile-update-success" style="display: none;">{{translate 'language.message.updated'}}</span>
+</form>
