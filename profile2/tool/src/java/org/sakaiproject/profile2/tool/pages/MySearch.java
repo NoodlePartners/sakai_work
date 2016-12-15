@@ -99,8 +99,6 @@ public class MySearch extends BasePage {
 		
 		log.debug("MySearch()");
 		
-		disableLink(searchLink);
-		
 		//check for current search cookie	 
 		CookieUtils utils = new CookieUtils();
 		searchCookie = utils.getCookie(ProfileConstants.SEARCH_COOKIE);

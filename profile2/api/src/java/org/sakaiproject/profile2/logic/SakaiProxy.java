@@ -17,13 +17,16 @@ package org.sakaiproject.profile2.logic;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.sakaiproject.api.common.edu.person.SakaiPerson;
 import org.sakaiproject.profile2.model.MimeTypeByteArray;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.tool.api.Tool;
+import org.sakaiproject.user.api.Preferences;
 import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserNotificationPreferencesRegistration;
 
 /**
  * An interface for abstracting Sakai specific parts away from the main logic.
@@ -168,6 +171,13 @@ public interface SakaiProxy {
 	 * @return
 	 */
 	public String getCurrentToolTitle();
+
+	/**
+	 * Get the id of the current tool. If no current tool is set, returns null.
+	 *
+	 * @return
+	 */
+	public String getCurrentToolId();
 
 	/**
 	 * Get a list of Users for the given userIds
@@ -1045,4 +1055,25 @@ public interface SakaiProxy {
 	 * @return <code>true</code> if the profile2.onlineStatus.enabled flag is set, otherwise returns <code>false</code>.
 	 */
 	public boolean isOnlineStatusEnabledGlobally();
+
+	/**
+	 * Returns all the notification preferences for the current user
+	 *
+	 * @return A list of <code>UserNotificationPreferencesRegistration</code> objects
+	 */
+	public List<UserNotificationPreferencesRegistration> getRegisteredNotificationItems();
+
+	public Preferences getPreferences();
+
+	public void savePreferences(String userId, String type, String value);
+
+	public void saveNotificationSiteOverrides(String userId, Map<String, Map<String,String>> overrides);
+
+	public void setTimezoneForCurrentUser(String timeZone);
+
+	public Locale[] getSakaiLocales();
+
+	public Locale getLocaleFromString(String language);
+
+	public void setLanguageForCurrentUser(String language);
 }

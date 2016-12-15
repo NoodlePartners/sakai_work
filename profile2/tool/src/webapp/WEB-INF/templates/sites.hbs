@@ -1,0 +1,36 @@
+<form id="profile-language-form" action="/direct/profile/updateSiteVisibility" method="POST">
+    <h3>{{translate 'sites.display.title'}}</h3>
+    <div>{{translate 'sites.display.instruction'}}</div>
+    <div class="profile-sites-tab-display-options">
+        <label>
+            <input id="profile-tab-label-1" type="radio" value="1" name="tab:label" checked="true" />
+            {{translate 'sites.tabsdisplaytitle'}}
+        </label>
+        <br />
+        <label>
+            <input id="profile-tab-label-2" type="radio" value="2" name="tab:label" />
+            {{translate 'sites.tabsdisplaydescription'}}
+        </label>
+    </div>
+    <h3>{{translate 'sites.hide.title'}}</h3>
+    <p class="instruction">{{{translate 'sites.hide.instruction'}}}</p>
+    <div>
+    {{#each terms}}
+        <div class="profile-sitestab-term">
+            <div class="profile-sitestab-site-title">{{name}}</div>
+            <div class="profile-sitestab-site-checkbox"><input type="checkbox" id="profile-term-checkbox-{{safeName}}" class="profile-term-checkbox" data-term="{{safeName}}" /></div>
+        </div>
+        
+        <div>
+        {{#each sites}}
+        <div id="profile-sitestab-site-{{id}}" class="profile-sitestab-site profile-sitestab-site-term-{{../safeName}}">
+            <div class="profile-sitestab-site-title">{{title}}</div>
+            <div class="profile-sitestab-site-checkbox"><input id="profile-site-checkbox-{{id}}" class="profile-site-checkbox profile-site-checkbox-term-{{../safeName}}" type="checkbox" data-site-id="{{id}}" name="site-{{id}}" data-term="{{../safeName}}" /></div>
+        </div>
+        {{/each}}
+        </div>
+    {{/each}}
+    </div>
+    <input type="submit" value="{{translate 'sites.updatebutton'}}" />
+    <span id="profile-sites-update-success" class="profile-update-success" style="display: none;">{{translate 'sites.message.updated'}}</span>
+</form>

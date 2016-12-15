@@ -86,11 +86,13 @@ public class ViewProfile extends BasePage {
 		}
 
 		myPicturesLink.setVisible(false);
-		myFriendsLink.setVisible(false);
 		myMessagesLink.setVisible(false);
 		myPrivacyLink.setVisible(false);
-		searchLink.setVisible(false);
 		preferencesLink.setVisible(false);
+		notificationsLink.setVisible(false);
+		timezoneLink.setVisible(false);
+		languageLink.setVisible(false);
+		sitesLink.setVisible(false);
 
 		// post view event
 		this.sakaiProxy.postEvent(ProfileConstants.EVENT_PROFILE_VIEW_OTHER, "/profile/" + userUuid, false);

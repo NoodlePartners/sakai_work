@@ -1,0 +1,10 @@
+<div id="profile-override-{{tool}}-{{siteId}}" class="profile-notification-override-row">
+    <div class="profile-notification-override-column profile-site-title">{{siteTitle}}</div>
+    <div class="profile-notification-override-column">
+        <select name="override:{{tool}}:{{siteId}}">
+        {{#each options}}
+            <option id="{{../tool}}_override-{{../siteId}}-{{value}}" value="{{value}}">{{display}}</option>
+        {{/each}}
+        </select>
+    </div>
+</div>

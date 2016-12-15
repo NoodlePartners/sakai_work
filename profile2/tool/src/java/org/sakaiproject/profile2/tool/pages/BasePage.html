@@ -27,12 +27,32 @@
 	
 	<script type="text/javascript">includeLatestJQuery('profile2');</script>
 	<script type="text/javascript" src="/library/js/jquery/hoverIntent/r7/jquery.hoverIntent.minified.js"></script>
-	<script type="text/javascript" src="/library/js/jquery/cluetip/1.2.10/jquery.cluetip.min.js"></script>
 	<script type="text/javascript" src="/library/js/jquery/i18n-properties/1.0.9/jquery.i18n.properties-1.0.9.js"></script>
 	<script type="text/javascript" src="/library/js/jquery/apTextCounter/jquery.apTextCounter.min.js"></script>
+	<script type="text/javascript" src="/library/js/jquery/qtip/jquery.qtip-latest.min.js"></script>
+	<!-- Handlebars and the compiled templates -->
+	<script type="text/javascript" src="/profile2-tool/javascript/handlebars.runtime-v4.0.5.js"></script>
+	<script type="text/javascript" src="/profile2-tool/templates/templates.js"></script>
+	<script type="text/javascript" src="/profile2-tool/javascript/profile2.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="/library/webjars/jquery-ui/1.11.3/jquery-ui.min.css" />
 	<link rel="stylesheet" type="text/css" href="/library/js/jquery/cluetip/1.2.10/css/jquery.cluetip.css" />
+	<link rel="stylesheet" type="text/css" href="/library/js/jquery/qtip/jquery.qtip-latest.min.css" />
+	<link rel="stylesheet" type="text/css" href="/profile2-tool/css/profile2.css" />
+
+	<script type="text/javascript">
+
+		$.i18n.properties({
+			name:'ProfileApplication',
+			path:'/profile2-tool/bundle/',
+			mode: 'both',
+            language: $('html').attr('lang')
+		});
+
+		var profile = profile || {};
+		profile.i18n = $.i18n.map;
+
+	</script>
 	
 </head>     
 <body>
@@ -61,26 +81,10 @@
 		</li>
 		<li>
 			<span>
-				<a wicket:id="myFriendsLink">
-					<span wicket:id="myFriendsLabel" tabindex="0">[myFriendsLabel]</span>
-					<span wicket:id="newRequestsLabel" class="new-items-count">[newRequestsLabel]</span>
-				</a>
-			</span>
-		</li>
-		<li>
-			<span>
 				<a wicket:id="myMessagesLink">
 					<span wicket:id="myMessagesLabel" tabindex="0">[myMessagesLabel]</span>
 					<span wicket:id="newMessagesLabel" class="new-items-count">[newMessagesLabel]</span>
 				</a>
-			</span>
-		</li>
-		<li>
-			<span>
-				<a wicket:id="searchLink">
-					<span wicket:id="searchLabel" tabindex="0">[searchLabel]</span>
-				</a>
-
 			</span>
 		</li>
 		<li>
@@ -96,7 +100,35 @@
 					<span wicket:id="preferencesLabel" tabindex="0">[preferencesLabel]</span>
 				</a>
 			</span>
-		</li> 
+		</li>
+		<li>
+			<span>
+				<a wicket:id="notificationsLink">
+					<span wicket:id="notificationsLabel" tabindex="0">[notificationsLabel]</span>
+				</a>
+			</span>
+		</li>
+		<li>
+			<span>
+				<a wicket:id="timezoneLink">
+					<span wicket:id="timezoneLabel" tabindex="0">[timezoneLabel]</span>
+				</a>
+			</span>
+		</li>
+		<li>
+			<span>
+				<a wicket:id="languageLink">
+					<span wicket:id="languageLabel" tabindex="0">[languageLabel]</span>
+				</a>
+			</span>
+		</li>
+		<li>
+			<span>
+				<a wicket:id="sitesLink">
+					<span wicket:id="sitesLabel" tabindex="0">[sitesLabel]</span>
+				</a>
+			</span>
+		</li>
 	</ul>
 	
 	<div class="portletBody">
