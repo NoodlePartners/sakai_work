@@ -2,6 +2,29 @@
  * For More Sites in Morpheus
  */
 
+var setSites = function(buttonType) {
+    if (buttonType === 'other' || buttonType === 'course') {
+        var container = $PBJQ('#selectSite');
+        $PBJQ('.tab-btn', container).removeClass('active');
+        $PBJQ('.tab-btn.'+buttonType, container).addClass('active');
+        if(buttonType === 'other')  {
+            $PBJQ('.moresites-left-col').hide();
+            $PBJQ('.moresites-right-col').show();
+            $PBJQ('#newSite_li').hide();
+            $PBJQ('#newGroupSite_li').show();
+            $PBJQ('#tab-btn-courses').addClass("not-selected");
+            $PBJQ('#tab-btn-others').removeClass("not-selected");
+        } else {
+            $PBJQ('.moresites-left-col').show();
+            $PBJQ('.moresites-right-col').hide();
+            $PBJQ('#newSite_li').show();
+            $PBJQ('#newGroupSite_li').hide();
+            $PBJQ('#tab-btn-courses').removeClass("not-selected");
+            $PBJQ('#tab-btn-others').addClass("not-selected");
+        }
+    }
+};
+
 var dhtml_view_sites = function(buttonType){
 
   // first time through set up the DOM
@@ -12,14 +35,7 @@ var dhtml_view_sites = function(buttonType){
   dhtml_view_sites = function (buttonType){
 
     if (!buttonType) buttonType = 'course';
-
-    if (buttonType === 'other') {
-        $PBJQ('.moresites-left-col').hide();
-        $PBJQ('.moresites-right-col').show();
-    } else if (buttonType === 'course') {
-        $PBJQ('.moresites-right-col').hide();
-        $PBJQ('.moresites-left-col').show();
-    }
+    setSites(buttonType);
 
     var modal = $PBJQ('#selectSiteModal');
     
@@ -502,6 +518,8 @@ $PBJQ(document).ready(function($){
     $PBJQ(this).addClass('active');
 
     var panel = $PBJQ(this).data('tab-target');
+	var type = $PBJQ(this).data('site-type');
+	setSites(type);
 
     $PBJQ('.tab-box').hide();
     $PBJQ(container).trigger('tab-shown', panel);
