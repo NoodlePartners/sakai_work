@@ -16,7 +16,7 @@ body.active-more-sites{
 		background: $tool-menu-background-color;
 		display: block;
 		position: fixed;
-		width: 60% ;
+		/* width: 60% ; */
 		max-height: 100%;
 		padding: 0 1em 1em 1em;
 		box-shadow: 5px 0 50px 0px rgba(0,0,0,0.5);
@@ -91,11 +91,20 @@ body.active-more-sites{
 
 	.tab-bar .tab-btn{
 		display: inline-block;
-		padding: 5px 2em 5px 2em;
+		padding: 5px 1.2em 5px 1.2em;
 		border: 1px solid $tool-border-color;
 		border-bottom:  0;
 		margin: 0;
 		background-color: darken( $tool-background-color, 20% );
+	}
+
+    .tab-bar .tab-btn.not-selected {
+		@media #{$phone}{
+			display: inline-block;
+		}
+		@media #{$nonPhone}{
+			display: none;
+		}
 	}
 
 	.tab-bar .tab-btn:hover{
@@ -182,8 +191,8 @@ ul#otherSitesMenu{
 
 	.moresites-left-col{
  		display: inline-block;
-		width: 49%;
-		float: left;
+		/* width: 49%; */
+		/* float: left; */
 		margin-right: 1%;
 		@media #{$more-sites-single-column}{
 			width: 100%;
@@ -195,8 +204,8 @@ ul#otherSitesMenu{
 	}
 	.moresites-right-col{
 		display: inline-block;
-		width: 49%;
-		float: left;
+		/* width: 49%; */
+		/* float: left; */
 		@media #{$more-sites-single-column}{
 			width: 100%;
 			float: none;

@@ -14,7 +14,8 @@
 
                 #if ($allowAddSite)
 
-                    <li><a id="newSite" href="${tabsSites.mrphs_worksiteToolUrl}?panel=Shortcut&amp;sakai_action=doNew_site&amp"><span>${rloader.sit_newsite}</span></a></li>
+                    <li id="newSite_li"><a id="newSite" href="${tabsSites.mrphs_worksiteToolUrl}?panel=Shortcut&amp;sakai_action=doNew_site&amp"><span>${rloader.sit_newsite}</span></a></li>
+                    <li id="newGroupSite_li" style="display:none;"><a id="newGroupSite" href="${tabsSites.mrphs_worksiteToolUrl}?panel=Shortcut&amp;sakai_action=doNew_groupSite&amp"><span>${rloader.sit_newgroupsite}</span></a></li>
 
                 #end ## END of IF ($allowAddSite)
 
@@ -32,7 +33,8 @@
         <div id="selectSite">
             <!-- View all sites, add new site, preferences -->
             <ul class="tab-bar">
-                <li class="tab-btn active" data-tab-target="otherSitesCategorWrap"><h2 class="favorites-tab-label">${rloader.sit_worksites}</h2></li>
+                <li id="tab-btn-courses" class="tab-btn course active" data-tab-target="otherSitesCategorWrap" data-site-type="course"><h2 class="favorites-tab-label">${rloader.sit_coursesites}</h2></li>
+                <li id="tab-btn-others" class="tab-btn other" data-tab-target="otherSitesCategorWrap" data-site-type="other"><h2 class="favorites-tab-label">${rloader.sit_othersites}</h2></li>
                 <li class="organizeFavorites tab-btn" data-tab-target="organizeFavorites">
                     <h2 class="favorites-tab-label"><span class="favorites-desktop">${rloader.moresite_organize_favorites}</span><span class="favorites-mobile">${rloader.moresite_favorites}</span> <span class="favoriteCount"></span></h2></li>
             </ul>
