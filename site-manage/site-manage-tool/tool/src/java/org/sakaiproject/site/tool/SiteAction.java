@@ -5224,6 +5224,7 @@ public class SiteAction extends PagedResourceActionII {
 		return fromENW;
 	}
 
+
 	/**
 	 * doNew_site is called when the Site list tool bar New... button is clicked
 	 * 
@@ -5246,6 +5247,36 @@ public class SiteAction extends PagedResourceActionII {
 		}
 
 	} // doNew_site
+
+
+    public void doNew_groupSite(RunData data) throws Exception {
+
+        SessionState state = ((JetspeedRunData) data)
+            .getPortletSessionState(((JetspeedRunData) data).getJs_peid());
+
+        // An annoying thing is that the state isn't really set up until the GET method
+        // is called as a part of the redirect. Here, we want to set up things up now,
+        // as part of the initial POST, so we can start setting values into the state now
+        // Unfortunately, the init method requires a VelocityPortlet which we don't have
+        // at this point.  However, the only thing it's needed for is to set up the
+        // STATE_SITE_TYPES entry, which, fortunately, we can do for it.
+        state.setAttribute(STATE_SITE_TYPES, new ArrayList<>(Arrays.asList("group")));
+        // Now we call init, setting the portlet parameter to null.
+        // Brittle, methinks, but I can't think of a better way.
+        VelocityPortlet portlet = null;
+        init(portlet, data, state);
+
+        state.setAttribute(STATE_TEMPLATE_INDEX, "13");
+        String type = "group";
+        ParameterParser params = data.getParameters();
+        getSelectedTemplate(state, params, type);
+        state.setAttribute(STATE_TYPE_SELECTED, type);
+        setNewSiteType(state, type);
+
+        redirectToQuestionVM(state, type);
+
+    } // doNew_groupSite
+
 
 	/**
 	 * doMenu_site_delete is called when the Site list tool bar Delete button is
