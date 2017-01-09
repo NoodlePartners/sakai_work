@@ -18,11 +18,11 @@
         <div id="snap-poll" style="display:none;">
             <div id="snap-poll-question">${rloader.snap_poll_question1}</div>
             <div id="snap-poll-options">
-                <span class="snap-poll-option fa fa-2x fa-frown-o" style="color: #88114A;" data-option="1"></span>
-                <span class="snap-poll-option fa fa-2x fa-frown-o" style="color: #BF6624;" data-option="2"></span>
-                <span class="snap-poll-option fa fa-2x fa-meh-o" style="color: #FCB03F;" data-option="3"></span>
-                <span class="snap-poll-option fa fa-2x fa-smile-o" style="color: #6CBD41;" data-option="4"></span>
-                <span class="snap-poll-option fa fa-2x fa-smile-o" style="color: #007B39;" data-option="5"></span>
+                <span class="snap-poll-option" data-option="1"><img class="snap-poll-img" src="/library/image/snap-poll/ic_mood_bad_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="2"><img class="snap-poll-img" src="/library/image/snap-poll/ic_sentiment_dissatisfied_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="3"><img class="snap-poll-img" src="/library/image/snap-poll/ic_sentiment_neutral_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="4"><img class="snap-poll-img" src="/library/image/snap-poll/ic_sentiment_satisfied_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="5"><img class="snap-poll-img" src="/library/image/snap-poll/ic_mood_black_36px.svg"/></span>
             </div>
             <div id="snap-poll-comment-title">${rloader.snap_poll_question2}</div>
             <textarea id="snap-poll-comment-box"></textarea>

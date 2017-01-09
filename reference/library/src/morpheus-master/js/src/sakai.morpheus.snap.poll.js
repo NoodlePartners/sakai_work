@@ -7,14 +7,14 @@
     var reset = function () {
 
             snapPoll.fadeOut();
-            $('.snap-poll-option').removeClass('fa-3x');
+            $('.snap-poll-option').removeClass('poll-option-selected');
             sendButton.prop('disabled', true);
             commentBox.val('');
         };
 
     $('.snap-poll-option').click(function (e) {
 
-        $(this).addClass('fa-3x').siblings().removeClass('fa-3x');
+        $(this).addClass('poll-option-selected').siblings().removeClass('poll-option-selected');
         sendButton.prop('disabled', false);
     });
 
@@ -35,7 +35,7 @@
 
     $('#snap-poll-send').click(function (e) {
 
-        var response = $('.snap-poll-option.fa-3x').data('option');
+        var response = $('.snap-poll-option.poll-option-selected').data('option');
         var tool = snapPoll.data('tool');
         var context = snapPoll.data('context');
         var reason = commentBox.val();
