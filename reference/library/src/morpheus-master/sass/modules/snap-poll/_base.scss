@@ -1,5 +1,5 @@
 #snap-poll {
-    position: absolute !important;
+    position: fixed !important;
     top: 50%;
     left: 50%;
     margin-top: -50px;
@@ -24,13 +24,23 @@
     }
 
     #snap-poll-options {
-        width: 150px;
+        width: 180px;
         margin-left: auto;
         margin-right: auto;
         text-align: center;
 
         .snap-poll-option {
             cursor: pointer;
+            .snap-poll-img {
+                height:30px;
+                width: 30px;
+            }
+        }
+        .snap-poll-option.poll-option-selected {
+            .snap-poll-img {
+                height:40px;
+                width: 40px;
+            }
         }
     }
 
