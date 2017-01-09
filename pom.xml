@@ -106,6 +106,7 @@
                 <module>site</module>
                 <module>site-manage</module>
                 <module>sitestats</module>
+                <module>snap-poll</module>
                 <module>syllabus</module>
                 <module>taggable</module>
                 <module>textarea</module>
@@ -189,6 +190,7 @@
                 <module>site</module>
                 <module>site-manage</module>
                 <module>sitestats</module>
+                <module>snap-poll</module>
                 <module>syllabus</module>
                 <module>taggable</module>
                 <module>textarea</module>
