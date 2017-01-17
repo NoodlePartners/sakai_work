@@ -1,5 +1,5 @@
-<h3 class="header icon notifications">{{translate 'heading.notifications'}}</h3>
-<p class="instruction">{{translate 'instruction.notifications'}}</p>
+<h3 class="header icon notifications">{{translate 'notifications.tab'}}</h3>
+<p class="instruction">{{translate 'notifications.instruction'}}</p>
 <form id="profile-notifications-form" action="/direct/profile/updateNotifications" method="POST">
     {{#each registrations}}
         <fieldset>
@@ -49,5 +49,5 @@
     {{/each}} <!-- / registrations -->
     <input type="submit" value="{{translate 'notifications.updatebutton'}}" />
     <input type="button" value="{{translate 'button.cancel'}}" />
-    <span id="profile-notifications-update-success" class="profile-update-success" style="display: none;">{{translate 'message.notifications.updated'}}</span>
+    <span id="profile-notifications-update-success" class="profile-update-success" style="display: none;">{{translate 'notifications.message.updated'}}</span>
 </form>

@@ -19,7 +19,7 @@
 
             if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
                 profile.currentTimezone = formData.get('timezone');
-                var newInstruction = profile.translate('instruction.timezone', profile.currentTimezone);
+                var newInstruction = profile.translate('timezone.instruction', profile.currentTimezone);
                 $('#profile-timezone-instruction').html(newInstruction);
                 var success = $('#profile-timezone-update-success');
                 success.show();

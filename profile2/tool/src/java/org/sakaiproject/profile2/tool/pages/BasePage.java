@@ -285,8 +285,8 @@ public class BasePage extends WebPage implements IHeaderContributor {
 				setResponsePage(new MyNotifications());
 			}
 		};
-		this.notificationsLink.add(new Label("notificationsLabel", new ResourceModel("link.my.notifications")));
-		this.notificationsLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.notifications.tooltip")));
+		this.notificationsLink.add(new Label("notificationsLabel", new ResourceModel("notifications.tab")));
+		this.notificationsLink.add(new AttributeModifier("title", true, new ResourceModel("notifications.tab.tooltip")));
 
 		add(this.notificationsLink);
 
@@ -299,8 +299,8 @@ public class BasePage extends WebPage implements IHeaderContributor {
 				setResponsePage(new MyTimezone());
 			}
 		};
-		this.timezoneLink.add(new Label("timezoneLabel", new ResourceModel("link.my.timezone")));
-		this.timezoneLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.timezone.tooltip")));
+		this.timezoneLink.add(new Label("timezoneLabel", new ResourceModel("timezone.tab")));
+		this.timezoneLink.add(new AttributeModifier("title", true, new ResourceModel("timezone.tab.tooltip")));
 
 		add(this.timezoneLink);
 
@@ -313,8 +313,8 @@ public class BasePage extends WebPage implements IHeaderContributor {
 				setResponsePage(new MyLanguage());
 			}
 		};
-		this.languageLink.add(new Label("languageLabel", new ResourceModel("link.my.language")));
-		this.languageLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.language.tooltip")));
+		this.languageLink.add(new Label("languageLabel", new ResourceModel("language.tab")));
+		this.languageLink.add(new AttributeModifier("title", true, new ResourceModel("language.tab.tooltip")));
 
 		add(this.languageLink);
 

@@ -1,5 +1,5 @@
-<h3 class="header icon timezone">{{translate 'heading.timezone'}}</h3>
-<p id="profile-timezone-instruction" class="instruction">{{translate 'instruction.timezone' currentTimezone}}</p>
+<h3 class="header icon timezone">{{translate 'timezone.tab'}}</h3>
+<p id="profile-timezone-instruction" class="instruction">{{translate 'timezone.instruction' currentTimezone}}</p>
 <form id="profile-timezone-form" action="/direct/profile/updateTimezone" method="POST">
     <select name="timezone" size="20" style="background: none;">
         {{#each timezones}}
