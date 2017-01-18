@@ -31,9 +31,9 @@
                 "chat": {
                     "enabled": $!{neoChat},
                     "pollInterval": $!{portalChatPollInterval},
-            "video" : {
-            "enabled": $!{neoChatVideo}
-            }
+                    "video" : {
+                        "enabled": $!{neoChatVideo}
+                    }
                 },
                 "loggedIn": $!{loggedIn},
                 "portalPath": "$!{portalPath}",
