@@ -811,14 +811,57 @@ function modalDialogWidth() {
 }
 
 var sakai = sakai || {};
+
 sakai.showSnapPoll = function (tool, context) {
 
+    // Checks to see if there's a fullscreen element. See
+    // https://www.sitepoint.com/use-html5-full-screen-api/
+    // https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
+    var existsFullScreenElement = function () {
+        return ( (
+            document.fullscreenEnabled ||
+            document.webkitFullscreenEnabled ||
+            document.mozFullScreenEnabled ||
+            document.msFullscreenEnabled
+        ) && (
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement
+        ) );
+    };
+
+    var showIt = function() {
+        jQuery('#snap-poll').attr('data-context', context).attr('data-tool', tool).fadeIn();
+    }
+
+    var okToShow = function() {
+        var ok = true;
+        if(existsFullScreenElement()) {ok = false;}
+        if(ok) {
+            jQuery.each(sakai.page_players, function(attr, value) {
+                if (value == YT.PlayerState.PLAYING) {ok = false;}
+            });
+        }
+        return ok;
+    };
+
+    var checkAndShow = function() {
+        if(okToShow()) {
+            showIt();
+        } else {
+            setTimeout(function () {
+                checkAndShow();
+            }, 4000); // hard coded to 4 secs
+        }
+    };
+
     var url = '/direct/snap-poll/showPollNow?siteId=' + portal.siteId + '&tool=' + tool + '&context=' + context;
+
     jQuery.ajax({url: url, cache: false})
         .done(function (data, textStatus, jqXHR) {
-
             if (data === 'true') {
-                jQuery('#snap-poll').attr('data-context', context).attr('data-tool', tool).fadeIn();
+                checkAndShow();
             }
         });
 };
