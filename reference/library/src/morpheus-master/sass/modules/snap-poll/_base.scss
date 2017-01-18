@@ -6,7 +6,7 @@
     margin-left: -50px;
     width: 200px;
     z-index: 100000 !important;
-    background-color: $tool-menu-background-color;
+    background-color: $tool-tab-background-color;
     color: $text-color;
     border-color: $tool-border-color;
     border-width: 1px;
@@ -42,6 +42,17 @@
                 width: 40px;
             }
         }
+    }
+
+    #snap-poll-ignore {
+        float: right;
+        span {
+            vertical-align: top;
+        }
+    }
+
+    #snap-poll-comment {
+        display: none;
     }
 
     #snap-poll-comment-title {

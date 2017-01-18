@@ -16,6 +16,7 @@
         #end ## END of IF ( ${bufferedResponse} && ${responseHead} )
 
         <div id="snap-poll" style="display:none;">
+			<a id="snap-poll-ignore" href="#"><span class="fa fa-times"></span></a>
             <div id="snap-poll-question">${rloader.snap_poll_question1}</div>
             <div id="snap-poll-options">
                 <span class="snap-poll-option" data-option="1"><img class="snap-poll-img" src="/library/image/snap-poll/ic_mood_bad_black_36px.svg"/></span>
@@ -24,11 +25,12 @@
                 <span class="snap-poll-option" data-option="4"><img class="snap-poll-img" src="/library/image/snap-poll/ic_sentiment_satisfied_black_36px.svg"/></span>
                 <span class="snap-poll-option" data-option="5"><img class="snap-poll-img" src="/library/image/snap-poll/ic_mood_black_36px.svg"/></span>
             </div>
-            <div id="snap-poll-comment-title">${rloader.snap_poll_question2}</div>
-            <textarea id="snap-poll-comment-box"></textarea>
-            <div id="snap-poll-buttons">
-                <button id="snap-poll-send" disabled="true">${rloader.snap_poll_send}</button>
-                <button id="snap-poll-ignore">${rloader.snap_poll_ignore}</button>
+            <div id="snap-poll-comment">
+                <div id="snap-poll-comment-title">${rloader.snap_poll_question2}</div>
+                <textarea id="snap-poll-comment-box"></textarea>
+				<div id="snap-poll-buttons">
+					<button id="snap-poll-send" disabled="true">${rloader.snap_poll_send}</button>
+				</div>
             </div>
         </div>
 
