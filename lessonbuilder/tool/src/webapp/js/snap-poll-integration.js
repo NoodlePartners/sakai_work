@@ -18,7 +18,7 @@
         jQuery(tag).load(function(event) {
             sakai.page_players = {};
             var setIt = function(event, value) {
-                sakai.page_players[event.target.a.id] = value;
+                sakai.page_players[$(event.target).attr("data-iframe-number")] = value;
             }
             var onReady = function(event) {
                 setIt(event, YT.PlayerState.UNSTARTED);
@@ -26,7 +26,10 @@
             var onStateChange = function(event) {
                 setIt(event, event.data);
             };
-            jQuery("iframe.playerwidth").each(function(index){
+            var n = 0;
+            jQuery("iframe").each(function(index){
+                n += 1;
+                $(this).attr("data-iframe-number", n);
                 var theUrl = this.src;
                 // Only do this stuff for iframes embedding youtube vids.
                 if(theUrl.indexOf("youtube.com") >= 0) {
