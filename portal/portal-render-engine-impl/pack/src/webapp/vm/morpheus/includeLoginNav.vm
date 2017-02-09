@@ -106,16 +106,6 @@
                                     </div>
                                 </li>
 
-                                    #if (${tabsSites.prefsToolUrl})
-
-                                        <li class="Mrphs-userNav__submenuitem Mrphs-userNav__submenuitem-indented">
-                                            <a role="menuitem" href="${tabsSites.prefsToolUrl}" class="Mrphs-userNav__submenuitem--prefs">
-                                                <span>${rloader.sit_preferences}</span>
-                                            </a>
-                                        </li>
-
-                                    #end ## END of IF (${tabsSites.prefsToolUrl})
-
                                     #if (${tabsSites.worksiteToolUrl})
 
                                         #if ($allowAddSite)
