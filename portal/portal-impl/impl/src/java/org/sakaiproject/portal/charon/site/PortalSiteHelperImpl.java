@@ -283,7 +283,7 @@ public class PortalSiteHelperImpl implements PortalSiteHelper
 		if ( session != null )
                 { 
                         Preferences prefs = PreferencesService.getPreferences(session.getUserId());
-                        ResourceProperties props = prefs.getProperties("sakai:portal:sitenav");
+                        ResourceProperties props = prefs.getProperties(org.sakaiproject.user.api.PreferencesService.SITENAV_PREFS_KEY);
 
                         List propList = props.getPropertyList("order");
                         if (propList != null)
