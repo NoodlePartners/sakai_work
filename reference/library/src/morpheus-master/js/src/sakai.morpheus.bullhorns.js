@@ -53,6 +53,7 @@
     $(document).ready(function () {
 
         portal.socialBullhorn.qtip({
+            suppress: false,
             position: { adjust: { scroll: false }, my: 'top right', at: 'bottom left', target: portal.socialBullhorn },
             show: { event: 'click', delay: 0, solo: portal.academicBullhorn },
             style: { classes: 'portal-bullhorns' },
@@ -119,6 +120,7 @@
         });
 
         portal.academicBullhorn.qtip({
+            suppress: false,
             position: { adjust: { scroll: false }, my: 'top right', at: 'bottom left', target: portal.socialBullhorn },
             show: { event: 'click', delay: 0, solo: portal.socialBullhorn },
             style: { classes: 'portal-bullhorns' },
@@ -145,6 +147,8 @@
                                     if (alert.event === 'asn.new.assignment'
                                                                 || alert.event === 'asn.grade.submission') {
                                         faClass = 'fa-file-text';
+                                    } else if (alert.event === 'lessonbuilder.comment.create') {
+                                        faClass = 'fa-leanpub';
                                     }
 
                                     markup += '<a href="' + alert.url + '" style="text-decoration: none;"><div id="portal-bullhorn-alert-' + alert.id + '" class="portal-bullhorn-alert">'
@@ -164,6 +168,8 @@
                                             = data.i18n.assignmentSubmissionGraded.replace('{0}', title).replace('{1}', siteTitle);
                                     } else if (alert.event === 'commons.comment.created') {
                                         markup += data.i18n.academicCommentCreated.replace('{0}', siteTitle);
+                                    } else if (alert.event === 'lessonbuilder.comment.create') {
+                                        markup += data.i18n.academicLessonBuilderCommentCreate.replace('{0}', siteTitle);
                                     } else {
                                         markup += data.i18n.unrecognisedAlert;
                                     }
