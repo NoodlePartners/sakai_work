@@ -9,6 +9,7 @@ import java.util.Observer;
 import java.util.Observable;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.sakaiproject.announcement.api.AnnouncementMessage;
 import org.sakaiproject.announcement.api.AnnouncementMessageHeader;
@@ -27,6 +28,11 @@ import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.lessonbuildertool.api.LessonBuilderEvents;
+import org.sakaiproject.lessonbuildertool.model.SimplePageToolDao;
+import org.sakaiproject.lessonbuildertool.SimplePage;
+import org.sakaiproject.lessonbuildertool.SimplePageComment;
+import org.sakaiproject.lessonbuildertool.SimplePageItem;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.portal.api.PortalService;
@@ -34,6 +40,7 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 //import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.tool.api.Session;
@@ -80,6 +87,8 @@ public class BullhornServiceImpl implements Observer {
     private SecurityService securityService;
     private SessionManager sessionManager;
     private ServerConfigurationService serverConfigurationService;
+    private SimplePageToolDao simplePageToolDao;
+    @Setter
     private SiteService siteService;
     private SqlService sqlService;
     private Object commonsManager = null;
@@ -137,6 +146,7 @@ public class BullhornServiceImpl implements Observer {
             HANDLED_EVENTS.add(AssignmentConstants.EVENT_GRADE_ASSIGNMENT_SUBMISSION);
             HANDLED_EVENTS.add(ASSESSMENT_PUBLISH);
             HANDLED_EVENTS.add(COMMONS_COMMENT_CREATED);
+            HANDLED_EVENTS.add(LessonBuilderEvents.COMMENT_CREATE);
             eventTrackingService.addObserver(this);
         }
 
@@ -152,6 +162,7 @@ public class BullhornServiceImpl implements Observer {
                 Event e = (Event) arg;
                 String event = e.getEvent();
                 String ref = e.getResource();
+                    String context = e.getContext();
                 String[] pathParts = ref.split("/");
                 String from = e.getUserId();
                 long at = e.getEventTime().getTime();
@@ -319,6 +330,42 @@ public class BullhornServiceImpl implements Observer {
                                 }
                             } catch (IdUnusedException idue) {
                                 log.error("Failed to find either the submission or the site", idue);
+                            }
+                        } else if (LessonBuilderEvents.COMMENT_CREATE.equals(event)) {
+                            try {
+                                long commentId = Long.parseLong(pathParts[pathParts.length - 1]);
+                                SimplePageComment comment = simplePageToolDao.findCommentById(commentId);
+
+                                String url = simplePageToolDao.getPageUrl(comment.getPageId());
+
+                                // Alert tutor types.
+                                List<User> receivers = securityService.unlockUsers(
+                                    SimplePage.PERMISSION_LESSONBUILDER_UPDATE, "/site/" + context);
+                                for (User receiver : receivers) {
+                                    String to = receiver.getId();
+                                    if (!to.equals(from)) {
+                                        doAcademicInsert(from, to, event, ref, "title", context, e.getEventTime(), url);
+                                    }
+                                }
+
+                                // Get all the comments in the same item
+                                List<SimplePageComment> comments
+                                    = simplePageToolDao.findCommentsOnItems(
+                                        Arrays.asList(new Long[] {comment.getItemId()}));
+
+                                if (comments.size() > 1) {
+                                    List<String> doneAuthors = new ArrayList<>();
+                                    // Not the first, alert all the other commenters
+                                    for (SimplePageComment c : comments) {
+                                        String to = c.getAuthor();
+                                        if (!to.equals(from) && !doneAuthors.contains(to)) {
+                                            doAcademicInsert(from, to, event, ref, "title", context, e.getEventTime(), url);
+                                            doneAuthors.add(to);
+                                        }
+                                    }
+                                }
+                            } catch (NumberFormatException nfe) {
+                                log.error("Caught number format exception whilst handling events", nfe);
                             }
                         } /*else if (ASSESSMENT_PUBLISH.equals(event)) {
                             String siteId = e.getContext();
