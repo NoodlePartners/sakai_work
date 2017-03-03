@@ -86,10 +86,10 @@ public class ViewProfile extends BasePage {
 		}
 
 		myPicturesLink.setVisible(false);
-		myFriendsLink.setVisible(false);
+		// myFriendsLink.setVisible(false);
 		myMessagesLink.setVisible(false);
 		myPrivacyLink.setVisible(false);
-		searchLink.setVisible(false);
+		// searchLink.setVisible(false);
 		preferencesLink.setVisible(false);
 
 		// post view event
