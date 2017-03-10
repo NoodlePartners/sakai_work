@@ -142,6 +142,8 @@
         <script src="${pageScriptPath}trimpath-template-latest.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/bgiframe/jquery.bgiframe.min.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/cluetip/1.2.10/jquery.cluetip.min.js$!{portalCDNQuery}"></script>
+        <script src="/library/jquery.i18n.properties.min.js"></script>
+        <script src="/library/js/portal-i18n-utils.js$!{portalCDNQuery}"></script>
         <script src="${pageSkinRepo}/${pageSkin}/js/morpheus.plugins.min.js$!{portalCDNQuery}"></script>
         <script src="${pageSkinRepo}/${pageSkin}/js/morpheus.scripts.min.js$!{portalCDNQuery}"></script>
         <script src="${pageWebjarsPath}/pnotify/2.1.0/pnotify.core.min.js$!{portalCDNQuery}"></script>
@@ -217,5 +219,6 @@
         #parse("/vm/morpheus/includeGoogleTagManager.vm")
 
         ${includeExtraHead}
+        #parse("/vm/morpheus/connection-manager.vm")
     </body>
 </html>
