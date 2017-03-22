@@ -1,6 +1,6 @@
 (function ($) {
 
-    moment.locale(sakai.locale.userLocale);
+    moment.locale(portal.locale);
 
     portal.socialBullhorn = $('#Mrphs-social-bullhorn');
     portal.academicBullhorn = $('#Mrphs-academic-bullhorn');
