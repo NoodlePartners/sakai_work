@@ -29,11 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Cookie;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -125,9 +127,7 @@ public class SiteHandler extends WorksiteHandler
 
 	// SAK-27774 - We are going inline default but a few tools need a crutch 
 	// This is Sakai 11 only so please do not back-port or merge this default value
-	private static final String IFRAME_SUPPRESS_DEFAULT = ":all:sakai.gradebook.gwt.rpc:com.rsmart.certification:sakai.melete:sakai.rsf.evaluation";
-
-	private static final long AUTO_FAVORITES_REFRESH_INTERVAL_MS = 30000;
+	private static final String IFRAME_SUPPRESS_DEFAULT = ":all:sakai.gradebook.gwt.rpc:com.rsmart.certification:sakai.melete";
 
 	public SiteHandler()
 	{
@@ -537,11 +537,9 @@ public class SiteHandler extends WorksiteHandler
 		if (SiteService.isUserSite(siteId)){
 			rcontext.put("siteTitle", rb.getString("sit_mywor") );
 			rcontext.put("siteTitleTruncated", rb.getString("sit_mywor") );
-			rcontext.put("isUserSite", true);
 		}else{
 			rcontext.put("siteTitle", portal.getSiteHelper().getUserSpecificSiteTitle(site, false, true, providers));
 			rcontext.put("siteTitleTruncated", portal.getSiteHelper().getUserSpecificSiteTitle(site, true, false, providers));
-			rcontext.put("isUserSite", false);
 		}
 		
 		addLocale(rcontext, site, session.getUserId());
@@ -646,10 +644,6 @@ public class SiteHandler extends WorksiteHandler
 	protected void includeSiteNav(PortalRenderContext rcontext, HttpServletRequest req,
 			Session session, String siteId)
 	{
-		if (session.getUserId() != null) {
-			refreshAutoFavorites(session);
-		}
-
 		if (rcontext.uses(INCLUDE_SITE_NAV))
 		{
 
@@ -692,29 +686,6 @@ public class SiteHandler extends WorksiteHandler
 			catch (Exception any)
 			{
 			}
-		}
-	}
-
-	final static String AUTO_FAVORITES_LAST_REFRESHED_TIME = "autoFavoritesLastRefreshedTime";
-
-	private void refreshAutoFavorites(Session session) {
-		Long lastRefreshTime = (Long)session.getAttribute(AUTO_FAVORITES_LAST_REFRESHED_TIME);
-
-		if (lastRefreshTime == null) {
-			lastRefreshTime = Long.valueOf(0);
-		}
-
-		long now = System.currentTimeMillis();
-
-		if ((now - lastRefreshTime) > AUTO_FAVORITES_REFRESH_INTERVAL_MS) {
-			// Fetch the list of favorites, which will in turn populate the auto favorites.
-			try {
-				new FavoritesHandler().userFavorites(session.getUserId());
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-
-			session.setAttribute(AUTO_FAVORITES_LAST_REFRESHED_TIME, now);
 		}
 	}
 
