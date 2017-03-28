@@ -5,6 +5,8 @@
 function toggleMinimizeNav(){
 
   $PBJQ('body').toggleClass('Mrphs-toolMenu-collapsed');
+  // Remove any popout div for subsites.  Popout only displayed when portal.showSubsitesAsFlyout is set to true.
+  $PBJQ('#subSites.floating').css({'display': 'none'});
 
   var el = $PBJQ(this);
   var label = $PBJQ('.accessibility-btn-label' , el);
@@ -33,11 +35,7 @@ var collapsed = false;
 
 var $window = $PBJQ(window),
 	$tools	= $("#toolMenu"),
-	$bread = $(".Mrphs-siteHierarchy"),
-	padding	= $bread.height() 
-		+ getNumPart($bread.css('padding-top'))
-		+ getNumPart($bread.css('padding-bottom'))
-		+ $(".Mrphs-topHeader").height();
+	padding	= $(".Mrphs-topHeader").height();
 
 $PBJQ(document).ready(function(){
 	if(getCookieVal('sakai_nav_minimized') === 'true') {
@@ -46,15 +44,15 @@ $PBJQ(document).ready(function(){
 	}
 });
 
-$PBJQ(window).scroll(function(){
+function animateToolBar() {
+	var offset = $('#toolMenuWrap').offset().top;
 	if($("#toolMenuWrap").attr("scrollingToolbarEnabled") != undefined){
-		var topPad = $(".pasystem-banner-alerts").height();
-		var follow = ($window.height()- (padding + topPad)) > $tools.height() 
-						&& ($window.scrollTop() > padding);
+		var topPad = padding + $(".pasystem-banner-alerts").height();
+		var follow = ($window.height() - topPad) > $tools.height();
 		if($("#toolMenuWrap").css('position') !== 'fixed'
 			&& follow && $window.scrollTop() > 0) {
 			$("#toolMenu,#subSites").stop().animate({
-				top: $window.scrollTop() + topPad - padding
+				top: Math.max($window.scrollTop() + topPad - offset, 0)
 			});
 		} else {
 			$("#toolMenu,#subSites").stop().animate({
@@ -62,25 +60,7 @@ $PBJQ(window).scroll(function(){
 			});
 		}
 	}
-});
-
-//Shows or hides the subsites in a popout div. This isn't used unless
-// portal.showSubsitesAsFlyout is set to true in sakai.properties.
-$PBJQ("#toggleSubsitesLink").click(function (e) {
-  var subsitesLink = $PBJQ(this);
-  if($PBJQ('#subSites').css('display') == 'block') {
-    $PBJQ('#subSites').hide();
-    $PBJQ('#subSites').removeClass('floating');
-  } else {
-    var position = subsitesLink.position();
-    var _top = ( -1 * ( $PBJQ('#toolMenu').height() - position.top ) );
-    $PBJQ('#subSites').css({'display': 'block','left': position.left + subsitesLink.width() + 6 + 'px','top': _top + 'px'});
-    $PBJQ('#subSites').addClass('floating');
-  	if( $PBJQ("#toggleSubsitesLink").position().top < 240 ){
-  		$PBJQ("#subSites.floating").addClass('ontop');
-  	}
-  }
-});
+}
 
 function getCookieVal(cookieName) {
 	var cks = document.cookie.split(';');
@@ -90,13 +70,5 @@ function getCookieVal(cookieName) {
 			return ((cks[i].split('='))[1]).trim();;
 		}
 	}
-	return 'false';
-}
-
-function getNumPart(val) {
-	for(var i = val.length - 1; i >= 0; i--) {
-		if(!isNaN(Number(val.charAt(i)))) {
-			return Number(val.substring(0,i+1));
-		}
-	}
+	return undefined;
 }
