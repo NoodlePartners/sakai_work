@@ -1,5 +1,6 @@
 /* portal.css currently sets label to display:block. reverse it but only for our content. have to
    do iframe and inline separately, and for some reason popups  */
+
 #content label,.ui-dialog label,body[onload] label{
   display: inline;
 }
@@ -53,7 +54,6 @@
 .right-col, .contentCol, .checklistDiv, .checklistDescription, .playerwidth, .playerwidth iframe, .playerwidth object, .playerwidth embed {
   max-width:100%;
 }
-
 .gradingPane {
   padding-top: 20px;
   padding-left: 10px;
@@ -109,9 +109,6 @@
 	margin-top: 10px;
 	background-color: #eee;
 	padding: 5px;
-}
-.nextprev {
-	font-size: 95% !important
 }
 .Mrphs-siteHierarchy {
 	display:flex
@@ -172,11 +169,20 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
 	border-width: 2px;
 }
 .instructionPanel,.controlsPanel {
-    border:1px solid #ccc;
+    border:1px solid #bbb;
     font-size:12px;
-    background: #eee;
+    background: #ddd;
     padding:5px;
     margin:5px 0
+}
+.indent {
+    margin-left: 10px;
+}
+.grouplist {
+    margin-left: 20px;
+    border:1px solid #bbb;
+    background: #ddd;
+    padding: 5px;
 }
 .controlsPanel {
     padding:0;
@@ -196,6 +202,11 @@ div.action span .nextbutton, .Mrphs-siteHierarchy span .nextbutton{
     color: #c00 !important;    
     text-shadow:none !important;
 
+}
+.mainList .narrow-instruction {
+    padding-top:5px;
+    padding-bottom:5px;
+    margin-bottom: 0px;
 }
 .act .deleteButton {
     float: none
@@ -280,8 +291,12 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
 .mm-file-input-itemname {
 	margin-left: 1.0em;
 }
-#edit-title {
-	margin-left: 1em
+.add-another-file-div {
+	padding: 10px;
+	padding-top: 0px;
+        margin-left: 30px;
+	background-color: #ddd;
+	border: 1px solid #bbb;
 }
 .ui-button-text {
 	padding: 0.25em 0.8em !important
@@ -451,7 +466,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
    make them subjectively the same darkness.
 */
 /* default */
-.column .commentDiv, .column .studentContentTable, .column .questionDiv .contentCol, .column .checklistDiv {
+.column .commentDiv, .column .studentContentTable, .column .questionDiv .contentCol, .column .checklistDiv, .column .forumSummaryHeaderDiv, .column .announcementsHeaderDiv, .column .fc-toolbar .timeline-Header{
   background-color: #b3ecff;
 }
 .column a[href]{
@@ -461,7 +476,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
    background-color: #f0f0f0;
    border-color: #222;
 }
-.colgray .commentDiv, .colgray .studentContentTable, .colgray .questionDiv .contentCol, .colgray .checklistDiv {
+.colgray .commentDiv, .colgray .studentContentTable, .colgray .questionDiv .contentCol, .colgray .checklistDiv, .colgray .forumSummaryHeaderDiv, .colgray .announcementsHeaderDiv .timeline-Header{
   background-color: #b8b8b8;
 }
 .colgray a[href]{
@@ -472,7 +487,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
    border-color: #600;
    color: #4660000;
 }
-.colred .commentDiv, .colred .studentContentTable, .colred .questionDiv .contentCol, .colred .checklistDiv {
+.colred .commentDiv, .colred .studentContentTable, .colred .questionDiv .contentCol, .colred .checklistDiv, .colred .forumSummaryHeaderDiv, .colred .announcementsHeaderDiv .timeline-Header{
   background-color: #ffb3b3;
 }
 .colred a[href], .colred h3.author {
@@ -484,7 +499,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
    border-color: #004;
    color: #004;
 }
-.colblue .commentDiv, .colblue .studentContentTable, .colblue .questionDiv .contentCol, .colblue .checklistDiv {
+.colblue .commentDiv, .colblue .studentContentTable, .colblue .questionDiv .contentCol, .colblue .checklistDiv, .colblue .forumSummaryHeaderDiv, .colblue .announcementsHeaderDiv .timeline-Header{
   background-color: #b3d9ff;
   background-color: #99e7ff;
 }
@@ -496,7 +511,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
    border-color: #030;
    color: #030;
 }
-.colgreen .commentDiv, .colgreen .studentContentTable, .colgreen .questionDiv .contentCol, .colgreen .checklistDiv {
+.colgreen .commentDiv, .colgreen .studentContentTable, .colgreen .questionDiv .contentCol, .colgreen .checklistDiv. .colgreen .forumSummaryHeaderDiv, .colgreen .announcementsHeaderDiv  .timeline-Header{
   background-color: #9fc;
 }
 .colgreen a[href] {
@@ -507,7 +522,7 @@ a.edit-link:link, a.edit-link:visited, a.section-merge-link:link, a.section-merg
    border-color: #840;
    color: #4b2600;
 }
-.colyellow .commentDiv, .colyellow .studentContentTable, .colyellow .questionDiv .contentCol, .colyellow .checklistDiv {
+.colyellow .commentDiv, .colyellow .studentContentTable, .colyellow .questionDiv .contentCol, .colyellow .checklistDiv. colyellow .forumSummaryHeaderDiv, .colyellow .announcementsHeaderDiv .timeline-Header{
   background-color:  #ffd480
 }
 .colyellow a[href],.colyellow h3.author {
@@ -883,6 +898,9 @@ a.peer-eval-stats {
     margin-left: 2em;
     font-size: 110%;
 }
+.missingStudentTitle {
+    margin-left: 23px;
+}
 .studentContentTable {
         margin-top:10px;
 	border: none;
@@ -898,7 +916,9 @@ a.peer-eval-stats {
 .studentContentTable .studentLink{
     padding-left:8px;
 }
-
+.studentContentTable .missingStudent {
+    padding-left:43px;
+}
 
 .duecol {
 	padding-left: 2em !important
@@ -906,23 +926,12 @@ a.peer-eval-stats {
 
 /* negative bottom margin because we set a top margin for the section below for the case where there's no toolbar */
 #toolbar {
-  padding:2px;
-  margin:0px;
+  margin: 0;
   margin-bottom:-10px;
-  display:inline-block !important;
+  display: inline-block;
 }
 
 /* Dropdown Menu */
-ul#toolbar li {
-	display: inline;
-	position: relative;
-}
-ul#toolbar li.dropdown a {
-    text-decoration:none
-}
-ul#toolbar li em {
-    font-style:normal;
-}
 .dropDownDiv {
 	position: absolute;
 	width: 350px;
@@ -987,7 +996,6 @@ span.nextprev {
   margin-right: 0.5em;
 }
 a.nextprev {
-	margin-left: 5px !important;
 	margin-right: 0px !important;
 }
 img {
@@ -1024,6 +1032,47 @@ img {
 }
 .topBorder td {
 	border-top: 3px solid white
+}
+.forum-summary-div, .forumSummary  .textbox, .forumSummary .right-col{
+   width: 100%;
+}
+.forum-summary-div {
+   margin-top: 10px;
+}
+.forumSummaryHeaderDiv{
+   position: relative;
+   width: 100.0%;
+   vertical-align: top;
+   overflow: hidden;
+   -moz-border-radius: 10px 10px 0px 0px;
+   -webkit-border-radius: 10px 10px 0px 0px;
+   border-radius: 10px 10px 0px 0px;
+}
+.forumSummaryHeader{
+ padding: 0px 0px 10px 15px;
+ font-size: 1.2em;
+ letter-spacing: normal
+}
+.forumSummaryLink{
+ text-decoration: none;
+ color: #444;
+ margin-left: 5px;
+}
+.forumSummaryDate{
+ font-size:12px;
+ color:#000;
+ font-weight: normal;
+}
+.forumSummaryList, .announcementSummaryList{
+ list-style: none;
+ padding: 0 15px;
+ font-family: 'Segoe UI', Segoe, Tahoma, Helvetica, Arial, sans-serif;
+ color: #666;
+ -moz-border-radius: 0px 0px 10px 10px;
+ -webkit-border-radius: 0px 0px 10px 10px;
+ border-radius: 0px 0px 10px 10px;
+ border: solid #999 1px;
+ border-top-style: none;
 }
 .first-row {
 }
@@ -1082,23 +1131,24 @@ img {
 	margin-bottom: 0.5em;
 	margin-top: 0em;
 }
-
+.twitter-div{
+ overflow-y: auto;
+ float: left;margin:
+ 0 10.0px 20.0px 0;
+ border: solid #999 1px;
+ border-radius: 0px 0px 10px 10px;
+ clear: right;
+}
+.edit-twitter-div{
+float:left;
+}
 #question-text-input {
 	width: 400px;
 }
 .question-multiplechoice-answer, .question-shortanswer-answer {
 	width: 250px;
 }
-
-.addStudentContent {
- -webkit-border-radius: 3px;
- -moz-border-radius: 3px;
- border-radius: 3px;
- border:solid black 1px;
- text-decoration:none;
- font-size:85%;
-}
-input[type="submit"].question-submit,.addStudentContent {
+input[type="submit"].question-submit,.linkCell .addStudentContent, input[type="submit"].setStudentZero {
    margin: inherit;
    margin-top:15px;
    border:1px solid #999;
@@ -1113,6 +1163,15 @@ input[type="submit"].question-submit,.addStudentContent {
    line-height: inherit;
    border-radius: 3px;
    position: static;
+}
+.linkCell .addStudentContent {
+ -webkit-border-radius: 3px;
+ -moz-border-radius: 3px;
+ background-image:none;
+ border-radius: 3px;
+ border:solid #999 1px;
+ text-decoration:none;
+ margin-top:0px;
 }
 
 .questionDiv .contentCol, .checklistDiv {
@@ -1207,12 +1266,11 @@ div[role="dialog"] {
     height: 100%;
 }
 .action {
-  display:inline-block;
-  float:right !important;
+  float: right;
 }
-.action {
-  margin-top: 5px;
-}			      
+.action a {
+  margin-top: 0;
+}
 .Mrphs-siteHierarchy {
     height: auto !important;
 }
@@ -1298,7 +1356,6 @@ div[role="dialog"] {
 }
 
 .right-col {
-  display: inline-block; /* probably no longer needed */
   -webkit-column-break-inside: avoid; /* Chrome, Safari, Opera */
   page-break-inside: avoid; /* Firefox */
   break-inside: avoid; /* standard, IE 10+ */
@@ -1329,6 +1386,40 @@ div[role="dialog"] {
 .right-col3 {
  left:10px;
 }
+.announcements-div, .announcementsType .textbox, .announcementsType .right-col {
+   width: 100%;
+}
+.announcements-div{
+   margin-top: 10px;
+ }
+.announcementsHeaderDiv{
+   position: relative;
+   width: 100.0%;
+   vertical-align: top;
+   overflow: hidden;
+   -moz-border-radius: 10px 10px 0px 0px;
+   -webkit-border-radius: 10px 10px 0px 0px;
+   border-radius: 10px 10px 0px 0px;
+}
+.announcementSummaryHeader{
+ padding: 0px 0px 10px 15px;
+ font-size: 1.2em;
+ letter-spacing: normal
+}
+.announcementLink{
+margin-left: 5px;
+}
+.announcementList {
+ -moz-border-radius: 0px 0px 10px 10px;
+ -webkit-border-radius: 0px 0px 10px 10px;
+ border-radius: 0px 0px 10px 10px;
+ border: solid #999 1px;
+ border-top-style: none;
+ padding-bottom:15px;
+}
+.itemDiv {
+padding: 10px 15px 0 15px
+}
 .returnwarning, .returnheader, .xMrphs-toolTitleNav__addLeft .usebutton span {
   font-size: .75em;
 }
@@ -1338,6 +1429,14 @@ div[role="dialog"] {
 }
 div.navIntraTool {
   border-top:none;
+}
+/* our additions to the top menu */
+
+.top-icon:before {
+   margin-right: 5px;
+}
+#print-view {
+   margin-right: 7px;
 }
 
 /* temporary, to avoid changing old stuff for the moment */
@@ -1369,7 +1468,38 @@ padding:1px;
 .edit-col span {
 color: #666;
 }
+.calendar-div{
+max-width: 550px;
+border: solid #999 1px;
+border-radius: 0px 0px 10px 10px;
+}
 
+.eventAttachmentList{
+display: inline-table;
+}
+
+eventAttachmentItem{
+list-style-type: none;
+}
+.fc-event{
+cursor: pointer;
+margin-bottom: 6px; /*to add space between two events*/
+}
+.fc-today-button{
+background-color: #eee !important;
+}
+.fc-state-default {
+color: #333 !important;
+}
+.fc-toolbar {
+padding: 10px 15px;
+}
+.fc-button-group {
+box-shadow: none !important;
+text-shadow: none !important;
+border: none !important;
+background: none !important;
+}
 .sectionHeader {
     padding: .5em;
 }
@@ -1441,7 +1571,7 @@ color: #666;
 }
 .sectionedit {
    display:inline-block;
-   background-color:#eee;
+   background-color:#ddd;
    z-index: 900;
    -webkit-border-radius: 3px;
    -moz-border-radius: 3px;
@@ -1523,6 +1653,10 @@ font-size: 90%;
 }
 
 /* for ShowItem */
+.itemDate {
+font-family: 'Segoe UI', Segoe, Tahoma, Helvetica, Arial, sans-serif;
+font-size: 12px;
+}
 .itemHeader {
 }
 .itemHeader-resource {
@@ -1532,6 +1666,11 @@ font-size: 90%;
 .itemTitle .title-instruction {
   margin-bottom:0px;
 }
+
+.forumSummaryItem, .announcementSummaryItem{
+ margin-bottom: 10px;
+}
+
 .itemTitle {
   line-height:10px;
   margin-bottom:5px;
@@ -1606,6 +1745,10 @@ div.portletBody[sakaiversion="12"] {
   padding-left: 7px;
   padding-right: 7px;
 }
+/* Give the repositioned button container some room */
+#toolbar {
+  margin-top: 20px;
+}
 }
 /* 480 is boundary of most phones */
 @media only screen and (max-width: 480px) {
@@ -1645,12 +1788,9 @@ span.nextprev {
 .fa-button-text{
   font-size:125%;
 }
-.navIntraTool li.contentButton a {
-  padding-top:2px !important;
-  padding-bottom:2px !important;
-}
 .navIntraTool li.contentButton a .fa-button-text, .fa-fw {
   font-family:FontAwesome;
+  font-size: 0.8em;
 }
 .studentRow > .fa-fw {
   width: 1em !important;
@@ -1684,15 +1824,6 @@ span.nextprev {
 
 .Mrphs-siteHierarchy span:last-child {
   margin-left: 6px;
-}
-.contentButton span a {
-  height: 24px;
-}
-.contentButton {
-  height: 26px;
-  line-height: 21px;
-  margin-top: 3px !important;
-  z-index:900;
 }
 .Mrphs-siteHierarchy .action .lessonsToolButton {
   background-color: transparent;
@@ -1833,13 +1964,8 @@ body > .portletBody > .action {
    elements of Morpheus. */
 
 /* directURL popup */
-nav.Mrphs-container--toolTitleNav {
+nav.Mrphs-container--toolTitleNav .Mrphs-directUrl__dropDown .active {
         z-index: 100001 !important;
-}
-/* menu off user icon, site menu in narrow, site menu in  wide mode */
-.Mrphs-mainHeader, .Mrphs-skipNav__menu, #selectSiteModal {
-        z-index: 100002 !important;
-	position:relative;
 }
 /* chat open button */
 #Mrphs-footerApp__chat {
@@ -1874,6 +2000,7 @@ nav.Mrphs-container--toolTitleNav {
 .saveChecklistError {
     color: #D8000C;
     background-image: url('../images/failed.png');
+    background-size: 16px 16px;
 }
 .saveChecklistSaving {
     margin-left: 2em;
