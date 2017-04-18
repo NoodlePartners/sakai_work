@@ -70,9 +70,13 @@ var dhtml_view_sites = function(buttonType){
       paneHeight -= topPosition;
 
       // and adjust to show the bottom of the modal frame
-      paneHeight -= parseInt(modal.css('padding-bottom'), 10);
-      
-      $PBJQ('#txtSearch').focus();
+      paneHeight -= parseInt(modal.css('padding-bottom'), 20);
+
+      // Avoid auto zoom to focus text field on touch devices
+      if (MorpheusViewportHelper.isNonPhone()) {
+        $PBJQ('#txtSearch').focus();
+      }
+
       createDHTMLMask(dhtml_view_sites);
 
       $PBJQ('.selectedTab').bind('click', function(e){
@@ -106,7 +110,7 @@ var dhtml_view_sites = function(buttonType){
   if($(window).width() < 800) {
 	  paneHeight = paneHeight*0.85;
   }
-  $PBJQ('.tab-pane').css('max-height', paneHeight);
+  $PBJQ('.tab-pane').css('height', paneHeight);
   
   // finally run the inner function, first time through
   dhtml_view_sites(buttonType);
