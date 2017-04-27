@@ -40,8 +40,8 @@
         #if (${userIsLoggedIn})
         #if (${useBullhornAlerts})
             <div class="Mrphs-sitesNav__menuitem portal-bullhorns-buttons">
-                <a id="Mrphs-academic-bullhorn" href="javascript:void(0);"><span class="icon-sakai-academic-bullhorn"></span></a>
-                <a id="Mrphs-social-bullhorn" href="javascript:void(0);"><span class="icon-sakai-social-bullhorn"></span></a>
+                <a id="Mrphs-academic-bullhorn" href="javascript:void(0);"><span class="icon-sakai--academic-bullhorn"></span></a>
+                <a id="Mrphs-social-bullhorn" href="javascript:void(0);"><span class="icon-sakai--social-bullhorn"></span></a>
             </div>
         #end
             <div class="Mrphs-sitesNav__menuitem view-all-sites-btn">
