@@ -58,7 +58,6 @@
     	<property name="preferencesLogic" ref="org.sakaiproject.profile2.logic.ProfilePreferencesLogic" />
     	<property name="privacyLogic" ref="org.sakaiproject.profile2.logic.ProfilePrivacyLogic" />
     	<property name="imageLogic" ref="org.sakaiproject.profile2.logic.ProfileImageLogic" />
-    	<property name="statusLogic" ref="org.sakaiproject.profile2.logic.ProfileStatusLogic" />
     	<property name="connectionsLogic" ref="org.sakaiproject.profile2.logic.ProfileConnectionsLogic" />
     	<property name="converter" ref="org.sakaiproject.profile2.conversion.ProfileConverter" />
     	<property name="linkLogic" ref="org.sakaiproject.profile2.logic.ProfileLinkLogic" />
@@ -87,15 +86,6 @@
     	<property name="dao" ref="org.sakaiproject.profile2.dao.ProfileDao" />
     	<property name="sakaiProxy" ref="org.sakaiproject.profile2.logic.SakaiProxy" />
     	<property name="cacheManager" ref="org.sakaiproject.profile2.cache.CacheManager" />
-    </bean>
-    
-    <!-- ProfileStatusLogic -->
-	<bean id="org.sakaiproject.profile2.logic.ProfileStatusLogic"
-    	class="org.sakaiproject.profile2.logic.ProfileStatusLogicImpl">
-    	<property name="dao" ref="org.sakaiproject.profile2.dao.ProfileDao" />
-    	<property name="sakaiProxy" ref="org.sakaiproject.profile2.logic.SakaiProxy" />
-    	<property name="privacyLogic" ref="org.sakaiproject.profile2.logic.ProfilePrivacyLogic" />
-    	<property name="connectionsLogic" ref="org.sakaiproject.profile2.logic.ProfileConnectionsLogic" />
     </bean>
     
     <!-- ProfileImageLogic -->
@@ -185,7 +175,6 @@
 
 	    <property name="mappingResources">
 	      <list>
-	      	<value>org/sakaiproject/profile2/hbm/ProfileStatus.hbm.xml</value>
 	        <value>org/sakaiproject/profile2/hbm/ProfilePrivacy.hbm.xml</value>
 	       	<value>org/sakaiproject/profile2/hbm/ProfileFriend.hbm.xml</value>
 	       	<value>org/sakaiproject/profile2/hbm/ProfileImageUploaded.hbm.xml</value>
@@ -257,7 +246,6 @@
 		<property name="imageLogic" ref="org.sakaiproject.profile2.logic.ProfileImageLogic" />
 		<property name="connectionsLogic" ref="org.sakaiproject.profile2.logic.ProfileConnectionsLogic" />
 		<property name="messagingLogic" ref="org.sakaiproject.profile2.logic.ProfileMessagingLogic" />
-		<property name="statusLogic" ref="org.sakaiproject.profile2.logic.ProfileStatusLogic" />
 		<property name="externalIntegrationLogic" ref="org.sakaiproject.profile2.logic.ProfileExternalIntegrationLogic" />
 		
 		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />

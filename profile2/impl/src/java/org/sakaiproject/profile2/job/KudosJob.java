@@ -32,7 +32,6 @@ import org.sakaiproject.profile2.logic.ProfileImageLogic;
 import org.sakaiproject.profile2.logic.ProfileKudosLogic;
 import org.sakaiproject.profile2.logic.ProfileLogic;
 import org.sakaiproject.profile2.logic.ProfileMessagingLogic;
-import org.sakaiproject.profile2.logic.ProfileStatusLogic;
 import org.sakaiproject.profile2.logic.SakaiProxy;
 import org.sakaiproject.profile2.model.ExternalIntegrationInfo;
 import org.sakaiproject.profile2.model.Person;
@@ -110,8 +109,6 @@ public class KudosJob implements StatefulJob {
 			put("studentInfoBonus", new BigDecimal("0.05"));
 			put("viewConnectionsShared", new BigDecimal("0.05"));
 			put("viewConnectionsBonus", new BigDecimal("0.05"));
-			put("viewStatusShared", new BigDecimal("0.05"));
-			put("viewStatusBonus", new BigDecimal("0.05"));
 			put("viewPicturesShared", new BigDecimal("0.05"));
 			put("viewPicturesBonus", new BigDecimal("0.05"));
 
@@ -126,12 +123,6 @@ public class KudosJob implements StatefulJob {
 			put("hasOneSentMessage", new BigDecimal("2"));
 			put("hasMoreThanTenSentMessages", new BigDecimal("3"));
 			
-			put("hasOneStatusUpdate", new BigDecimal("0.25"));
-			
-			// add when PRFL-191 is added
-			//put("hasMoreThanTenStatusUpdates", new BigDecimal(1));
-			//put("hasMoreThanOneHundredStatusUpdates", new BigDecimal(2));
-
 			put("twitterEnabled", new BigDecimal("2"));
 
 			put("hasOneGalleryPicture", new BigDecimal("0.25"));
@@ -302,17 +293,6 @@ public class KudosJob implements StatefulJob {
 				break;
 			}
 			
-			//view status
-			switch(privacy.getMyStatus()) {
-				case (ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) :
-					score = score.add(val("viewStatusShared"));
-				break;
-				case (ProfileConstants.PRIVACY_OPTION_EVERYONE) :
-					score = score.add(val("viewStatusShared"));
-					score = score.add(val("viewStatusBonus"));
-				break;
-			}
-			
 			//view pictures. if it's disabled, assign full points
 			if(sakaiProxy.isProfileGalleryEnabledGlobally()) {
 				switch(privacy.getMyPictures()) {
@@ -364,20 +344,6 @@ public class KudosJob implements StatefulJob {
 		if(numSentMessages > 10){
 			score = score.add(val("hasMoreThanTenSentMessages"));
 		}
-		
-		//number of status updates
-		int numStatusUpdates = statusLogic.getStatusUpdatesCount(person.getUuid());
-		if(numStatusUpdates >= 1) {
-			score = score.add(val("hasOneStatusUpdate"));
-		}
-		/* enable for PRFL-191 as well as entries in map above.
-		if(numStatusUpdates > 10) {
-			score = score.add(val("hasMoreThanTenStatusUpdates"));
-		}
-		if(numStatusUpdates > 100) {
-			score = score.add(val("hasMoreThanOneHundredStatusUpdates"));
-		}
-		*/
 		
 		/*
 		ProfilePreferences prefs = person.getPreferences();
@@ -569,9 +535,6 @@ public class KudosJob implements StatefulJob {
 	
 	@Setter
 	private ProfileMessagingLogic messagingLogic;
-	
-	@Setter
-	private ProfileStatusLogic statusLogic;
 	
 	@Setter
 	private ProfileExternalIntegrationLogic externalIntegrationLogic;

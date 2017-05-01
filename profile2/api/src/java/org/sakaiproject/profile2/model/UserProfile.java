@@ -68,7 +68,6 @@ public class UserProfile implements Serializable {
 	
 	private boolean locked;
 	
-	private ProfileStatus status;
 	private List<CompanyProfile> companyProfiles;
 	private SocialNetworkingInfo socialInfo;
 	

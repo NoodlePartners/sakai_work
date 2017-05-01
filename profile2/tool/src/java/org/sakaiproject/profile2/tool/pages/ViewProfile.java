@@ -45,7 +45,6 @@ import org.sakaiproject.profile2.model.ProfilePreferences;
 import org.sakaiproject.profile2.model.ProfilePrivacy;
 import org.sakaiproject.profile2.tool.components.OnlinePresenceIndicator;
 import org.sakaiproject.profile2.tool.components.ProfileImage;
-import org.sakaiproject.profile2.tool.components.ProfileStatusRenderer;
 import org.sakaiproject.profile2.tool.models.FriendAction;
 import org.sakaiproject.profile2.tool.pages.panels.FriendsFeed;
 import org.sakaiproject.profile2.tool.pages.panels.GalleryFeed;
@@ -157,13 +156,6 @@ public class ViewProfile extends BasePage {
 			add(new OnlinePresenceIndicator("online", userUuid));
 		} else {
 			add(new EmptyPanel("online"));
-		}
-
-		/* STATUS PANEL */
-		if (this.sakaiProxy.isProfileStatusEnabled()) {
-			add(new ProfileStatusRenderer("status", userUuid, privacy, null, "tiny"));
-		} else {
-			add(new EmptyPanel("status"));
 		}
 
 		/* TABS */
