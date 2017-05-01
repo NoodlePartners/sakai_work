@@ -51,10 +51,8 @@ import org.sakaiproject.tool.assessment.api.spring.SamigoApi;*/
 
 import org.sakaiproject.profile2.logic.ProfileConnectionsLogic;
 import org.sakaiproject.profile2.logic.ProfileLinkLogic;
-import org.sakaiproject.profile2.logic.ProfileStatusLogic;
 import org.sakaiproject.profile2.logic.ProfileWallLogic;
 import org.sakaiproject.profile2.model.Person;
-import org.sakaiproject.profile2.model.ProfileStatus;
 import org.sakaiproject.profile2.model.WallItem;
 import org.sakaiproject.profile2.model.WallItemComment;
 import org.sakaiproject.profile2.util.ProfileConstants;
@@ -82,7 +80,6 @@ public class BullhornServiceImpl implements Observer {
     private ProfileConnectionsLogic profileConnectionsLogic;
     private ProfileLinkLogic profileLinkLogic;
     private ProfileWallLogic profileWallLogic;
-    private ProfileStatusLogic profileStatusLogic;
     private UserDirectoryService userDirectoryService;
     private SecurityService securityService;
     private SessionManager sessionManager;

@@ -506,22 +506,6 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 			sb.append("</div>");
 		}
 		
-		//status
-		if(userProfile.getStatus() != null) {
-			String message = userProfile.getStatus().getMessage();
-			if(StringUtils.isNotBlank(message)) {
-				sb.append("<div class=\"profile2-profile-statusMessage\">");
-				sb.append(StringEscapeUtils.escapeHtml(message));
-				sb.append("</div>");
-			}
-			
-			if(StringUtils.isNotBlank(userProfile.getStatus().getDateFormatted())) {
-				sb.append("<div class=\"profile2-profile-statusDate\">");
-				sb.append(userProfile.getStatus().getDateFormatted());
-				sb.append("</div>");
-			}
-		}
-		
 		if(StringUtils.isNotBlank(userProfile.getUserUuid())) {
 			sb.append("<div class=\"icon profile-image\">");
 			

@@ -78,7 +78,6 @@
 		<property name="memoryService"><ref bean="org.sakaiproject.memory.api.MemoryService" /></property>
 		<property name="profileConnectionsLogic" ><ref bean="org.sakaiproject.profile2.logic.ProfileConnectionsLogic" /></property>
 		<property name="profileLinkLogic" ><ref bean="org.sakaiproject.profile2.logic.ProfileLinkLogic" /></property>
-		<property name="profileStatusLogic" ><ref bean="org.sakaiproject.profile2.logic.ProfileStatusLogic" /></property>
 		<property name="profileWallLogic" ><ref bean="org.sakaiproject.profile2.logic.ProfileWallLogic" /></property>
 		<property name="userDirectoryService" ><ref bean="org.sakaiproject.user.api.UserDirectoryService" /></property>
 		<property name="securityService" ><ref bean="org.sakaiproject.authz.api.SecurityService" /></property>

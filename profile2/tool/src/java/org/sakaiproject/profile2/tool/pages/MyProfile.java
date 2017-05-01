@@ -63,7 +63,6 @@ import org.sakaiproject.profile2.tool.pages.panels.FriendsFeed;
 import org.sakaiproject.profile2.tool.pages.panels.GalleryFeed;
 import org.sakaiproject.profile2.tool.pages.panels.KudosPanel;
 import org.sakaiproject.profile2.tool.pages.panels.MyProfilePanel;
-import org.sakaiproject.profile2.tool.pages.panels.MyStatusPanel;
 import org.sakaiproject.profile2.tool.pages.panels.MyWallPanel;
 import org.sakaiproject.profile2.tool.pages.panels.ViewWallPanel;
 import org.sakaiproject.profile2.tool.pages.windows.AddFriend;
@@ -460,87 +459,14 @@ public class MyProfile extends BasePage {
 		}
 		
 		add(sideLinks);
-		
-		//status panel
-		Panel myStatusPanel = new MyStatusPanel("myStatusPanel", userProfile);
-		add(myStatusPanel);
-		
-		List<ITab> tabs = new ArrayList<ITab>();
 
-		AjaxTabbedPanel tabbedPanel = new AjaxTabbedPanel("myProfileTabs", tabs) {
-			
-			private static final long serialVersionUID = 1L;
-
-			// overridden so we can add tooltips to tabs
-			@Override
-			protected WebMarkupContainer newLink(String linkId, final int index) {
-				WebMarkupContainer link = super.newLink(linkId, index);
-				
-				if (ProfileConstants.TAB_INDEX_PROFILE == index) {
-					link.add(new AttributeModifier("title", true,
-							new ResourceModel("link.tab.profile.tooltip")));
-					
-				} else if (ProfileConstants.TAB_INDEX_WALL == index) {
-					link.add(new AttributeModifier("title", true,
-							new ResourceModel("link.tab.wall.tooltip")));	
-				}
-				return link;
-			}
-		};
-		
-		
-		CookieUtils utils = new CookieUtils();
-		Cookie tabCookie = utils.getCookie(ProfileConstants.TAB_COOKIE);
-		
-		if (sakaiProxy.isProfileFieldsEnabled()) {
-			tabs.add(new AbstractTab(new ResourceModel("link.tab.profile")) {
-	
-				private static final long serialVersionUID = 1L;
-	
-				@Override
-				public Panel getPanel(String panelId) {
-	
-					setTabCookie(ProfileConstants.TAB_INDEX_PROFILE);
-					MyProfilePanelState panelState = new MyProfilePanelState();
-					panelState.showBusinessDisplay = sakaiProxy.isBusinessProfileEnabled();
-					panelState.showSocialNetworkingDisplay = sakaiProxy.isSocialProfileEnabled();
-					panelState.showInterestsDisplay = sakaiProxy.isInterestsProfileEnabled();
-					panelState.showStaffDisplay = sakaiProxy.isStaffProfileEnabled();
-					panelState.showStudentDisplay = sakaiProxy.isStudentProfileEnabled();
-					return new MyProfilePanel(panelId, userProfile,panelState);
-				}
-	
-			});
-		}
-		
-		// DEPRECATED: UNLESS THERE IS AN EXPRESSED DESIRE FOR THIS FUNCTIONALITY THE WALL WILL BE REMOVED FOR 13.
-		if (sakaiProxy.isWallEnabledGlobally()) {
-			
-			tabs.add(new AbstractTab(new ResourceModel("link.tab.wall")) {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public Panel getPanel(String panelId) {
-
-					setTabCookie(ProfileConstants.TAB_INDEX_WALL);
-					if (sakaiProxy.isSuperUser()) {
-						return new MyWallPanel(panelId, userUuid);
-					} else {
-						return new MyWallPanel(panelId);
-					}
-				}
-			});
-			
-			if (ProfileConstants.WALL.equals(requestedTab)
-					|| (sakaiProxy.isWallDefaultProfilePage() && null == tabCookie)) {
-				tabbedPanel.setSelectedTab(ProfileConstants.TAB_INDEX_WALL);
-			} else if (null != tabCookie) {
-				tabbedPanel.setSelectedTab(Integer.parseInt(tabCookie.getValue()));
-			}
-		}
-		
-		add(tabbedPanel);
+		MyProfilePanelState panelState = new MyProfilePanelState();
+		panelState.showBusinessDisplay = sakaiProxy.isBusinessProfileEnabled();
+		panelState.showSocialNetworkingDisplay = sakaiProxy.isSocialProfileEnabled();
+		panelState.showInterestsDisplay = sakaiProxy.isInterestsProfileEnabled();
+		panelState.showStaffDisplay = sakaiProxy.isStaffProfileEnabled();
+		panelState.showStudentDisplay = sakaiProxy.isStudentProfileEnabled();
+		add(new MyProfilePanel("myProfilePanel", userProfile, panelState));
 		
 		//kudos panel
 		add(new AjaxLazyLoadPanel("myKudos"){
