@@ -1345,8 +1345,6 @@ public class SakaiProxyImpl implements SakaiProxy {
 				ProfileConstants.DEFAULT_BIRTHYEAR_VISIBILITY));
 		props.put("myFriends", this.serverConfigurationService.getInt("profile2.privacy.default.myFriends",
 				ProfileConstants.DEFAULT_PRIVACY_OPTION_MYFRIENDS));
-		props.put("myStatus", this.serverConfigurationService.getInt("profile2.privacy.default.myStatus",
-				ProfileConstants.DEFAULT_PRIVACY_OPTION_MYSTATUS));
 		props.put("myPictures", this.serverConfigurationService.getInt("profile2.privacy.default.myPictures",
 				ProfileConstants.DEFAULT_PRIVACY_OPTION_MYPICTURES));
 		props.put("messages", this.serverConfigurationService.getInt("profile2.privacy.default.messages",
@@ -1688,16 +1686,6 @@ public class SakaiProxyImpl implements SakaiProxy {
 	public boolean isProfileFieldsEnabled() {
 		return this.serverConfigurationService.getBoolean("profile2.profile.fields.enabled",
 				ProfileConstants.SAKAI_PROP_PROFILE2_PROFILE_FIELDS_ENABLED);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean isProfileStatusEnabled() {
-		return this.serverConfigurationService.getBoolean("profile2.profile.status.enabled",
-				ProfileConstants.SAKAI_PROP_PROFILE2_PROFILE_STATUS_ENABLED);
-
 	}
 
 	/**

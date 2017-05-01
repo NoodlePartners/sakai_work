@@ -65,7 +65,6 @@ import org.sakaiproject.profile2.model.ProfileSearchTerm;
 import org.sakaiproject.profile2.tool.components.HashMapChoiceRenderer;
 import org.sakaiproject.profile2.tool.components.IconWithClueTip;
 import org.sakaiproject.profile2.tool.components.ProfileImage;
-import org.sakaiproject.profile2.tool.components.ProfileStatusRenderer;
 import org.sakaiproject.profile2.tool.models.FriendAction;
 import org.sakaiproject.profile2.tool.models.StringModel;
 import org.sakaiproject.profile2.tool.pages.windows.AddFriend;
@@ -325,16 +324,6 @@ public class MySearch extends BasePage {
 				
 				profileLink.add(new Label("searchResultName", displayName));
 		    	item.add(profileLink);
-		    	
-		    	//status component
-		    	ProfileStatusRenderer status = new ProfileStatusRenderer("searchResultStatus", person, "search-result-status-msg", "search-result-status-date") {
-		    		@Override
-					public boolean isVisible(){
-					   return sakaiProxy.isProfileStatusEnabled();
-					}
-		    	};
-				status.setOutputMarkupId(true);
-				item.add(status);
 		    	
 		    	
 		    	/* ACTIONS */
