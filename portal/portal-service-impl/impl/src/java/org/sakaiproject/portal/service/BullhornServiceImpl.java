@@ -335,6 +335,8 @@ public class BullhornServiceImpl implements Observer {
 
                                 String url = simplePageToolDao.getPageUrl(comment.getPageId());
 
+                                List<String> done = new ArrayList<>();
+
                                 // Alert tutor types.
                                 List<User> receivers = securityService.unlockUsers(
                                     SimplePage.PERMISSION_LESSONBUILDER_UPDATE, "/site/" + context);
@@ -342,6 +344,8 @@ public class BullhornServiceImpl implements Observer {
                                     String to = receiver.getId();
                                     if (!to.equals(from)) {
                                         doAcademicInsert(from, to, event, ref, "title", context, e.getEventTime(), url);
+                                        done.add(to);
+                                        countCache.remove(to);
                                     }
                                 }
 
@@ -355,9 +359,10 @@ public class BullhornServiceImpl implements Observer {
                                     // Not the first, alert all the other commenters
                                     for (SimplePageComment c : comments) {
                                         String to = c.getAuthor();
-                                        if (!to.equals(from) && !doneAuthors.contains(to)) {
+                                        if (!to.equals(from) && !done.contains(to)) {
                                             doAcademicInsert(from, to, event, ref, "title", context, e.getEventTime(), url);
-                                            doneAuthors.add(to);
+                                            done.add(to);
+                                            countCache.remove(to);
                                         }
                                     }
                                 }
