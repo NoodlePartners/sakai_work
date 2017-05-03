@@ -376,6 +376,8 @@ body.is-logged-out{
 	> * {
 		height: 2.3em;
 		line-height: 2.3em;
+		@media #{$phone} {
+		}
 	}
 
 	@media #{$phone}{
