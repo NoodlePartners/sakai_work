@@ -31,7 +31,6 @@ import org.sakaiproject.profile2.logic.ProfilePrivacyLogic;
 import org.sakaiproject.profile2.model.ProfilePrivacy;
 import org.sakaiproject.profile2.util.ProfileConstants;
 import org.sakaiproject.search.api.EntityContentProducer;
-import org.sakaiproject.search.api.EntityContentProducerEvents;
 import org.sakaiproject.search.api.SearchIndexBuilder;
 import org.sakaiproject.search.api.SearchService;
 import org.sakaiproject.search.api.SearchUtils;
@@ -55,7 +54,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Setter @Slf4j
-public class ProfileContentProducer implements EntityContentProducer, EntityContentProducerEvents {
+public class ProfileContentProducer implements EntityContentProducer {
 
     private static final String PROFILE = "profile";
     private static final String TYPE = "type";
