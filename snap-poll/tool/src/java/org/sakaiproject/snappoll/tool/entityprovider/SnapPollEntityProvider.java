@@ -50,8 +50,8 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
     private final static String THROTTLE_HOURS_PROP = "snappoll.throttleHours";
     private final static String MOD_OF_SHOWS_IN_COURSE_PROP = "snappoll.modShowsInCourse";
     // TODO: This should not be hard coded.  What is the appropriate way to do it?
-    private final static String SESSIONS_PAGE_TITLE_PROP = "snappoll.sessionsPageTitle";
-    private final static String SESSIONS_PAGE_TITLE_DEFAULT = "Sessions";
+    // private final static String SESSIONS_PAGE_TITLE_PROP = "snappoll.sessionsPageTitle";
+    // private final static String SESSIONS_PAGE_TITLE_DEFAULT = "Sessions";
     private final static String EXAM_PAGE_TITLE_PROP = "snappoll.examPageTitle";
     private final static String EXAM_PAGE_TITLE_DEFAULT = "Exam";
     private final static String REPORT_USER_ID_PROP = "api.user";
@@ -146,8 +146,8 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
 
         // make sure that the page we're on is one of the sub-pages of "Sessions" lesson_builder_page
         // Ignore any Sessions that are exams
-        String sessionsPageTitle = serverConfigurationService.getString(
-                SESSIONS_PAGE_TITLE_PROP, SESSIONS_PAGE_TITLE_DEFAULT);
+        // String sessionsPageTitle = serverConfigurationService.getString(
+        //         SESSIONS_PAGE_TITLE_PROP, SESSIONS_PAGE_TITLE_DEFAULT);
         String examPageTitle = serverConfigurationService.getString(
                 EXAM_PAGE_TITLE_PROP, EXAM_PAGE_TITLE_DEFAULT);
 
@@ -160,13 +160,13 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
                   "INNER JOIN lesson_builder_pages p2 " +
                   "ON p2.pageId = i1.sakaiId " +
                   "WHERE p1.siteId = ? " +
-                  "AND p1.title=? " +
+                  "AND p1.title IN ('Sessions', 'Weekly Sessions', 'Coursework') " +
                   "AND p2.title NOT LIKE ? " +
                   "AND p2.title NOT LIKE ? " +
                   "AND p2.title NOT LIKE ? " +
                   "AND p2.title NOT LIKE ? " +
                   "ORDER BY i1.sequence",
-                new Object[] {siteId, sessionsPageTitle,
+                new Object[] {siteId,
                   examPageTitle, "% "+examPageTitle, examPageTitle+" %", "% "+examPageTitle+" %"},
                 null);
 
