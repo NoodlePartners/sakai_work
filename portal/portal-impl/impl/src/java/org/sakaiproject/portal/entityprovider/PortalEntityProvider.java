@@ -253,6 +253,7 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 		ResourceLoader rl = new ResourceLoader(currentUserId, "profile-popup");
 
 		UserProfile userProfile = (UserProfile) profileLogic.getUserProfile(ref.getId());
+        // See https://jira.sakaiproject.org/browse/SAK-32441
 
 		String connectionUserId = userProfile.getUserUuid();
 
@@ -260,15 +261,17 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 		context.put("i18n", rl);
 		context.put("profileUrl", profileLinkLogic.getInternalDirectUrlToUserProfile(connectionUserId));
 
-		SocialNetworkingInfo socialInfo = userProfile.getSocialInfo();
+		final SocialNetworkingInfo socialInfo
+			= (userProfile != null) ? userProfile.getSocialInfo() : new SocialNetworkingInfo();
+
 		String facebookUrl = socialInfo.getFacebookUrl();
 		if (StringUtils.isEmpty(facebookUrl)) facebookUrl = "";
-		context.put("facebookUrl", facebookUrl);
 		String twitterUrl = socialInfo.getTwitterUrl();
 		if (StringUtils.isEmpty(twitterUrl)) twitterUrl = "";
+		context.put("facebookUrl", facebookUrl);
 		context.put("twitterUrl", twitterUrl);
 
-		String email = userProfile.getEmail();
+		String email = (userProfile != null) ? userProfile.getEmail() : "";
 		if (StringUtils.isEmpty(email)) email = "";
 		context.put("email", email);
 
