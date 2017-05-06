@@ -379,24 +379,6 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 	        	}
 	        	
 				break;
-			case PRIVACY_OPTION_MYSTATUS:
-	    		
-	    		//if user is friend and friends are allowed
-	        	if(isConnected && profilePrivacy.getMyStatus() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
-	        		result = true; break;
-	        	}
-	        	
-	        	//if not friend and set to friends only
-	        	if(!isConnected && profilePrivacy.getMyStatus() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
-	        		result = false; break;
-	        	}
-	        	
-	        	//if everyone is allowed
-	        	if(profilePrivacy.getMyStatus() == ProfileConstants.PRIVACY_OPTION_EVERYONE) {
-	        		result = true; break;
-	        	}
-	        	
-				break;
 			case PRIVACY_OPTION_MYKUDOS:
 	    		//if user is friend and friends are allowed
 	        	if(isConnected && profilePrivacy.getMyKudos() == ProfileConstants.PRIVACY_OPTION_ONLYFRIENDS) {
@@ -510,7 +492,6 @@ public class ProfilePrivacyLogicImpl implements ProfilePrivacyLogic {
 		privacy.setPersonalInfo((Integer)props.get("personalInfo"));
 		privacy.setShowBirthYear((Boolean)props.get("birthYear"));
 		privacy.setMyFriends((Integer)props.get("myFriends"));
-		privacy.setMyStatus((Integer)props.get("myStatus"));
 		privacy.setMyPictures((Integer)props.get("myPictures"));
 		privacy.setMessages((Integer)props.get("messages"));
 		privacy.setBusinessInfo((Integer)props.get("businessInfo"));
