@@ -49,9 +49,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
     private final static String SUPPORT_EMAIL_MESSAGE_TEMPLATE_PROP = "snappoll.supportEmailMessageTemplate";
     private final static String THROTTLE_HOURS_PROP = "snappoll.throttleHours";
     private final static String MOD_OF_SHOWS_IN_COURSE_PROP = "snappoll.modShowsInCourse";
-    // TODO: This should not be hard coded.  What is the appropriate way to do it?
-    // private final static String SESSIONS_PAGE_TITLE_PROP = "snappoll.sessionsPageTitle";
-    // private final static String SESSIONS_PAGE_TITLE_DEFAULT = "Sessions";
+    private final static String SESSIONS_NAME_PROP = "snappoll.sessions_name";
     private final static String EXAM_PAGE_TITLE_PROP = "snappoll.examPageTitle";
     private final static String EXAM_PAGE_TITLE_DEFAULT = "Exam";
     private final static String REPORT_USER_ID_PROP = "api.user";
@@ -91,26 +89,37 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         String tool = (String) params.get("tool");
         String context = (String) params.get("context");
 
+        log.debug("handleShowPollNow('{}', '{}', '{}')", siteId, tool, context);
+
         if (StringUtils.isEmpty(siteId) || StringUtils.isEmpty(tool) || StringUtils.isEmpty(context)) {
             throw new EntityException("Bad request", "", HttpServletResponse.SC_BAD_REQUEST);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("handleShowPollNow('" + siteId + "','" + tool + "','" + context + "')");
-        }
-
         // We only have an algorithm for the lessons tool, so do nothing anywhere else
         if (!tool.equals(LESSONS)) {
-            if (log.isDebugEnabled()) {
-                log.debug("tool is " + tool + ", not allowed");
-            }
+            log.debug("tool is '{}', not allowed", tool);
             return FALSE;
         }
 
-        if (!canTakePolls(siteId, userId)) {
-            if (log.isDebugEnabled()) {
-                log.debug("user can't take polls");
-            }
+        Site site = null;
+        try {
+            site = SiteService.getSite(siteId);
+        } catch (IdUnusedException ex) {
+            log.error("Unused siteId passed to handleShowPollNow: '{}'", siteId);
+        }
+        if (site==null) {
+            throw new EntityException("Bad request", "", HttpServletResponse.SC_BAD_REQUEST);
+        }
+
+        String sessionsName = site.getProperties().getProperty(SESSIONS_NAME_PROP);
+        log.debug("sessionsName is '{}'", sessionsName);
+        if(StringUtils.isBlank(sessionsName)) {
+            log.debug("no sessionsName, so no poll");
+            return(FALSE);
+        }
+
+        if (!canTakePolls(site, userId)) {
+            log.debug("user can't take polls");
             return FALSE;
         }
         
@@ -134,14 +143,12 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
 
         if (counts.size() == 1) {
             if (counts.get(0) > 0) {
-                if (log.isDebugEnabled()) {
-                    log.debug("This poll already shown, or other shown within " + throttleHours +
-                        " hours.");
-                }
+                log.debug("This poll already shown, or other shown within {} hours", throttleHours);
                 return FALSE;
             }
         } else {
-            log.error("Only one count should be returned. Something is wrong.");
+            log.error("counts.size should be 1, was {}, something is wrong.", counts.size());
+            return FALSE;
         }
 
         // make sure that the page we're on is one of the sub-pages of "Sessions" lesson_builder_page
@@ -160,31 +167,27 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
                   "INNER JOIN lesson_builder_pages p2 " +
                   "ON p2.pageId = i1.sakaiId " +
                   "WHERE p1.siteId = ? " +
-                  "AND p1.title IN ('Sessions', 'Weekly Sessions', 'Coursework') " +
+                  "AND p1.title = ? " +
                   "AND p2.title NOT LIKE ? " +
                   "AND p2.title NOT LIKE ? " +
                   "AND p2.title NOT LIKE ? " +
                   "AND p2.title NOT LIKE ? " +
                   "ORDER BY i1.sequence",
-                new Object[] {siteId,
+                new Object[] {siteId, sessionsName,
                   examPageTitle, "% "+examPageTitle, examPageTitle+" %", "% "+examPageTitle+" %"},
                 null);
 
         int position = -1;
         int i = 0;
         for (String spId : sessionPageIds) {
-            if (log.isDebugEnabled()) {
-                log.debug("checking: " + spId + " ==? " + context);
-            }
+            log.debug("checking: '{}' ?== '{}'", spId, context);
             if (spId.equals(context)) {
                 position = i;
                 break;
             }
             i++;
         }
-        if (log.isDebugEnabled()) {
-            log.debug("current page was found in list of lesson pages at position: " + position);
-        }
+        log.debug("current page was found in list of lesson pages at position {}", position);
         if (position < 0) {
             return FALSE;
         }
@@ -194,9 +197,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
         // Do an extra mod on the hashCode to avoid an int overflow
         int showMod = (((userId+siteId).hashCode()%modShowsInCourse)+position)%modShowsInCourse;
         
-        if (log.isDebugEnabled()) {
-            log.debug("showMod is " + showMod);
-        }
+        log.debug("showMod is {}", showMod);
         if (showMod == 0) {
             return TRUE;
         } else {
@@ -273,9 +274,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
                     log.info(SUPPORT_EMAIL_PROP + " not configured. No email will be sent.");
                 }
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Sending support email ...");
-                }
+                log.debug("Sending support email ...");
 
                 try {
                     User user = userDirectoryService.getUser(userId);
@@ -293,9 +292,7 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
                             .replace("{2}", getPageName(tool, context))
                             .replace("{3}", response)
                             .replace("{4}", reason);
-                    if (log.isDebugEnabled()) {
-                        log.debug("email message is " + message);
-                    }
+                    log.debug("email message is {}", message);
                     emailService.send(from, supportEmailAddress, subject, message, null, user.getEmail(), null);
                 } catch (UserNotDefinedException unde) {
                     log.error("Failed sending support email from snap poll. No user for user id '" + userId + "'.");
@@ -381,42 +378,15 @@ public class SnapPollEntityProvider extends AbstractEntityProvider implements Au
     }
 
     // Figure out if the user is allowed to take polls
-    private boolean canTakePolls(String siteId, String userId) {
-        Site site = null;
-        try {
-            site = SiteService.getSite(siteId);
-        } catch (IdUnusedException ex) {
-            log.error("Unused site passed to canTakePolls: " + site);
-        }
-        if (site==null) {
-            return false;
-        }
+    private boolean canTakePolls(Site site, String userId) {
         // The site must be a course and the user must be a student
         String siteType = site.getType();
-        if (log.isDebugEnabled()) {
-            log.debug("siteType is " + siteType);
-        }
+        log.debug("siteType is {}", siteType);
         if (!siteType.equals("course")) {
             return false;
         }
-        try {
-            if (site.getProperties().getBooleanProperty("snappoll.enabled")) {
-                log.debug("snappoll.enabled is true");
-            } else {
-                log.debug("snappoll.enabled is false");
-                return false;
-            }
-        } catch (EntityPropertyNotDefinedException nde) {
-            log.debug("snappoll.enabled not defined");
-			return false;
-        } catch (EntityPropertyTypeException pte) {
-            log.error("snappoll.enabled set for site id " + siteId + ", but is not a boolean.");
-			return false;
-        }
         boolean isStudent = site.isAllowed(userId, "section.role.student");
-        if (log.isDebugEnabled()) {
-            log.debug("isStudent is " + isStudent);
-        }
+        log.debug("isStudent is {}", isStudent);
         return (isStudent);
     }
     
