@@ -32,7 +32,7 @@ $header-font-weight: 700 !default;										// 400 or 700 as you wish
 
 /* Color palette */
 $background-color: 			 #FFFFFF !default;
-$background-color-secondary: #FFFFFF !default;
+$background-color-secondary: #57068c !default;
 
 $primary-color:    			 #0081bc !default;
 $primary-color-highContrast: darken( $primary-color, 4% ) !default;	// for use of primary on non-white light backgrounds, such as greys
@@ -138,7 +138,7 @@ $header-gradient-d: $header-gradient-a !default;
 
 /* topNav Main Menu */
 $header-size: 50px !default;
-$topNav-text-color:                         #000 !default; /* used for links and text in the topNav */
+$topNav-text-color:                         #fff !default; /* used for links and text in the topNav */
 $topNav-text-alt-color:                     #ccc !default;
 
 /* Favorites */ 
@@ -334,9 +334,9 @@ $measure: 960px !default;
 $banner-height: 52px !default;
 
 /* Logo location */
-$logo: 'images/pepperdine_1.png' !default;
-$logo-height: 36px !default;
-$logo-width: 146px !default;
+$logo: 'images/nyu_logo.svg' !default;
+$logo-height: 52px !default;
+$logo-width: 240px !default;
 $mobile-logo-width: 140px !default;
 
 /* Tool icons */
