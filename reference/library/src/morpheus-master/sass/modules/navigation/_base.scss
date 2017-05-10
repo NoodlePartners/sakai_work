@@ -22,7 +22,6 @@ body.is-logged-out{
 	.#{$namespace}headerLogo{
 		width: 100%;
 		overflow: hidden;
-		padding: 0 1em;
 		height: $banner-height;
 		background: $top-header-background;
 
@@ -36,7 +35,8 @@ body.is-logged-out{
 			}
 			height: 100%; // align vertically center
 			float: left;
-			background-size: $logo-width $logo-height;
+			background-size: 80% auto;
+			background-position-x: 10px;
 		}
 	}
 
