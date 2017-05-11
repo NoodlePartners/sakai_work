@@ -32,7 +32,7 @@ $header-font-weight: 700 !default;										// 400 or 700 as you wish
 
 /* Color palette */
 $background-color: 			 #FFFFFF !default;
-$background-color-secondary: #00205c !default;
+$background-color-secondary: #FFFFFF !default;
 
 $primary-color:    			 #0081bc !default;
 $primary-color-highContrast: darken( $primary-color, 4% ) !default;	// for use of primary on non-white light backgrounds, such as greys
@@ -138,7 +138,7 @@ $header-gradient-d: $header-gradient-a !default;
 
 /* topNav Main Menu */
 $header-size: 50px !default;
-$topNav-text-color:                         #fff !default; /* used for links and text in the topNav */
+$topNav-text-color:                         #000 !default; /* used for links and text in the topNav */
 $topNav-text-alt-color:                     #ccc !default;
 
 /* Favorites */ 

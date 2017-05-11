@@ -198,9 +198,8 @@
             var setCounter = function (type, count) {
 
                     var horn = $('#Mrphs-' + type + '-bullhorn');
-                    var colour = (type === 'social') ? 'blue' : 'red';
                     horn.find('.bullhorn-counter').remove();
-                    horn.append('<span class="bullhorn-counter bullhorn-counter-' + colour + '">' + count + '</span>');
+                    horn.append('<span class="bullhorn-counter bullhorn-counter-red">' + count + '</span>');
                 };
 
             $.ajax({
