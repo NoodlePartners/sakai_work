@@ -3,20 +3,22 @@
     font-weight: bold;
     font-size: $default-font-size - 4px;
     position: absolute;
-    padding: 0px 2px;
-    margin-top: 8px;
-    margin-left: -10px;
+    padding: 2px 6px;
+    margin-top: 12px;
+    margin-left: -6px;
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     border-radius: 2px;
+	line-height: 1.5em;
+}
+##{$namespace}academic-bullhorn {
+    .bullhorn-counter {
+        margin-left: -12px;
+    }
 }
 
 .bullhorn-counter-red {
     background-color: #f00;
-}
-
-.bullhorn-counter-blue {
-    background-color: #2a94c0;
 }
 
 .portal-bullhorns.qtip {
