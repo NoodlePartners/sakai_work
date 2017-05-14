@@ -23,6 +23,14 @@
 	> .#{$namespace}pagebody{
 		width: 100%;
 	}
+	@media #{$nonPhone} {
+		> .#{$namespace}twoColumn{
+			padding-top: 10px;
+			> .#{$namespace}siteHierarchy {
+				display: none;
+			}
+		}
+	}
 }
 
 #content, .#{$namespace}container--footer{
