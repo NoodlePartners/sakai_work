@@ -13,8 +13,6 @@
 	padding-top: 4px;
 
 	.#{$namespace}container {
-		border: 1px solid $overview-portlet-border-color;
-		box-shadow: $overview-portlet-shadow;
 		margin-bottom: 20px;
 
 		@media #{$tablet} {
@@ -33,12 +31,31 @@
 			background-color: $overview-portlet-title-background-color;
 			border-bottom: 1px solid $overview-portlet-border-color;
 			padding: 0.6em;
-  	}
+		}
 
 		.#{$namespace}toolBody {
 			border-bottom: none;
 		}
-  }
+	}
+
+	#col2of2 {
+		.#{$namespace}container {
+			border: 1px solid $overview-portlet-border-color;
+			box-shadow: $overview-portlet-shadow;
+		}
+	}
+
+	@media #{$phone} {
+		#col1of2 {
+			.navIntraTool {
+				margin-left: 0px;
+			}
+			.#{$namespace}container {
+				border: 1px solid $overview-portlet-border-color;
+				box-shadow: $overview-portlet-shadow;
+			}
+		}
+	}
 
 	.#{$namespace}toolTitleNav__button_container {
 		position: absolute;
@@ -49,7 +66,7 @@
 		@media #{$tablet}{
 			font-size: 1.2em;
 		}
-  }
+	}
 
 	.#{$namespace}toolTitleNav{
 		.#{$namespace}toolTitleNav__title{

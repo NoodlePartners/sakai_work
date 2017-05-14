@@ -15,7 +15,7 @@
 
     #end ## END of IF ( $sitePages.pageNavToolsCount > 1 || ! $sitePages.pageMaxIfSingle )
 
-    <div class="Mrphs-pagebody">
+    <div class="Mrphs-pagebody #if ( $pageTwoColumn ) Mrphs-twoColumn #end">
         #parse("/vm/morpheus/includeSiteHierarchy.vm")
 
         #parse("/vm/morpheus/includePageBody.vm")
