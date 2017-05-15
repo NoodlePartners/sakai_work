@@ -31,6 +31,9 @@ body.is-logged-out{
 		.#{$namespace}headerLogo--institution{
 			background: url($logo) no-repeat center center;
 			width: 		$logo-width;
+			@media #{$phone} {
+				width: $mobile-logo-width !important;
+			}
 			height: 100%; // align vertically center
 			float: left;
 			background-size: $logo-width $logo-height;
@@ -525,7 +528,7 @@ body.is-logged-out{
 
 			@media #{$phone}
 			{
-				margin-right: 0;
+				margin-right: 6px;
 			}
 		}
 		.#{$namespace}userNav__pic-changer{
