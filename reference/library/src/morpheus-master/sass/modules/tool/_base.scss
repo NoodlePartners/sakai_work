@@ -13,6 +13,8 @@
 	padding-top: 4px;
 
 	.#{$namespace}container {
+		border: 1px solid $overview-portlet-border-color;
+		box-shadow: $overview-portlet-shadow;
 		margin-bottom: 20px;
 
 		@media #{$tablet} {
@@ -38,22 +40,33 @@
 		}
 	}
 
-	#col2of2 {
-		.#{$namespace}container {
-			border: 1px solid $overview-portlet-border-color;
-			box-shadow: $overview-portlet-shadow;
+	.#{$namespace}sakai-commons {
+		.navIntraTool {
+			margin-left: 0px;
+			margin-right: 2px;
 		}
 	}
 
+	@media #{$nonPhone} {
+		.#{$namespace}sakai-commons {
+			border: none !important;
+			box-shadow: none !important;
+			.portletBody {
+				padding-left: 0px;
+				padding-right: 0px;
+			}
+		}
+		/*#col1of2 {
+			.portletBody {
+				padding-left: 0px;
+				padding-right: 0px;
+			}
+		}*/
+	}
+
 	@media #{$phone} {
-		#col1of2 {
-			.navIntraTool {
-				margin-left: 0px;
-			}
-			.#{$namespace}container {
-				border: 1px solid $overview-portlet-border-color;
-				box-shadow: $overview-portlet-shadow;
-			}
+		.#{$namespace}sakai-widget-site-information {
+			box-shadow: none !important;
 		}
 	}
 
