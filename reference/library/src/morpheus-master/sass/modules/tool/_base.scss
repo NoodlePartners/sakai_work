@@ -56,18 +56,10 @@
 				padding-right: 0px;
 			}
 		}
-		/*#col1of2 {
-			.portletBody {
-				padding-left: 0px;
-				padding-right: 0px;
-			}
-		}*/
 	}
 
-	@media #{$phone} {
-		.#{$namespace}sakai-widget-site-information {
-			box-shadow: none !important;
-		}
+	.#{$namespace}sakai-widget-site-information {
+		box-shadow: none !important;
 	}
 
 	.#{$namespace}toolTitleNav__button_container {
