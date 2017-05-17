@@ -121,7 +121,7 @@
 
         portal.academicBullhorn.qtip({
             suppress: false,
-            position: { adjust: { scroll: false }, my: 'top right', at: 'bottom left', target: portal.socialBullhorn },
+            position: { adjust: { scroll: false }, my: 'top right', at: 'bottom left', target: portal.academicBullhorn },
             show: { event: 'click', delay: 0, solo: portal.socialBullhorn },
             style: { classes: 'portal-bullhorns' },
             hide: { event: 'click unfocus' },
