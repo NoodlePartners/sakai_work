@@ -1697,6 +1697,9 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
                         rcontext.put("portalVideoChatTimeout", 
 				ServerConfigurationService.getInt("portal.chat.video.timeout", 25));
 
+            rcontext.put("portalBullhornsPollInterval",
+                    ServerConfigurationService.getInt("portal.bullhorns.poll.interval", 10000));
+
                         if(sakaiTutorialEnabled && thisUser != null) {
                         	if (!("1".equals(prefs.getProperties().getProperty("sakaiTutorialFlag")))) {
                         		rcontext.put("tutorial", true);
