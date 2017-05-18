@@ -226,6 +226,7 @@ public class BullhornServiceImpl implements Observer {
                             switchUser(oldUserId);
                             doSocialInsert(from, to, event, ref, e.getEventTime(), url);
                             countCache.remove(from);
+                            countCache.remove(to);
                         } else if (ProfileConstants.EVENT_MESSAGE_SENT.equals(event)) {
                             String to = pathParts[2];
                             String siteId = "~" + to;
