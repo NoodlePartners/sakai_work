@@ -233,6 +233,6 @@
 
     if (portal.loggedIn) {
         updateCounts();
-        portal.bullhornCountIntervalId = setInterval(updateCounts, 60000);
+        portal.bullhornCountIntervalId = setInterval(updateCounts, portal.bullhorns.pollInterval);
     }
 }) ($PBJQ);
