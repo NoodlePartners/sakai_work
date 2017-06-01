@@ -16,7 +16,7 @@
 
 var profile = profile || {};
 
-profile.requestFriend = function (requestorId, friendId, callback, displayName) {
+profile.requestFriend = function (requestorId, friendId, callback) {
 
     $PBJQ.ajax( {
         url: "/direct/profile/" + requestorId + "/requestFriend?friendId=" + friendId,
@@ -27,12 +27,12 @@ profile.requestFriend = function (requestorId, friendId, callback, displayName) 
                 $PBJQ('#profile-popup-request-button-' + friendId).hide();
                 $PBJQ('#profile-popup-cancel-button-' + friendId).show();
 
-				if (callback && displayName) callback(friendId, displayName);
+				if (callback) callback(friendId);
             });
     return false;
 };
 
-profile.confirmFriendRequest = function (requestorId, friendId) {
+profile.confirmFriendRequest = function (requestorId, friendId, callback) {
 
     $PBJQ.ajax( {
         url : "/direct/profile/" + requestorId + "/confirmFriendRequest?friendId=" + friendId,
@@ -42,12 +42,14 @@ profile.confirmFriendRequest = function (requestorId, friendId) {
 
                 $PBJQ('#profile-popup-incoming-block-' + friendId).hide();
                 $PBJQ('#profile-popup-remove-button-' + friendId).show();
+
+				if (callback) callback(friendId);
             });
 
     return false;
 };
 
-profile.removeFriend = function (removerId, friendId) {
+profile.removeFriend = function (removerId, friendId, callback, displayName) {
 
     $PBJQ.ajax( {
         url : "/direct/profile/" + removerId + "/removeFriend?friendId=" + friendId,
@@ -57,27 +59,29 @@ profile.removeFriend = function (removerId, friendId) {
 
                 $PBJQ('#profile-popup-remove-button-' + friendId).hide();
                 $PBJQ('#profile-popup-request-button-' + friendId).show();
+
+				if (callback && displayName) callback(friendId, displayName);
             });
 
     return false;
 };
 
-profile.ignoreFriendRequest = function (removerId, friendId, cancel) {
+profile.ignoreFriendRequest = function (removerId, friendId, cancel, callback) {
 
-    $PBJQ.ajax( {
-        url : "/direct/profile/" + removerId + "/ignoreFriendRequest?friendId=" + friendId,
-        dataType : "text",
-        cache: false })
-            .done(function (data, textStatus, jqXHR) {
+    $PBJQ.ajax( { url : '/direct/profile/' + removerId + '/ignoreFriendRequest?friendId=' + friendId, cache: false })
+        .done(function (data, textStatus, jqXHR) {
 
-                if (cancel !== undefined && cancel == true) {
-                    $PBJQ('#profile-popup-cancel-button-' + removerId).hide();
-                    $PBJQ('#profile-popup-request-button-' + removerId).show();
-                } else {
-                    $PBJQ('#profile-popup-incoming-block-' + friendId).hide();
-                    $PBJQ('#profile-popup-request-button-' + friendId).show();
-                }
-            });
+            if (cancel !== undefined && cancel == true) {
+                $PBJQ('#profile-popup-cancel-button-' + removerId).hide();
+                $PBJQ('#profile-popup-request-button-' + removerId).show();
+                if (callback) callback(removerId);
+            } else {
+                $PBJQ('#profile-popup-incoming-block-' + friendId).hide();
+                $PBJQ('#profile-popup-request-button-' + friendId).show();
+                if (callback) callback(friendId);
+            }
+
+        });
 
     return false;
 };
@@ -127,16 +131,89 @@ profile.attachPopups = function (jqArray, callbacks) {
 			events: {
         		visible: function(event, api) {
 
-					if (callbacks && callbacks.connect) {
-						$PBJQ('#profile-popup-request-button-' + userId).click(function (e) {
+                    var requestButton = $PBJQ('#profile-popup-request-button-' + userId);
+                    requestButton.on('click', function (e) {
+                        profile.requestFriend(portal.user.id, userId);
+                    });
 
-							var decoratedCallback = function (friendId, displayName) {
+                    var cancelButton = $PBJQ('#profile-popup-cancel-button-' + userId);
+                    cancelButton.on('click', function (e) {
+                        profile.ignoreFriendRequest(userId, portal.user.id, true);
+                    });
 
-									callbacks.connect(friendId, displayName);
-									api.destroy();
-								};
-							profile.requestFriend(portal.user.id, userId, decoratedCallback, callbackDisplayName);
-						});
+                    var acceptButton = $PBJQ('#profile-popup-accept-button-' + userId);
+                    acceptButton.on('click', function (e) {
+                        profile.confirmFriendRequest(portal.user.id, userId);
+                    });
+                    var ignoreButton = $PBJQ('#profile-popup-ignore-button-' + userId);
+                    ignoreButton.on('click', function (e) {
+                        profile.ignoreFriendRequest(portal.user.id, userId, false);
+                    });
+                    var removeButton = $PBJQ('#profile-popup-remove-button-' + userId);
+                    removeButton.on('click', function (e) {
+                        profile.removeFriend(portal.user.id, userId);
+                    });
+
+					if (callbacks) {
+                        if (callbacks.connect) {
+                            requestButton.off('click').on('click', function (e) {
+
+                                var callback = function (friendId) {
+
+                                        callbacks.connect(friendId);
+                                        api.destroy();
+                                    };
+                                profile.requestFriend(portal.user.id, userId, callback);
+                            });
+                        }
+                        if (callbacks.cancel) {
+                            cancelButton.off('click').on('click', function (e) {
+
+                                var callback = function (friendId) {
+
+                                        callbacks.cancel(friendId);
+                                        api.destroy();
+                                    };
+
+                                profile.ignoreFriendRequest(userId, portal.user.id, true, callback);
+                            });
+                        }
+                        if (callbacks.accept) {
+                            acceptButton.off('click').on('click', function (e) {
+
+                                var callback = function (friendId) {
+
+                                        callbacks.accept(friendId);
+                                        api.destroy();
+                                    };
+
+                                profile.confirmFriendRequest(portal.user.id, userId, callback);
+                            });
+                        }
+                        if (callbacks.ignore) {
+                            ignoreButton.off('click').on('click', function (e) {
+
+                                var callback = function (friendId) {
+
+                                        callbacks.ignore(friendId);
+                                        api.destroy();
+                                    };
+
+                                profile.ignoreFriendRequest(portal.user.id, userId, false, callback);
+                            });
+                        }
+                        if (callbacks.remove) {
+                            removeButton.off('click').on('click', function (e) {
+
+                                var callback = function (friendId, displayName) {
+
+                                        callbacks.remove(friendId, displayName);
+                                        api.destroy();
+                                    };
+
+                                profile.removeFriend(portal.user.id, userId, callback, callbackDisplayName);
+                            });
+                        }
 					}
         		}
     		}

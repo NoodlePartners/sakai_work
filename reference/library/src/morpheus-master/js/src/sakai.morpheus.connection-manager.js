@@ -5,11 +5,16 @@
     var connectionTemplate = Handlebars.templates['connection-manager-connection'];
     var searchResultTemplate = Handlebars.templates['connection-manager-searchresult'];
 
+    var indexedCurrentConnections = {};
+    var indexedPendingConnections = {};
+
+    var countPending = function () { return Object.keys(indexedPendingConnections).length; };
+    var indexedSearchResults = {};
+    var lastSearchResults = {};
+
     portal.i18n.loadProperties('connection-manager', '/library/translations');
     portal.i18n.loadProperties('profile-popup', '/library/translations');
 
-    var searchUserIdFilter = [];
-    var pendingTotal = 0;
     var currentTotal = 0;
     var currentConnections = [];
 
@@ -71,6 +76,8 @@
 
 		var addPendingAndShowTab = function (friendId, displayName) {
 
+				var countBefore = countPending();
+
 				$('#connection-manager-connection-' + friendId).remove();
 				$('#connection-manager-connectionsview-searchresult-' + friendId).remove();
 
@@ -78,19 +85,26 @@
 					searchResultsWrapper.hide();
 				}
 
-				var markup = connectionTemplate({displayName: displayName, uuid: friendId, connected: false, hideConnect: true, outgoing: true});
-				if (pendingTotal == 0) {
+                var connection = indexedSearchResults[friendId];
+                connection.connected = false;
+                connection.hideConnect = true;
+                connection.outgoing = true;
+
+                indexedPendingConnections[friendId] = connection;
+
+				var markup = connectionTemplate(connection);
+				if (countBefore === 0) {
                     pendingConnectionsDiv.show().html('');
                     noPendingConnectionsDiv.hide();
                 }
 				pendingConnectionsDiv.append(markup);
-				pendingTotal += 1;
 				updatePendingTabText();
-				searchUserIdFilter.push(friendId);
 
-                if (currentState === CONNECTIONS) {
+                if (currentState === CONNECTIONS
+                        || (currentState == SEARCH_RESULTS && moreSearchResults.children().length === 0)) {
                     showPendingTab();
                 }
+
 				$('#connection-manager-cancel-button-' + friendId).click(cancelHandler);
 			};
 
@@ -115,22 +129,82 @@
             shown += 1;
         }
 
+        var moveFromPendingToCurrent = function (friendId) {
+
+                $('#connection-manager-connection-' + friendId).remove();
+                if (currentTotal == 0) {
+                    currentConnectionsDiv.html('');
+                }
+                var connection = indexedPendingConnections[friendId];
+                var markup = connectionTemplate(connection);
+                currentConnectionsDiv.append(markup);
+                currentTotal += 1;
+                $('#connection-manager-remove-button-' + friendId).click(removeHandler);
+                noCurrentConnectionsDiv.hide();
+                updatePendingTabText();
+                delete indexedPendingConnections[friendId];
+                indexedCurrentConnections[friendId] = connection;
+                showCurrentTab();
+            };
+
+        var acceptHandler = function () {
+
+                var friendId = this.dataset.userId;
+                var displayName = this.dataset.displayName;
+                $.ajax('/direct/profile/' + portal.user.id + '/confirmFriendRequest?friendId=' + friendId
+                        , {cache: false})
+                    .done(function (data) {
+                        moveFromPendingToCurrent(friendId);
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log('ERROR: failed to confirm request from \'' + displayName + '\'. errorThrown: ' + errorThrown);
+                    });
+            };
+
+        var removePending = function (friendId) {
+
+                $('.connection-manager-connection-' + friendId).remove();
+                updatePendingTabText();
+                delete indexedPendingConnections[friendId];
+            };
+
+        var ignoreHandler = function () {
+
+                var friendId = this.dataset.userId;
+                var displayName = this.dataset.displayName;
+                $.ajax('/direct/profile/' + portal.user.id + '/ignoreFriendRequest?friendId=' + friendId, {cache: false})
+                    .done(function (data) {
+                        removePending(friendId);
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log('ERROR: failed to ignore request from \'' + displayName + '\'. errorThrown: ' + errorThrown);
+                    });
+            };
+
         var connectHandler = function () {
 
 				var friendId = this.dataset.userId;
 				var displayName = this.dataset.displayName;
-				if (confirm(portal.i18n.translate('connection_manager_connect_confirm', {displayName: displayName}))) {
-					$.ajax('/direct/profile/' + portal.user.id + '/requestFriend?friendId=' + friendId
-							, {cache: false})
-						.done(function (data) {
+                $.ajax('/direct/profile/' + portal.user.id + '/requestFriend?friendId=' + friendId
+                        , {cache: false})
+                    .done(function (data) {
 
-							addPendingAndShowTab(friendId, displayName);
-						})
-						.fail(function (jqXHR, textStatus, errorThrown) {
-							console.log('ERROR: failed to request connection to \'' + displayName + '\'. errorThrown: ' + errorThrown);
-						});
-				}
+                        addPendingAndShowTab(friendId, displayName);
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log('ERROR: failed to request connection to \'' + displayName + '\'. errorThrown: ' + errorThrown);
+                    });
 			};
+
+        var removeCurrent = function (friendId) {
+
+                $('#connection-manager-connection-' + friendId).remove();
+                currentTotal -= 1;
+                if (currentTotal == 0) {
+                    noCurrentConnectionsDiv.show();
+                }
+                delete indexedCurrentConnections[friendId];
+            };
 
         var removeHandler = function () {
 
@@ -139,14 +213,7 @@
 				if (confirm(portal.i18n.translate('connection_manager_remove_confirm', {displayName: displayName}))) {
 					$.ajax('/direct/profile/' + portal.user.id + '/removeFriend?friendId=' + friendId, {cache: false})
 						.done(function (data) {
-
-							$('#connection-manager-connection-' + friendId).remove();
-							currentTotal -= 1;
-							if (currentTotal == 0) {
-                                noCurrentConnectionsDiv.show();
-							}
-							var index = searchUserIdFilter.indexOf(friendId);
-							searchUserIdFilter.splice(index, 1);
+                            removeCurrent(friendId);
 						})
 						.fail(function (jqXHR, textStatus, errorThrown) {
 							console.log('ERROR: failed to remove \'' + displayName + '\'. errorThrown: ' + errorThrown);
@@ -158,24 +225,22 @@
 
                 var friendId = this.dataset.userId;
                 var displayName = this.dataset.displayName;
-                if (confirm(portal.i18n.translate('connection_manager_cancel_confirm', {displayName: displayName}))) {
-                    $.ajax('/direct/profile/' + friendId + '/ignoreFriendRequest?friendId=' + portal.user.id, {cache: false})
-                        .done(function (data) {
 
-                            $('#connection-manager-connection-' + friendId).remove();
-                            pendingTotal -= 1;
-                            updatePendingTabText();
-                            var index = searchUserIdFilter.indexOf(friendId);
-                            searchUserIdFilter.splice(index, 1);
-                        })
-                        .fail(function (jqXHR, textStatus, errorThrown) {
-                            console.log('ERROR: failed to ignore request from \'' + displayName + '\'. errorThrown: ' + errorThrown);
-                        });
-                }
+                $.ajax('/direct/profile/' + friendId + '/ignoreFriendRequest?friendId=' + portal.user.id, {cache: false})
+                    .done(function (data) {
+
+                        $('.connection-manager-connection-' + friendId).remove();
+                        delete indexedPendingConnections[friendId];
+                        updatePendingTabText();
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log('ERROR: failed to ignore request from \'' + displayName + '\'. errorThrown: ' + errorThrown);
+                    });
             };
 
         var updatePendingTabText = function () {
 
+                var pendingTotal = countPending();
                 if (pendingTotal === 0) {
                     pendingTab.html(pendingTabBaseHtml);
                     pendingConnectionsDiv.html('').hide();
@@ -220,21 +285,25 @@
                         }
 
                         var markup = '';
-                        portal.connectionManager.lastSearchResults
-                            = results.filter(function (r) { return searchUserIdFilter.indexOf(r.uuid) == -1; });
+                        lastSearchResults = results;
+
+                        indexedSearchResults = {};
+                        lastSearchResults.forEach(function (r) {
+                            indexedSearchResults[r.uuid] = r;
+                        });
 
                         if (showFullConnections) {
-                            portal.connectionManager.lastSearchResults.forEach(function (result, i) {
+                            lastSearchResults.forEach(function (result, i) {
                                     markup += template(result);
                                 });
                         } else {
-                            portal.connectionManager.lastSearchResults.slice(0, 5).forEach(function (result, i) {
+                            lastSearchResults.slice(0, 5).forEach(function (result, i) {
                                     markup += template(result);
                                 });
                         }
 
                         if (showFullConnections) {
-                            updateSearchResultsCount(portal.connectionManager.lastSearchResults.length);
+                            updateSearchResultsCount(lastSearchResults.length);
                         }
 
                         container.html(markup);
@@ -246,33 +315,50 @@
                         $(document).ready(function () {
 
                             if (!showFullConnections) {
-                                profile.attachPopups($('.profile-popup'), {connect: addPendingAndShowTab});
+                                profile.attachPopups($('.profile-popup'), {connect: addPendingAndShowTab, cancel: removePending, accept: moveFromPendingToCurrent, ignore: removePending, remove: removeCurrent});
                             } else {
                                 $('.connection-manager-connect-button').click(connectHandler);
                             }
 
                             $('#connection-manager-connectionsview-searchresults-more').click(function (e) {
 
+                                currentState = SEARCH_RESULTS;
+
                                 searchResults.html('');
                                 searchResultsWrapper.hide();
                                 connectionsView.hide();
                                 searchResultsView.show();
-                                currentState = SEARCH_RESULTS;
                                 moreSearchBox.val(portal.connectionManager.searchCriteria);
                                 searchBox.val('');
                                 $(document).ready(function () {
 
-                                    updateSearchResultsCount(portal.connectionManager.lastSearchResults.length);
+                                    updateSearchResultsCount(lastSearchResults.length);
 
                                     var markup = '';
-                                    portal.connectionManager.lastSearchResults.forEach(function (result, i) {
+                                    lastSearchResults.forEach(function (result, i) {
                                         result.facebookSet = result.socialNetworkingInfo.facebookUrl;
                                         result.twitterSet = result.socialNetworkingInfo.twitterUrl;
+                                        result.moreResult = true;
+                                        if (indexedCurrentConnections.hasOwnProperty(result.uuid)) {
+                                            result.connected = true;
+                                            result.hideConnect = true;
+                                        }
+                                        if (indexedPendingConnections.hasOwnProperty(result.uuid)) {
+                                            result.connected = false;
+                                            result.hideConnect = true;
+                                            result.outgoing = indexedPendingConnections[result.uuid].outgoing;
+                                            result.incoming = indexedPendingConnections[result.uuid].incoming;
+                                        }
                                         markup += connectionTemplate(result);
                                     });
                                     moreSearchResults.html(markup);
                                     $(document).ready(function () {
+
+                                        $('.connection-manager-accept-button').click(acceptHandler);
+                                        $('.connection-manager-ignore-button').click(ignoreHandler);
                                         $('.connection-manager-connect-button').click(connectHandler);
+                                        $('.connection-manager-remove-button').click(removeHandler);
+                                        $('.connection-manager-cancel-button').click(cancelHandler);
                                     });
                                 });
                             });
@@ -293,6 +379,8 @@
         // Load up the current connections
         $.ajax('/direct/profile/' + portal.user.id + '/connections.json', {cache: false})
             .done(function (data) {
+
+                indexedCurrentConnections = {};
 
                 currentTotal = data.length;
 
@@ -316,7 +404,7 @@
                     connection.connected = true;
                     connection.incoming = false;
                     connection.hideConnect = true;
-                    searchUserIdFilter.push(connection.uuid);
+                    indexedCurrentConnections[connection.uuid] = connection;
                     currentConnectionsDiv.append(connectionTemplate(connection));
                 });
 
@@ -341,12 +429,10 @@
                 connections.forEach(function (connection) {
 
                     connection.hideConnect = true;
-                    searchUserIdFilter.push(connection.uuid);
                     connection.pending = true;
                     pendingConnectionsDiv.append(connectionTemplate(connection));
+                    indexedPendingConnections[connection.uuid] = connection;
                 });
-
-                pendingTotal = connections.length;
 
                 if (connections.length > 0) {
                     // Update the pending tab
@@ -357,53 +443,8 @@
 
                 $(document).ready(function () {
 
-                    $('.connection-manager-accept-button').click(function (e) {
-
-                        var friendId = this.dataset.userId;
-                        var displayName = this.dataset.displayName;
-                        if (confirm(portal.i18n.translate('connection_manager_accept_confirm', {displayName: displayName}))) {
-                            $.ajax('/direct/profile/' + portal.user.id + '/confirmFriendRequest?friendId=' + friendId
-                                    , {cache: false})
-                                .done(function (data) {
-
-                                    $('#connection-manager-connection-' + friendId).remove();
-                                    if (currentTotal == 0) {
-                                        currentConnectionsDiv.html('');
-                                    }
-                                    var markup = connectionTemplate({displayName: displayName, uuid: friendId, connected: true, hideConnect: true});
-                                    currentConnectionsDiv.append(markup);
-                                    currentTotal += 1;
-                                    $('#connection-manager-remove-button-' + friendId).click(removeHandler);
-                                    pendingTotal -= 1;
-                                    noCurrentConnectionsDiv.hide();
-                                    updatePendingTabText();
-                                    showCurrentTab();
-                                })
-                                .fail(function (jqXHR, textStatus, errorThrown) {
-                                    console.log('ERROR: failed to confirm request from \'' + displayName + '\'. errorThrown: ' + errorThrown);
-                                });
-                        }
-                    });
-                    $('.connection-manager-ignore-button').click(function (e) {
-
-                        var friendId = this.dataset.userId;
-                        var displayName = this.dataset.displayName;
-                        if (confirm(portal.i18n.translate('connection_manager_ignore_confirm', {displayName: displayName}))) {
-                            $.ajax('/direct/profile/' + portal.user.id + '/ignoreFriendRequest?friendId=' + friendId, {cache: false})
-                                .done(function (data) {
-
-                                    $('#connection-manager-connection-' + friendId).remove();
-                                    pendingTotal -= 1;
-                                    updatePendingTabText();
-                                    var index = searchUserIdFilter.indexOf(friendId);
-                                    searchUserIdFilter.splice(index, 1);
-                                })
-                                .fail(function (jqXHR, textStatus, errorThrown) {
-                                    console.log('ERROR: failed to ignore request from \'' + displayName + '\'. errorThrown: ' + errorThrown);
-                                });
-                        }
-                    });
-
+                    $('.connection-manager-accept-button').click(acceptHandler);
+                    $('.connection-manager-ignore-button').click(ignoreHandler);
                     $('.connection-manager-cancel-button').click(cancelHandler);
                 }); // document.ready
             }; // pendingConnectionsCallback
@@ -412,7 +453,11 @@
         $.ajax('/direct/profile/' + portal.user.id + '/incomingConnectionRequests.json', {cache: false})
             .done(function (data) {
 
-                data.forEach(function (connection) { connection.incoming = true; });
+                indexedPendingConnections = {};
+
+                data.forEach(function (connection) {
+                    connection.incoming = true;
+                });
 
                 $.ajax('/direct/profile/' + portal.user.id + '/outgoingConnectionRequests.json', {cache: false})
                     .done(function (outgoing) {
@@ -422,6 +467,7 @@
                             connection.outgoing = true;
                             data.push(connection);
                         });
+
                         pendingConnectionsCallback(data);
                     })
                     .fail(function (jqXHR, textStatus, errorThrown) {
