@@ -3,11 +3,13 @@
 	border-bottom: 1px solid $tool-border-color;
 	padding: 0 1em 0 0;
 	//max-width: calc(100% - 170px);
-	font-size: 0;
 	&:after{
 		content: " ";
 		display: block;
 		width: 100%;
+	}
+	ul#toolbar {
+		font-size: 0;
 	}
 	li{
 		display: inline-block;
