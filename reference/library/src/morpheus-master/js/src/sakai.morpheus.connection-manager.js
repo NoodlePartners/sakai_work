@@ -122,6 +122,7 @@
         var pendingConnectionsWrapper = $('#connection-manager-pending-connections-wrapper');
         var noPendingConnectionsDiv = $('#connection-manager-no-pending-connections-wrapper');
         var searchBox = $('#connection-manager-connectionsview-searchbox');
+        searchBox.clearSearch({callback: function () { searchResultsWrapper.hide(); }});
         var moreSearchBox = $('#connection-manager-searchresultsview-searchbox');
 
         if (shown == 0) {
@@ -164,8 +165,8 @@
         var removePending = function (friendId) {
 
                 $('.connection-manager-connection-' + friendId).remove();
-                updatePendingTabText();
                 delete indexedPendingConnections[friendId];
+                updatePendingTabText();
             };
 
         var ignoreHandler = function () {
