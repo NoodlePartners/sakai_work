@@ -31,24 +31,27 @@
 				text-decoration: none;
 				text-transform: $tool-tab-text-transform;
 				letter-spacing: $tool-tab-text-letter-spacing;
+                text-decoration: none;
 
-				&:hover{
-					color: $tool-tab-hover-text-color;
-					background: $tool-tab-hover-background-color;
-					text-decoration: none;
-					position: relative;
+                @media #{$desktop}{
+                    &:hover{
+                        color: $tool-tab-hover-text-color;
+                        background: $tool-tab-hover-background-color;
+                        position: relative;
+                        text-decoration: none;
 
-					&:before{
-						border-top: 4px solid $tool-tab-hover-highlight-color;
-						content: "";
-						display: block;
-						position: absolute;
-						left: -1px;
-						right: -1px;
-						top: -1px;
-					}
-			  }
-			}
+                        &:before{
+                            border-top: 4px solid $tool-tab-hover-highlight-color;
+                            content: "";
+                            display: block;
+                            position: absolute;
+                            left: -1px;
+                            right: -1px;
+                            top: -1px;
+                        }
+                    }
+                }
+            }
 			&.current{
 				color: $tool-tab-active-text-color;
 				font-size: $tool-tab-active-text-size;
@@ -87,6 +90,7 @@
 				    font-size: 1em;
 				    margin: 0;
 				    padding: 0;
+                    text-decoration: none;
 				    top: 1px;
                     pointer-events: none;
 				}
