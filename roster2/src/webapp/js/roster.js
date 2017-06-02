@@ -839,7 +839,7 @@
     };
 
     // jquery.i18n
-    $.i18n.properties({
+    /*$.i18n.properties({
         name:'ui',
         path:'/sakai-roster2-tool/i18n/',
         mode: 'both',
@@ -849,7 +849,7 @@
         callback: function () {
             roster.loadSiteDataAndInit();
         }
-    });
+    });*/
 
     roster.alignMobileLabels = function () {
 
@@ -862,6 +862,18 @@
         }
         $('.roster-mobile-label').width(roster.maxMobileLabelWidth);
     };
+
+	$(document).ready(function () {
+
+		$.getScript('/sakai-roster2-tool/templates.js', function () {
+
+			if (portal.i18n) {
+				portal.i18n.loadProperties('ui', '/sakai-roster2-tool/i18n/', false, function () { roster.loadSiteDataAndInit(); });
+			} else {
+				console.log('portal.i18n not loaded');
+			}
+		});
+    });
 
     $(window).resize(function () {
         roster.alignMobileLabels();
