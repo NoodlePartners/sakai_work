@@ -3,7 +3,7 @@
     portal.i18n = portal.i18n || {};
     portal.i18n.translations = portal.i18n.translations || {};
 
-    portal.i18n.loadProperties = function (name, path, debug) {
+    portal.i18n.loadProperties = function (name, path, debug, callback) {
 
         if (!path.match(/\/$/)) path += '/';
 
@@ -21,6 +21,8 @@
                     console.log('Updated translations: ');
                     console.log(portal.i18n.translations);
                 }
+
+                if (callback) callback();
             }
         });
     };
