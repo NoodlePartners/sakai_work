@@ -141,9 +141,9 @@
                 currentTotal += 1;
                 $('#connection-manager-remove-button-' + friendId).click(removeHandler);
                 noCurrentConnectionsDiv.hide();
-                updatePendingTabText();
                 delete indexedPendingConnections[friendId];
                 indexedCurrentConnections[friendId] = connection;
+                updatePendingTabText();
                 showCurrentTab();
             };
 
