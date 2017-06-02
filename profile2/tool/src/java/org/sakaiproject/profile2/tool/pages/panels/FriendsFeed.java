@@ -163,50 +163,13 @@ public class FriendsFeed extends Panel {
 		Label numFriendsLabel = new Label("numFriendsLabel");
 		add(numFriendsLabel);
 		
-		
-		/* VIEW ALL FRIENDS LINK */
-    	Link<String> viewFriendsLink = new Link<String>("viewFriendsLink") {
-			private static final long serialVersionUID = 1L;
-
-			public void onClick() {
-				//this could come from a bookmarkablelink, but this works for now
-				if(numFriends == 0) {
-					setResponsePage(new MySearch());
-				} else {
-					//if own FriendsFeed, link to own MyFriends, otherwise link to ViewFriends
-					if (sakaiProxy.isSuperUserAndProxiedToUser(ownerUserId)) {
-						setResponsePage(new ViewFriends(ownerUserId));
-					} else if (viewingUserId.equals(ownerUserId)) {
-						setResponsePage(new MyFriends());
-					} else {
-						setResponsePage(new ViewFriends(ownerUserId));
-					}
-				}
-			}
-		};
-		Label viewFriendsLabel = new Label("viewFriendsLabel");
-		viewFriendsLink.add(viewFriendsLabel);
-		add(viewFriendsLink);
-
-		
 		/* TESTS FOR THE ABOVE to change labels and links */
 		if(numFriends == 0) {
 			numFriendsLabel.setDefaultModel(new ResourceModel("text.friend.feed.num.none"));
-			//numFriendsLabel.setVisible(false);
-			//if own FriendsFeed, show search link, otherwise hide
-			if(viewingUserId.equals(ownerUserId)) {
-				if (sakaiProxy.isSearchEnabledGlobally()) {
-					viewFriendsLabel.setDefaultModel(new ResourceModel("link.friend.feed.search"));
-				}
-			} else {
-				viewFriendsLink.setVisible(false);
-			}
 		} else if (numFriends == 1) {
 			numFriendsLabel.setDefaultModel(new ResourceModel("text.friend.feed.num.one"));
-			viewFriendsLink.setVisible(false);
 		} else {
 			numFriendsLabel.setDefaultModel(new StringResourceModel("text.friend.feed.num.many", null, new Object[]{ numFriends }));
-			viewFriendsLabel.setDefaultModel(new ResourceModel("link.friend.feed.view"));
 		}
 	
 	}
