@@ -41,20 +41,39 @@
 		#col1of2, #col2of2{
 			margin: 0 0 0 1%;
 			vertical-align: top;
-	    display: inline-block;
-    }
+			display: inline-block;
+		}
 		#col1of2 {
-      width: $col1of2-width;
-    }
-    #col2of2 {
-      width: $col2of2-width;
-    }
-  }
+			width: $col1of2-width;
+		}
+		#col2of2 {
+			width: $col2of2-width;
+		}
+		#col1of2.col1-sakai-commons {
+			flex-grow: 1;
+			display: block !important;
+			margin: 0 5px 0 5px !important;
+			padding: 0 5px 0 5px !important;
+		}
+		#col2of2.col2-sakai-widget-my-calendar {
+			width: 300px !important;
+			display: block !important;
+			flex-grow: 0;
+			margin: 0 5px 0 5px !important;
+			padding: 0 5px 0 5px !important;
+		}
+	}
 }
 
 .#{$namespace}mainContent{
 	background: $main-content-background;
 	padding-top: 1em;
+}
+
+@media #{$nonPhone}{
+	.#{$namespace}mainContent.#{$namespace}multiColumn {
+		display: flex !important;
+	}
 }
 
 #content {

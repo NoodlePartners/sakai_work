@@ -9,6 +9,7 @@
 #elseif ($pageColumnLayout == 'col1of2')
 
     #set($columnClasses = "Mrphs-pageColumns Mrphs-pageColumns--first")
+    #set($multiColumn = true)
 
 #end
 
@@ -24,11 +25,11 @@
         #set( $numberTools = $pageColumn0Tools.size() )
     #end
 
-    <main id="$pageWrapperClass" class="Mrphs-mainContent #if( $numberTools > 1 )Mrphs-multipleTools #end" role="main">
+    <main id="$pageWrapperClass" class="Mrphs-mainContent #if( $numberTools > 1 )Mrphs-multipleTools #end #if( $multiColumn )Mrphs-multiColumn#end" role="main">
 
         #parse("/vm/morpheus/snippets/siteStatus-snippet.vm")
 
-        <div id="$pageColumnLayout" class="${columnClasses}">
+        <div id="$pageColumnLayout" class="${columnClasses} #foreach ( $tool in $pageColumn0Tools ) col1-${tool.toolId.trim().replace(".", '-').toLowerCase()} #end">
 
             #foreach ( $tool in $pageColumn0Tools )
 
@@ -199,7 +200,8 @@
 
         #if ($pageTwoColumn)
 
-            <div id="col2of2" class="Mrphs-pageColumns Mrphs-pageColumns--second">
+            ##<div id="col2of2" class="Mrphs-pageColumns Mrphs-pageColumns--second">
+            <div id="col2of2" class="Mrphs-pageColumns Mrphs-pageColumns--second#foreach ( $tool in $pageColumn1Tools ) col2-${tool.toolId.trim().replace(".", '-').toLowerCase()} #end">
 
                 #foreach ( $tool in $pageColumn1Tools )
 
