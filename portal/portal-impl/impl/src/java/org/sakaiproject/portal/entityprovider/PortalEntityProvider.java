@@ -74,6 +74,7 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 	public final static String TOOL_ID = "sakai.portal";
 	private final static String CONNECTIONSEARCH_CACHE = "org.sakaiproject.portal.entityprovider.connectionSearchCache";
 	private final static String WORKSPACE_IDS_KEY = "workspaceIds";
+	private final static String ACTUAL_SAKAI_USERS = "actualSakaiUsers";
 
 	private PortalService portalService;
 	private MemoryService memoryService;
@@ -326,16 +327,29 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 			throw new EntityException("No query supplied", "");
 		}
 
+		final boolean limitToActualSakaiUsers
+			= serverConfigurationService.getBoolean("connectionmanager.limitToActualSakaiUsers", false);
+
 		try {
 			Cache cache = getCache(CONNECTIONSEARCH_CACHE);
 
 			List<String> workspaceIds = (List<String>) cache.get(WORKSPACE_IDS_KEY);
+			List<String> actualSakaiUsers = (List<String>) cache.get(ACTUAL_SAKAI_USERS);
 
 			if (workspaceIds == null) {
 				log.debug("Cache MISS on {}.", WORKSPACE_IDS_KEY);
+				workspaceIds = new ArrayList<>();
+				actualSakaiUsers = new ArrayList<>();
 				List<String> all = siteService.getSiteIds(SelectionType.ANY, null, null, null, null, null);
-				workspaceIds = all.stream().filter(id -> id.startsWith("~")).collect(Collectors.toList());
+				for (String id : all) {
+					if (id.startsWith("~")) {
+						// This is a user workspace
+						workspaceIds.add(id);
+						actualSakaiUsers.add(id.substring(1));
+					}
+				}
 				cache.put(WORKSPACE_IDS_KEY, workspaceIds);
+				cache.put(ACTUAL_SAKAI_USERS, actualSakaiUsers);
 			} else {
 				log.debug("Cache HIT on {}.", WORKSPACE_IDS_KEY);
 			}
@@ -361,14 +375,22 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 					}).collect(Collectors.toSet());
 
 			if (log.isDebugEnabled()) {
-				hits.forEach(hit -> log.debug("User ID: " + hit.getUuid()));
+				hits.forEach(hit -> log.debug("User display name: " + hit.getDisplayName()));
 			}
 
 			// Now search the users. TODO: Move to ElasticSearch eventually.
 			List<User> users = userDirectoryService.searchUsers(query, 1, 100);
 			users.addAll(userDirectoryService.searchExternalUsers(query, 1, 100));
 
-			hits.addAll(users.stream().map(u -> { return connectionFromUser(u); }).collect(Collectors.toList()));
+			for (User user : users) {
+				if (limitToActualSakaiUsers) {
+					if (actualSakaiUsers.contains(user.getId())) {
+						hits.add(connectionFromUser(user));
+					}
+				} else {
+					hits.add(connectionFromUser(user));
+				}
+			}
 
 			return new ActionReturn(hits);
 		} catch (Exception e) {
