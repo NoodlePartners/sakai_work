@@ -445,16 +445,21 @@ public class BaseSite implements Site
 			// look for the page list
 			else if (element.getTagName().equals("pages"))
 			{
+                M_log.error("Doing pages!");
 				NodeList pagesNodes = element.getChildNodes();
 				for (int p = 0; p < pagesNodes.getLength(); p++)
 				{
 					Node pageNode = pagesNodes.item(p);
+					M_log.error("pageNode.getLocalName() is: " + pageNode.getLocalName());
 					if (pageNode.getNodeType() != Node.ELEMENT_NODE) continue;
 					Element pageEl = (Element) pageNode;
+					M_log.error("pageEl.getTagName() is: " + pageEl.getTagName());
 					if (!pageEl.getTagName().equals("page")) continue;
 
+					M_log.error("adding page");
 					BaseSitePage page = new BaseSitePage(siteService,pageEl, this);
 					m_pages.add(page);
+					M_log.error("added page");
 				}
 
 				// TODO: else if ( "groups")

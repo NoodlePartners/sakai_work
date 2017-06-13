@@ -359,6 +359,7 @@ public class SiteMerger {
 		for(int i = 0; i < length; i++)
 		{
 			Node child = children.item(i);
+			M_log.error("On node: " + child.getLocalName());
 			if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 			Element element2 = (Element)child;
 			if (!element2.getTagName().equals("site")) continue;
@@ -368,7 +369,9 @@ public class SiteMerger {
 			for(int i2 = 0; i2 < tLength; i2++)
 			{
 				Element element3 = (Element) toolChildren.item(i2);
+                M_log.error("On child node: " + element3.getTagName());
 				String toolId = element3.getAttribute("toolId");
+                M_log.error("toolId is: " + toolId);
 				if (toolId != null)
 				{
 					toolId = toolId.replaceAll(old_toolId_prefix, new_toolId_prefix);
