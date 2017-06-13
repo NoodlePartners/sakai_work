@@ -304,12 +304,15 @@ public class BaseToolConfiguration extends org.sakaiproject.util.Placement imple
 		m_page = page;
 
 		m_id = el.getAttribute("id");
+		M_log.error("doing tool, m_id is: " + m_id);
 		m_toolId = StringUtils.trimToNull(el.getAttribute("toolId"));
+		M_log.error("doing tool, m_toolId is: " + m_toolId);
 		if (m_toolId != null)
 		{
 			m_tool = siteService.activeToolManager().getTool(m_toolId);
 		}
 		m_title = StringUtils.trimToNull(el.getAttribute("title"));
+		M_log.error("doing tool, m_title is: " + m_title);
 		m_layoutHints = StringUtils.trimToNull(el.getAttribute("layoutHints"));
 		m_custom_title = getTitleCustom(page);
 
