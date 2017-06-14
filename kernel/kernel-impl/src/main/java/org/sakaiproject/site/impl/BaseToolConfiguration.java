@@ -33,6 +33,7 @@ import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Tool;
+import org.sakaiproject.tool.api.ToolException;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Xml;
 import org.w3c.dom.Document;
@@ -296,7 +297,7 @@ public class BaseToolConfiguration extends org.sakaiproject.util.Placement imple
 	 * @param page
 	 *        The page in which this tool lives.
 	 */
-	protected BaseToolConfiguration(BaseSiteService siteService, Element el, SitePage page)
+	protected BaseToolConfiguration(BaseSiteService siteService, Element el, SitePage page) throws ToolException
 	{
 		super();
 		this.siteService = siteService;
@@ -307,9 +308,25 @@ public class BaseToolConfiguration extends org.sakaiproject.util.Placement imple
 		M_log.error("doing tool, m_id is: " + m_id);
 		m_toolId = StringUtils.trimToNull(el.getAttribute("toolId"));
 		M_log.error("doing tool, m_toolId is: " + m_toolId);
+		m_tool = null;
 		if (m_toolId != null)
 		{
 			m_tool = siteService.activeToolManager().getTool(m_toolId);
+		}
+		if (m_tool == null)
+		{
+			// Unset everything that could have been set by super's constructor
+			m_id = null;
+			m_toolId = null;
+			m_tool = null;
+			m_config = null;
+			m_context = null;
+			m_title = null;
+			// Note that this particular constructor is called from only one place (in
+			// BaseSitePage), and this exception is dealt with there.
+			String message = "We were asked to construct a tool with toolId " + m_toolId + ", but it was not found";
+			M_log.error(message);
+			throw new ToolException(message);
 		}
 		m_title = StringUtils.trimToNull(el.getAttribute("title"));
 		M_log.error("doing tool, m_title is: " + m_title);

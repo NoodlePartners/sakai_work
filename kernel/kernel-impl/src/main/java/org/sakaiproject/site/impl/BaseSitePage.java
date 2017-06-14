@@ -32,6 +32,7 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Tool;
+import org.sakaiproject.tool.api.ToolException;
 import org.sakaiproject.util.BaseResourceProperties;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 import org.w3c.dom.Document;
@@ -330,9 +331,15 @@ public class BaseSitePage implements SitePage, Identifiable
 					if (toolNode.getNodeType() != Node.ELEMENT_NODE) continue;
 					Element toolEl = (Element) toolNode;
 					if (!toolEl.getTagName().equals("tool")) continue;
-
-					BaseToolConfiguration tool = new BaseToolConfiguration(siteService, toolEl, this);
-					m_tools.add(tool);
+					// We need to handle the case of the tool just not existing in this
+					// instance of Sakai.
+					try {
+						BaseToolConfiguration tool = new BaseToolConfiguration(siteService, toolEl, this);
+						m_tools.add(tool);
+					}
+					catch(ToolException) {
+						// Just don't construct the tool
+					}
 				}
 			}
 		}
