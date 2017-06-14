@@ -337,7 +337,7 @@ public class BaseSitePage implements SitePage, Identifiable
 						BaseToolConfiguration tool = new BaseToolConfiguration(siteService, toolEl, this);
 						m_tools.add(tool);
 					}
-					catch(ToolException) {
+					catch(ToolException e) {
 						// Just don't construct the tool
 					}
 				}
