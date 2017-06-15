@@ -323,7 +323,7 @@ public class WebServiceImpl implements WebService, EntityTransferrer
 											{
 												String pTitle = p.getTitle();
 												M_log.warn("Checking " + pTitle + " against " + pageTitle);
-												if(pTitle == pageTitle)
+												if(pageTitle.equals(pTitle))
 												{
 													page = p;
 													break;
