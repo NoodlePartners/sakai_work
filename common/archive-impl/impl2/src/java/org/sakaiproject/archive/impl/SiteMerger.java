@@ -386,8 +386,8 @@ public class SiteMerger {
 			// merge the site info first
 			try
 			{
+				mergeSiteDescription(element2, siteId);
 				m_siteService.merge(siteId, element2, creatorId);
-				mergeSiteInfo(element2, siteId);
 			}
 			catch(Exception any)
 			{
@@ -432,7 +432,7 @@ public class SiteMerger {
 	* @param element The XML DOM tree of messages to merge.
 	* @param siteId The id of the site getting imported into.
 	*/
-	protected void mergeSiteInfo(Element el, String siteId)
+	protected void mergeSiteDescription(Element el, String siteId)
 		throws IdInvalidException, IdUsedException, PermissionException, IdUnusedException, InUseException 
 	{
 		// heck security (throws if not permitted)
@@ -468,16 +468,14 @@ public class SiteMerger {
 		}
 		catch(Exception any)
 		{
-			M_log.warn("mergeSiteInfo(): exception caught", any);	
+			M_log.warn("mergeSiteDescription(): exception caught", any);	
 		}							
 		//edit.setTitle(title);
 		edit.setDescription(desc);
 		
-		m_siteService.save(edit);
-			 
 		return;
 		
-	} // mergeSiteInfo	
+	} // mergeSiteDescription
 	
 	/**
 	* Merge the the permission-roles settings into the site
