@@ -265,6 +265,12 @@ public abstract class DbSiteService extends BaseSiteService
 
 		public void save(final Site edit)
 		{
+			try {
+				raise(new Exception("saving at"));
+			}
+			catch(Exception e) {
+				M_log.exception(e);
+			}
 			// run our save code in a transaction that will restart on deadlock
 			// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
 			m_sql.transact(new Runnable()
