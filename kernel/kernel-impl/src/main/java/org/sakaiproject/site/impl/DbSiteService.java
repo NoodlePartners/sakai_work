@@ -330,6 +330,7 @@ public abstract class DbSiteService extends BaseSiteService
 				fields[3] = Integer.toString(page.getLayout());
 				fields[4] = ((((BaseSitePage) page).m_popup) ? "1" : "0");
 				fields[5] = Integer.valueOf(pageOrder++);
+				M_log.error("saving page " + fields[2] + " position " + fields[5]);
 				m_sql.dbWrite(statement, fields);
 
 				// write the page's properties
