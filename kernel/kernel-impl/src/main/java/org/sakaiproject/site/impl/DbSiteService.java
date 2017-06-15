@@ -266,7 +266,7 @@ public abstract class DbSiteService extends BaseSiteService
 		public void save(final Site edit)
 		{
 			try {
-				raise(new Exception("saving at"));
+				throw(new Exception("saving at"));
 			}
 			catch(Exception e) {
 				M_log.exception(e);
