@@ -319,7 +319,7 @@ public class WebServiceImpl implements WebService, EntityTransferrer
 											Tool tr = ToolManager.getTool(TOOL_ID);
 											SitePage page = null;
 											List<SitePage> pages = site.getPages();
-											for(page : pages)
+											for(SitePage p : pages)
 											{
 												if(p.getTitle() == pageTitle)
 												{
