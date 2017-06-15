@@ -364,6 +364,18 @@ public class SiteMerger {
 			Element element2 = (Element)child;
 			if (!element2.getTagName().equals("site")) continue;
 			
+			// merge the site info first
+			// Note that this will save an empty Site (no pages) into the DB,
+			// if the Site doesn't already exist
+			try
+			{
+				m_siteService.merge(siteId, element2, creatorId);
+			}
+			catch(Exception any)
+			{
+				M_log.warn(any.getMessage(), any);
+			}
+
 			NodeList toolChildren = element2.getElementsByTagName("tool");
 			final int tLength = toolChildren.getLength();
 			for(int i2 = 0; i2 < tLength; i2++)
@@ -382,11 +394,20 @@ public class SiteMerger {
 				}
 				element3.setAttribute("toolId", toolId);
 			}
-				
-			// merge the site info first
+			
+			// Now handle the site description
 			try
 			{
 				mergeSiteDescription(element2, siteId);
+			}
+			catch(Exception any)
+			{
+				M_log.warn(any.getMessage(), any);
+			}
+			
+			// Save the Site again, now including the attached Pages and Tools
+			try
+			{
 				m_siteService.merge(siteId, element2, creatorId);
 			}
 			catch(Exception any)
