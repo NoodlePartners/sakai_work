@@ -7651,8 +7651,14 @@ public class SimplePageBean {
 			resourceCache.put(collectionId, resources);
 		}
 		
+		// For a while, Sakai would generate file names like foo.css-1
+		// These are really quite broken (e.g. they confuse the web server's
+		// assignment of the mime type) but they should at least appear in
+		// the dropdown for custom css
+		Pattern cssPattern = Pattern.compile(".css(-[0-9][0-9]*){0,1}$")
+		
 		for(ContentResource r : resources) {
-			if(r.getUrl().endsWith(".css")) {
+			if(cssPattern.matcher(r.getUrl()).matches()) {
 				list.add(r);
 			}
 		}
@@ -7674,7 +7680,7 @@ public class SimplePageBean {
 		}
 		
 		for(ContentResource r : resources) {
-			if(r.getUrl().endsWith(".css")) {
+			if(cssPattern.matcher(r.getUrl()).matches()) {
 				list.add(r);
 			}
 		}
