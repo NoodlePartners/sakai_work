@@ -321,7 +321,9 @@ public class WebServiceImpl implements WebService, EntityTransferrer
 											List<SitePage> pages = site.getPages();
 											for(SitePage p : pages)
 											{
-												if(p.getTitle() == pageTitle)
+												String pTitle = p.getTitle();
+												M_log.warn("Checking " + pTitle + " against " + pageTitle);
+												if(pTitle == pageTitle)
 												{
 													page = p;
 													break;
