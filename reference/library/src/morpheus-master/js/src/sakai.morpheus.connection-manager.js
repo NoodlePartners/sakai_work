@@ -480,6 +480,12 @@
             });
 
         searchBox.keyup(function (e) { search(this.value, false); });
+        searchBox.keydown(function (e) {
+
+            if (e.which == 13 && this.value.length >= 4) {
+                $('#connection-manager-connectionsview-searchresults-more').click();
+            }
+        });
         moreSearchBox.keyup(function (e) { search(this.value, true); });
     }); // #Mrphs-userNav__submenuitem--connections.click
 }) ($PBJQ);
