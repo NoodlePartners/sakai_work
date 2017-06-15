@@ -269,7 +269,7 @@ public abstract class DbSiteService extends BaseSiteService
 				throw(new Exception("saving at"));
 			}
 			catch(Exception e) {
-				M_log.exception(e);
+				M_log.error(e.getMessage(), e);
 			}
 			// run our save code in a transaction that will restart on deadlock
 			// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
