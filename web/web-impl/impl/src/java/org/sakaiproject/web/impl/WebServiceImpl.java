@@ -331,7 +331,7 @@ public class WebServiceImpl implements WebService, EntityTransferrer
 											}
 											// Page is already there, do not add again.
 											if(page != null) {
-												M.log.warn("Web content page '" + pageTitle + "' not added because it is already present in Site ");
+												M_log.warn("Web content page '" + pageTitle + "' not added because it is already present in Site ");
 												continue;
 											}
 											page = site.addPage(); 
