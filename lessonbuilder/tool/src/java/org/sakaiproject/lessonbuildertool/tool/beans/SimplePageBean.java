@@ -7656,7 +7656,7 @@ public class SimplePageBean {
 		// assignment of the mime type) but they should at least appear in
 		// the dropdown for custom css
 		Pattern cssPattern = Pattern.compile("\\.css(-[0-9][0-9]*){0,1}$");
-		log.error(r.toString());
+		log.error(cssPattern.toString());
 		for(ContentResource r : resources) {
             log.error("URL is " + r.getUrl());
 			if(cssPattern.matcher(r.getUrl()).matches()) {
