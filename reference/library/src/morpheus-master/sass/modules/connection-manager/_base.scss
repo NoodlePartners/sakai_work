@@ -26,8 +26,10 @@
                     padding-right: 12px !important;
                 }
             }
-            .current > a {
+            &.current > a {
                 background-color: #FFFFFF !important;
+                color: $tool-tab-active-highlight-color !important;
+                font-weight: 600;
             }
 		}
     }
@@ -122,9 +124,10 @@
 				margin-right: 5px;
 				padding: 4px 3px 2px 3px;
 				background-color: #ECECEC;
-				#connection-manager-close-icon {
-					color: #4C4C4C !important;
-				}
+                &.close {
+                    color: #4C4C4C !important;
+                    opacity: 1;
+                }
 			}
 		}
         .modal-body {
@@ -342,4 +345,9 @@
     background-color: #1E80B5 !important;
     color: #FFFFFF !important;
     font-size: 13px !important;
+}
+
+.modal-backdrop {
+    background-color: #FFFFFF !important;
+    opacity: 0.4 !important;
 }
