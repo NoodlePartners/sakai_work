@@ -317,7 +317,24 @@ public class WebServiceImpl implements WebService, EntityTransferrer
 												&& pageTitle !=null && pageTitle.length() > 0)
 										{
 											Tool tr = ToolManager.getTool(TOOL_ID);
-											SitePage page = site.addPage(); 
+											SitePage page = null;
+											List<SitePage> pages = site.getPages();
+											int spl = pages.length;
+											for(int ii=0; ii<spl; ii++)
+											{
+												SitePage p = pages[ii];
+												if(p.getTitle() == pageTitle)
+												{
+													page = p;
+													break;
+												}
+											}
+											// Page is already there, do not add again.
+											if(page != null) {
+												M.log.warn("Web content page '" + pageTitle + "' not added because it is already present in Site ");
+												continue;
+											}
+											page = site.addPage(); 
 											page.setTitle(pageTitle);
 											ToolConfiguration tool = page.addTool();
 											tool.setTool(TOOL_ID, tr);
