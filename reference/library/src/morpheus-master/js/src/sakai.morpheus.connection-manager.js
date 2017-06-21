@@ -28,9 +28,12 @@
 
     $('#Mrphs-userNav__submenuitem--connections').click(function (event) {
 
-        $('#connection-manager').modal({
+        var connectionManager = $('#connection-manager');
+
+        connectionManager.modal({
             width: 320
         });
+        
 
         var connectionsView = $('#connection-manager-connectionsview');
         var searchResultsView = $('#connection-manager-searchresultsview');
@@ -114,6 +117,17 @@
         var searchResultsWrapper = $('#connection-manager-connectionsview-searchresults-wrapper');
         var searchResults = $('#connection-manager-connectionsview-searchresults');
         var moreSearchResults = $('#connection-manager-searchresultsview-results');
+
+        connectionManager.click(function (e) {
+
+            if (e.target.id !== 'connection-manager-connectionsview-searchbox') {
+                var wrapperRect = searchResultsWrapper[0].getBoundingClientRect();
+                var searchBoxRect = searchBox[0].getBoundingClientRect();
+                if (e.pageX < wrapperRect.x || e.pageY < wrapperRect.y || e.pageX > (wrapperRect.x + wrapperRect.width) || e.pageY > (wrapperRect.y + wrapperRect.height)) {
+                    searchResultsWrapper.hide();
+                }
+            }
+        });
 
         var currentConnectionsDiv = $('#connection-manager-current-connections');
         var currentConnectionsWrapper = $('#connection-manager-current-connections-wrapper');
@@ -480,6 +494,12 @@
             });
 
         searchBox.keyup(function (e) { search(this.value, false); });
+        searchBox.keydown(function (e) {
+
+            if (e.which == 13 && this.value.length >= 4) {
+                $('#connection-manager-connectionsview-searchresults-more').click();
+            }
+        });
         moreSearchBox.keyup(function (e) { search(this.value, true); });
     }); // #Mrphs-userNav__submenuitem--connections.click
 }) ($PBJQ);
