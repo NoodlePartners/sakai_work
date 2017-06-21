@@ -328,7 +328,7 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 		}
 
 		final boolean limitToActualSakaiUsers
-			= serverConfigurationService.getBoolean("connectionmanager.limitToActualSakaiUsers", false);
+			= serverConfigurationService.getBoolean("connectionmanager.limitToActualSakaiUsers", true);
 
 		try {
 			Cache cache = getCache(CONNECTIONSEARCH_CACHE);
