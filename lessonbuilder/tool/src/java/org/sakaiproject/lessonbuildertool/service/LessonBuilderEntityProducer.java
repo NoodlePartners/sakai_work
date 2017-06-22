@@ -419,6 +419,9 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 
 	List<SimplePageItem> items = simplePageToolDao.findItemsOnPage(pageId);
 
+	String serverUrl = ServerConfigurationService.getServerUrl();
+	String portalUrl = ServerConfigurationService.getPortalUrl();
+
 	if (items != null) {
 	    for (SimplePageItem item: items) {
 			 
@@ -448,6 +451,9 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 		}
 		// the Sakai ID is good enough for other object types
 		addAttr(doc, itemElement, "name", item.getName());
+		String oldHtml = item.getHtml();
+		String newHtml = oldHtml.replace("\"" + serverUrl, "\"");
+		newHtml = newHtml.replace("'" + serverUrl, "'");
 		addAttr(doc, itemElement, "html", item.getHtml());
 		addAttr(doc, itemElement, "description", item.getDescription());
 		addAttr(doc, itemElement, "height", item.getHeight());
