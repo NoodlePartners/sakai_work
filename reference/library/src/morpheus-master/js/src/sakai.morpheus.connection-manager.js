@@ -26,7 +26,7 @@
     var shown = 0;
     var pendingTabBaseHtml = '';
 
-    $('#Mrphs-userNav__submenuitem--connections').click(function (event) {
+    portal.connectionManager.show = function (options) {
 
         var connectionManager = $('#connection-manager');
 
@@ -504,5 +504,11 @@
             }
         });
         moreSearchBox.keyup(function (e) { search(this.value, true); });
-    }); // #Mrphs-userNav__submenuitem--connections.click
+
+        if (options && options.state === 'pending') {
+            showPendingTab();
+        }
+    }; // portal.connectionManager.show;
+
+    $('#Mrphs-userNav__submenuitem--connections').click(portal.connectionManager.show);
 }) ($PBJQ);
