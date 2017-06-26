@@ -139,11 +139,20 @@
             <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script>
 <![endif]-->
 
+        <script>
+            if (typeof Handlebars == 'undefined') {
+                document.write('\x3Cscript src="${pageWebjarsPath}handlebars/4.0.5/handlebars.runtime.min.js$!{portalCDNQuery}">\x3C/script>');
+            }
+        </script>
+        <script src="/library/templates.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}trimpath-template-latest.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/bgiframe/jquery.bgiframe.min.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/cluetip/1.2.10/jquery.cluetip.min.js$!{portalCDNQuery}"></script>
-        <script src="/library/jquery.i18n.properties.min.js"></script>
-        <script src="/library/js/portal-i18n-utils.js$!{portalCDNQuery}"></script>
+        <script>
+            if (typeof jQuery.i18n == 'undefined') {
+                document.write('\x3Cscript src="${pageWebjarsPath}jquery-i18n-properties/1.2.2/jquery.i18n.properties.min.js$!{portalCDNQuery}">\x3C/script>');
+            }
+        </script>
         <script src="/library/js/jquery/jquery.clearsearch.js"></script>
         <script src="${pageSkinRepo}/${pageSkin}/js/morpheus.plugins.min.js$!{portalCDNQuery}"></script>
         <script src="${pageSkinRepo}/${pageSkin}/js/morpheus.scripts.min.js$!{portalCDNQuery}"></script>
