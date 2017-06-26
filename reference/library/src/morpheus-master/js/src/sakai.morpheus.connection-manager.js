@@ -12,8 +12,14 @@
     var indexedSearchResults = {};
     var lastSearchResults = {};
 
-    portal.i18n.loadProperties('connection-manager', '/library/translations');
-    portal.i18n.loadProperties('profile-popup', '/library/translations');
+    $(document).ready(function () {
+
+        portal.i18n.loadProperties({
+            names: ['connection-manager', 'profile-popup'],
+            path: '/library/translations',
+            namespace: 'connection-manager'
+        });
+    });
 
     var currentTotal = 0;
     var currentConnections = [];
@@ -45,13 +51,13 @@
         var updateSearchResultsCount = function (count) {
 
                 if (count === 0) {
-                    searchResultsCount.html(portal.i18n.translate('connection_manager_no_results'));
+                    searchResultsCount.html(portal.i18n.translate('connection-manager', 'connection_manager_no_results'));
                 } else {
                     var translateOptions
                         = {count: count, criteria: portal.connectionManager.searchCriteria};
                     var countMessage = (count > 1)
-                        ? portal.i18n.translate('connection_manager_results_count', translateOptions)
-                        : portal.i18n.translate('connection_manager_result_count', translateOptions);
+                        ? portal.i18n.translate('connection-manager', 'connection_manager_results_count', translateOptions)
+                        : portal.i18n.translate('connection-manager', 'connection_manager_result_count', translateOptions);
 
                     searchResultsCount.html(countMessage);
                 }
@@ -228,7 +234,7 @@
 
 				var friendId = this.dataset.userId;
 				var displayName = this.dataset.displayName;
-				if (confirm(portal.i18n.translate('connection_manager_remove_confirm', {displayName: displayName}))) {
+				if (confirm(portal.i18n.translate('connection-manager', 'connection_manager_remove_confirm', {displayName: displayName}))) {
 					$.ajax('/direct/profile/' + portal.user.id + '/removeFriend?friendId=' + friendId, {cache: false})
 						.done(function (data) {
                             removeCurrent(friendId);

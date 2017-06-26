@@ -23,8 +23,6 @@
         <script src="/profile2-tool/javascript/profile2-eb.js"></script>
         <script src="${pageWebjarsPath}momentjs/2.11.1/min/moment-with-locales.min.js$!{portalCDNQuery}"></script>
     #end
-        <script src="${pageWebjarsPath}handlebars/4.0.5/handlebars.min.js$!{portalCDNQuery}"></script>
-        <script src="/library/templates.js$!{portalCDNQuery}"></script>
 
         <script> ## Include this at the top so tool markup and headscripts.js can use it
             ## SAK-16484 Allow Javascript to easily get at user details.
