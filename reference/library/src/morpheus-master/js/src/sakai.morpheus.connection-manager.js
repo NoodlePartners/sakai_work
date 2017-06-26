@@ -151,6 +151,9 @@
                     currentConnectionsDiv.html('');
                 }
                 var connection = indexedPendingConnections[friendId];
+                connection.connected = true;
+                connection.outgoing = false;
+                connection.incoming = false;
                 var markup = connectionTemplate(connection);
                 currentConnectionsDiv.append(markup);
                 currentTotal += 1;

@@ -147,7 +147,7 @@
 
     .connection-manager-connections-wrapper {
 		padding-top: 10px;
-        overflow: scroll;
+        overflow: auto;
         height: 375px !important;
     }
 
@@ -336,7 +336,7 @@
     }
     #connection-manager-searchresultsview-results {
         padding-top: 20px;
-		overflow: scroll;
+		overflow: auto;
 		height: 375px;
     }
 }

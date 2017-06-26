@@ -432,7 +432,6 @@
 								<resource>
                                     <directory>${basedir}/../../portal/portal-impl/impl/src/bundle</directory>
 									<includes>
-										<include>**/usernav*.properties</include>
 										<include>**/connection-manager*.properties</include>
 										<include>**/profile-popup*.properties</include>
 									</includes>
