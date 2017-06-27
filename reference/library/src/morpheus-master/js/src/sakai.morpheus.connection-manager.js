@@ -129,7 +129,7 @@
             if (e.target.id !== 'connection-manager-connectionsview-searchbox') {
                 var wrapperRect = searchResultsWrapper[0].getBoundingClientRect();
                 var searchBoxRect = searchBox[0].getBoundingClientRect();
-                if (e.pageX < wrapperRect.x || e.pageY < wrapperRect.y || e.pageX > (wrapperRect.x + wrapperRect.width) || e.pageY > (wrapperRect.y + wrapperRect.height)) {
+                if (e.pageX < wrapperRect.left || e.pageY < wrapperRect.top || e.pageX > (wrapperRect.left + wrapperRect.width) || e.pageY > (wrapperRect.top + wrapperRect.height)) {
                     searchResultsWrapper.hide();
                 }
             }
