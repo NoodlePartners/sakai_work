@@ -5,7 +5,7 @@
        <tool
                        id="pepp.mylibrary"
                        title="MyLibrary"
-                       description="Research Resources for Pepperdine Libraries">
+                       description="Research resources for Pepperdine Libraries">
 
                <configuration name="source" value="https://courses.pepperdine.edu/access/content/group/fb934cd1-b3ad-4d52-8bf4-7c2e27f28b20/MyLibrary2/MyLibrary.html" />
                <configuration name="height" value="800px" />
