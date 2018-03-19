@@ -18,7 +18,9 @@
 
         <util:list id="contentReviewProviders">
                 <!--ref bean="org.sakaiproject.contentreview.service.ContentReviewServiceTii"/ -->
+                <!-- TV Remove - doesn't run
                 <ref bean="org.sakaiproject.contentreview.service.ContentReviewServiceVeriCite"/>
+                -->
                 <!--ref bean="org.sakaiproject.contentreview.service.ContentReviewServiceCompilatio"/ -->
                 <!--ref bean="org.sakaiproject.contentreview.service.ContentReviewServiceUrkund"/ -->
         </util:list>

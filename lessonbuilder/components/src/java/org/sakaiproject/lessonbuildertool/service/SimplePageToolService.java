@@ -93,6 +93,22 @@ public class SimplePageToolService implements ResourceLoaderAware, LessonBuilder
 	    return toolApi.deleteOrphanPages(siteId);
 	}
 
+	public String getLessonsInSite(String siteId) {
+	    return toolApi.getLessonsInSite(siteId);
+	}
+
+	public String getLesson(String siteId, String lessonId) {
+	    return toolApi.getLesson(siteId, lessonId);
+	}
+
+	public String addOrUpdateItemInLesson(String siteId, String parentItemId, String itemId, int type, int sequence, String name, String html, String url, String customCss) {
+	    return toolApi.addOrUpdateItemInLesson(siteId, parentItemId, itemId, type, sequence, name, html, url, customCss);
+    }
+
+	public String deleteItemInLesson(String siteId, String parentItemId, String itemId) {
+	    return toolApi.deleteItemInLesson(siteId, parentItemId, itemId);
+    }
+
 	public SimplePageToolService() {}
 
 	public void init() {

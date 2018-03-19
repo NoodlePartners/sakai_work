@@ -95,4 +95,225 @@ public class LessonBuilder extends AbstractWebService {
         return "Failure";
     }
 
+    /**
+     * lists all lessons for a site
+     * @param sessionid the session to use
+     * @param siteId    the siteId to use
+     * @return the string representation of the lessons within the site in XML
+     */
+    @WebMethod
+    @Path("/getLessonsInSite")
+    @Produces("text/plain")
+    @GET
+    public String getLessonsInSite(
+            @WebParam(name = "sessionid", partName = "sessionid") @QueryParam("sessionid") String sessionid,
+            @WebParam(name = "siteId", partName = "siteId") @QueryParam("siteId") String siteId) {
+        Session session = establishSession(sessionid);
+
+        // Wrap this in a big try / catch block so we get better feedback
+        // in the logs in the case of an error
+        try {
+            Site site = siteService.getSite(siteId);
+            if( site == null ) {
+                LOG.warn("WS getLessonsInSite(): Site not found.");
+                throw new RuntimeException("WS getLessonsInSite(): Site not found.");
+            }
+
+            // If not admin, check maintainer membership in the source site
+    		if (!securityService.isSuperUser(session.getUserId()) && !securityService.unlock(SiteService.SECURE_UPDATE_SITE, site.getReference()))
+    		{
+                LOG.warn("WS getLessonsInSite(): Permission denied. Must be super user to getLessonsInSite as part of a site in which you are not a maintainer.");
+                throw new RuntimeException("WS getLessonsInSite(): Permission denied. Must be super user to getLessonsInSite as part of a site in which you are not a maintainer.");
+            }
+
+            ToolConfiguration tool = site.getToolForCommonId("sakai.lessonbuildertool");
+
+            if (tool == null) {
+                return "Tool sakai.lessonbuildertool NOT found in site=" + siteId;
+            }
+
+            // Lets go down and hack our essence into the thread
+            ToolSession toolSession = session.getToolSession(tool.getId());
+            sessionManager.setCurrentToolSession(toolSession);
+            threadLocalManager.set(CURRENT_PLACEMENT, tool);
+            threadLocalManager.set(CURRENT_TOOL, tool.getTool());
+
+            LOG.info("Before getLessonsInSite");
+            return lessonBuilderAccessAPI.getLessonsInSite(siteId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Failure";
+    }
+
+    /** list details of a lesson
+     * @param sessionid the session to use
+     * @param siteId    the siteId to use
+     * @param lessonId  the lessonId to use
+     * @return the string representation of the items in the lesson XML
+     */
+    @WebMethod
+    @Path("/getLesson")
+    @Produces("text/plain")
+    @GET
+    public String getLesson(
+            @WebParam(name = "sessionid", partName = "sessionid") @QueryParam("sessionid") String sessionid,
+            @WebParam(name = "siteId", partName = "siteId") @QueryParam("siteId") String siteId,
+            @WebParam(name = "lessonId", partName = "lessonId") @QueryParam("lessonId") String lessonId) {
+        Session session = establishSession(sessionid);
+
+        // Wrap this in a big try / catch block so we get better feedback
+        // in the logs in the case of an error
+        try {
+            Site site = siteService.getSite(siteId);
+
+            if( site == null ) {
+                LOG.warn("WS getLesson(): Site not found.");
+                throw new RuntimeException("WS getLesson(): Site not found.");
+            }
+
+            // If not admin, check maintainer membership in the source site
+    		if (!securityService.isSuperUser(session.getUserId()) && !securityService.unlock(SiteService.SECURE_UPDATE_SITE, site.getReference()))
+    		{
+                LOG.warn("WS getLesson(): Permission denied. Must be super user to getLesson as part of a site in which you are not a maintainer.");
+                throw new RuntimeException("WS getLesson(): Permission denied. Must be super user to getLesson as part of a site in which you are not a maintainer.");
+            }
+
+            ToolConfiguration tool = site.getToolForCommonId("sakai.lessonbuildertool");
+
+            if (tool == null) {
+                return "Tool sakai.lessonbuildertool NOT found in site=" + siteId;
+            }
+
+            // Lets go down and hack our essence into the thread
+            ToolSession toolSession = session.getToolSession(tool.getId());
+            sessionManager.setCurrentToolSession(toolSession);
+            threadLocalManager.set(CURRENT_PLACEMENT, tool);
+            threadLocalManager.set(CURRENT_TOOL, tool.getTool());
+
+            return lessonBuilderAccessAPI.getLesson(siteId, lessonId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Failure";
+    }
+
+    /** add or update an item on a lesson page
+     * @param sessionid the session to use
+     * @param siteId    the siteId to use
+     * @param parentItemId  the parentItemId of the parent to use
+     * @param itemId    the item to use
+     * @param type      the type of item to create (see SimplePageItem for types)
+     * @param sequence  the sequence of the item on the page
+     * @param name      the new name of the item
+     * @param htmlOrUrl the html or url to put in the item
+     * @return success and the itemid or failure string
+     */
+    @WebMethod
+    @Path("/addOrUpdateItemInLesson")
+    @Produces("text/plain")
+    @GET
+    public String addOrUpdateItemInLesson(
+            @WebParam(name = "sessionid", partName = "sessionid") @QueryParam("sessionid") String sessionid,
+            @WebParam(name = "siteId", partName = "siteId") @QueryParam("siteId") String siteId,
+            @WebParam(name = "parentItemId", partName = "parentItemId") @QueryParam("parentItemId") String parentItemId,
+            @WebParam(name = "itemId", partName = "itemId") @QueryParam("itemId") String itemId,
+            @WebParam(name = "type", partName = "type") @QueryParam("type") int type,
+            @WebParam(name = "sequence", partName = "sequence") @QueryParam("sequence") int sequence,
+            @WebParam(name = "name", partName = "name") @QueryParam("name") String name,
+            @WebParam(name = "html", partName = "html") @QueryParam("html") String html,
+            @WebParam(name = "url", partName = "url") @QueryParam("url") String url,
+            @WebParam(name = "customCss", partName = "customCss") @QueryParam("customCss") String customCss) {
+        Session session = establishSession(sessionid);
+
+        // Wrap this in a big try / catch block so we get better feedback
+        // in the logs in the case of an error
+        try {
+            Site site = siteService.getSite(siteId);
+
+            if( site == null ) {
+                LOG.warn("WS addOrUpdateItemInLesson(): Site not found.");
+                throw new RuntimeException("WS addOrUpdateItemInLesson(): Site not found.");
+            }
+
+            // If not admin, check maintainer membership in the source site
+    		if (!securityService.isSuperUser(session.getUserId()) && !securityService.unlock(SiteService.SECURE_UPDATE_SITE, site.getReference()))
+    		{
+                LOG.warn("WS addOrUpdateItemInLesson(): Permission denied. Must be super user to addOrUpdateItemInLesson as part of a site in which you are not a maintainer.");
+                throw new RuntimeException("WS addOrUpdateItemInLesson(): Permission denied. Must be super user to addOrUpdateItemInLesson as part of a site in which you are not a maintainer.");
+            }
+
+            ToolConfiguration tool = site.getToolForCommonId("sakai.lessonbuildertool");
+
+            if (tool == null) {
+                return "Tool sakai.lessonbuildertool NOT found in site=" + siteId;
+            }
+
+            // Lets go down and hack our essence into the thread
+            ToolSession toolSession = session.getToolSession(tool.getId());
+            sessionManager.setCurrentToolSession(toolSession);
+            threadLocalManager.set(CURRENT_PLACEMENT, tool);
+            threadLocalManager.set(CURRENT_TOOL, tool.getTool());
+
+            return lessonBuilderAccessAPI.addOrUpdateItemInLesson(siteId, parentItemId, itemId, type, sequence, name, html, url, customCss);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Failure";
+    }
+
+    /** delete an item on a lesson page
+     * @param sessionid the session to use
+     * @param siteId    the siteId to use
+     * @param parentItemId  the parentItemId of the parent to use
+     * @param itemId    the item to use
+     * @return success or failure string
+     */
+    @WebMethod
+    @Path("/deleteItemInLesson")
+    @Produces("text/plain")
+    @GET
+    public String deleteItemInLesson(
+            @WebParam(name = "sessionid", partName = "sessionid") @QueryParam("sessionid") String sessionid,
+            @WebParam(name = "siteId", partName = "siteId") @QueryParam("siteId") String siteId,
+            @WebParam(name = "parentItemId", partName = "parentItemId") @QueryParam("parentItemId") String parentItemId,
+            @WebParam(name = "itemId", partName = "itemId") @QueryParam("itemId") String itemId) {
+        Session session = establishSession(sessionid);
+
+        // Wrap this in a big try / catch block so we get better feedback
+        // in the logs in the case of an error
+        try {
+            Site site = siteService.getSite(siteId);
+
+            if( site == null ) {
+                LOG.warn("WS deleteItemInLesson(): Site not found.");
+                throw new RuntimeException("WS deleteItemInLesson(): Site not found.");
+            }
+
+            // If not admin, check maintainer membership in the source site
+    		if (!securityService.isSuperUser(session.getUserId()) && !securityService.unlock(SiteService.SECURE_UPDATE_SITE, site.getReference()))
+    		{
+                LOG.warn("WS deleteItemInLesson(): Permission denied. Must be super user to deleteItemInLesson as part of a site in which you are not a maintainer.");
+                throw new RuntimeException("WS deleteItemInLesson(): Permission denied. Must be super user to deleteItemInLesson as part of a site in which you are not a maintainer.");
+            }
+
+            ToolConfiguration tool = site.getToolForCommonId("sakai.lessonbuildertool");
+
+            if (tool == null) {
+                return "Tool sakai.lessonbuildertool NOT found in site=" + siteId;
+            }
+
+            // Lets go down and hack our essence into the thread
+            ToolSession toolSession = session.getToolSession(tool.getId());
+            sessionManager.setCurrentToolSession(toolSession);
+            threadLocalManager.set(CURRENT_PLACEMENT, tool);
+            threadLocalManager.set(CURRENT_TOOL, tool.getTool());
+
+            return lessonBuilderAccessAPI.deleteItemInLesson(siteId, parentItemId, itemId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Failure";
+    }
+
 }
