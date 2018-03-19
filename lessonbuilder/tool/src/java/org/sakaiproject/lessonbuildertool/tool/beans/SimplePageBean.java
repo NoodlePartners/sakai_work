@@ -98,6 +98,13 @@ import org.sakaiproject.lti.api.LTIService;
 import org.sakaiproject.basiclti.util.SakaiBLTIUtil;
 import org.tsugi.lti2.ContentItem;
 
+import org.sakaiproject.util.Xml;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+
 /**
  * Backing bean for Simple pages
  * 
@@ -8302,4 +8309,435 @@ public class SimplePageBean {
 	return result.toString();
     }
 
+    /*
+     * Support Webservices version of direct call to /direct/lessons/site/SITEID.xml
+     */
+	public String getLessonsInSite() {
+	    if (canEditSite() != true)
+	    	return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><errormsg>permission-failed canEditSite</errormsg>";
+
+		List<SimplePageItem> lessons = simplePageToolDao.findItemsInSite(getCurrentSiteId());
+
+        Document dom = Xml.createDocument();
+        Node list = dom.createElement("lessonlist");
+        dom.appendChild(list);
+
+        int lessonCnt = 0;
+        if( lessons != null ) {
+            for (Iterator i = lessons.iterator(); i.hasNext(); ) {
+                SimplePageItem lesson = (SimplePageItem) i.next();
+
+                String ret = addSimplePageItemToDom(dom, list, lesson, "lesson", false );
+                if( ret != null && ret.length() > 0 ) {
+                    Node msg = dom.createElement("errorMsg");
+                    msg.appendChild(dom.createTextNode(ret));
+                    list.appendChild(msg);
+                }
+            }
+            lessonCnt = lessons.size();
+        }
+
+        //add total size node (nice attribute to save the end user doing an XSLT count every time)
+        Node total = dom.createElement("lessonlistTotal");
+        total.appendChild(dom.createTextNode(Integer.toString(lessonCnt)));
+        list.appendChild(total);
+
+        return Xml.writeDocumentToString(dom);
+	}
+
+    /*
+     * Support Webservices version of direct call to /direct/lessons/lesson/LESSONID.xml
+     */
+	public String getLesson(String lessonId) {
+		//get item by id
+		SimplePageItem item = simplePageToolDao.findItem(Integer.parseInt(lessonId));
+
+		if(item == null)
+	    	return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><errormsg>Could not find passed lessonId</errormsg>";
+
+		SimplePage page = null;
+		if (item.getType() == SimplePageItem.PAGE) {
+			page = simplePageToolDao.getPage(Long.parseLong(item.getSakaiId()));
+		}
+		else {
+			page = simplePageToolDao.getPage(item.getPageId());
+		}
+		if(page != null)
+		{
+            setCurrentSiteId(page.getSiteId());
+
+            if (canEditSite() != true)
+                return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><errormsg>permission-failed canEditSite</errormsg>";
+
+            Document dom = Xml.createDocument();
+            Element lesson = dom.createElement("lesson");
+            dom.appendChild(lesson);
+
+            Attr idAttr = dom.createAttribute("id");
+            idAttr.setNodeValue(lessonId);
+            lesson.setAttributeNode(idAttr);
+
+            addPageItemsToDom( dom, lesson, page, "item", true );
+
+            return Xml.writeDocumentToString(dom);
+		}
+		else
+		{
+            return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><errormsg>page not found</errormsg>";
+		}
+	}
+
+	//This is an internal call appends SimplePageItem XML item to an existing dom
+	//Public because it's accessed from an entity producer
+    public String addPageItemsToDom(Document dom, Node list, SimplePage page, String itemType, boolean bRecursive ) {
+        String strRet = "";
+
+        try {
+            Node itemlist = dom.createElement(itemType + "list");
+            list.appendChild(itemlist);
+
+            List<SimplePageItem> items = simplePageToolDao.findItemsOnPage(page.getPageId());
+
+            for (Iterator i = items.iterator(); i.hasNext(); ) {
+                SimplePageItem subitem = (SimplePageItem) i.next();
+
+                strRet = addSimplePageItemToDom(dom, itemlist, subitem, "item", true );
+            }
+
+            Node itemTotal = dom.createElement( itemType + "listTotal");
+            itemTotal.appendChild(dom.createTextNode(Integer.toString(items.size())));
+            list.appendChild(itemTotal);
+
+        } catch (Exception e) {
+            strRet = "Exception: " + e;
+        }
+        return strRet;
+    }
+
+	public String addSimplePageItemToDom(Document dom, Node list, SimplePageItem item, String itemType, boolean bRecursive ) {
+	    String strRet = "";
+        try {
+            Element itemNode = dom.createElement(itemType);
+            list.appendChild(itemNode);
+
+            Attr idAttr = dom.createAttribute("id");
+            idAttr.setNodeValue(Long.toString(item.getId()));
+            itemNode.setAttributeNode(idAttr);
+
+            Node pageId = dom.createElement("pageId");
+            pageId.appendChild(dom.createTextNode(Long.toString(item.getPageId())));
+            itemNode.appendChild(pageId);
+
+            Node sequence = dom.createElement("sequence");
+            sequence.appendChild(dom.createTextNode(Integer.toString(item.getSequence())));
+            itemNode.appendChild(sequence);
+
+            Node type = dom.createElement("type");
+            type.appendChild(dom.createTextNode(Integer.toString(item.getType())));
+            itemNode.appendChild(type);
+
+            Node sakaiId = dom.createElement("sakaiId");
+            sakaiId.appendChild(dom.createTextNode(item.getSakaiId()));
+            itemNode.appendChild(sakaiId);
+
+            Node name = dom.createElement("name");
+            name.appendChild(dom.createTextNode(item.getName()));
+            itemNode.appendChild(name);
+
+            Node html = dom.createElement("html");
+            html.appendChild(dom.createTextNode(item.getHtml()));
+            itemNode.appendChild(html);
+
+            Node description = dom.createElement("description");
+            description.appendChild(dom.createTextNode(item.getDescription()));
+            itemNode.appendChild(description);
+
+            Node height = dom.createElement("height");
+            height.appendChild(dom.createTextNode(item.getHeight()));
+            itemNode.appendChild(height);
+
+            Node width = dom.createElement("width");
+            width.appendChild(dom.createTextNode(item.getWidth()));
+            itemNode.appendChild(width);
+
+            Node alt = dom.createElement("alt");
+            alt.appendChild(dom.createTextNode(item.getAlt()));
+            itemNode.appendChild(alt);
+
+            Node nextPage = dom.createElement("nextPage");
+            nextPage.appendChild(dom.createTextNode(item.getNextPage() ? "true" : "false"));
+            itemNode.appendChild(nextPage);
+
+            Node format = dom.createElement("format");
+            format.appendChild(dom.createTextNode(item.getFormat()));
+            itemNode.appendChild(format);
+
+            Node isRequired = dom.createElement("isRequired");
+            isRequired.appendChild(dom.createTextNode(item.isRequired() ? "true" : "false"));
+            itemNode.appendChild(isRequired);
+
+            Node isAlternate = dom.createElement("isAlternate");
+            isAlternate.appendChild(dom.createTextNode(item.isAlternate() ? "true" : "false"));
+            itemNode.appendChild(isAlternate);
+
+            Node isPrerequisite = dom.createElement("isPrerequisite");
+            isPrerequisite.appendChild(dom.createTextNode(item.isPrerequisite() ? "true" : "false"));
+            itemNode.appendChild(isPrerequisite);
+
+            Node subrequirement = dom.createElement("subrequirement");
+            subrequirement.appendChild(dom.createTextNode(item.getSubrequirement() ? "true" : "false"));
+            itemNode.appendChild(subrequirement);
+
+            Node requirementText = dom.createElement("requirementText");
+            requirementText.appendChild(dom.createTextNode(item.getRequirementText()));
+            itemNode.appendChild(requirementText);
+
+            Node isSameWindow = dom.createElement("isSameWindow");
+            isSameWindow.appendChild(dom.createTextNode(item.isSameWindow() ? "true" : "false"));
+            itemNode.appendChild(isSameWindow);
+
+            Node url = dom.createElement("url");
+            url.appendChild(dom.createTextNode(item.getURL()));
+            itemNode.appendChild(url);
+
+            Node isAnonymous = dom.createElement("isAnonymous");
+            isAnonymous.appendChild(dom.createTextNode(item.isAnonymous() ? "true" : "false"));
+            itemNode.appendChild(isAnonymous);
+
+            Node groups = dom.createElement("groups");
+            groups.appendChild(dom.createTextNode(item.getGroups()));
+            itemNode.appendChild(groups);
+
+            Node showComments = dom.createElement("showComments");
+            showComments.appendChild(dom.createTextNode(item.getShowComments() ? "true" : "false"));
+            itemNode.appendChild(showComments);
+
+            Node forcedCommentsAnonymous = dom.createElement("forcedCommentsAnonymous");
+            forcedCommentsAnonymous.appendChild(dom.createTextNode(item.getForcedCommentsAnonymous() ? "true" : "false"));
+            itemNode.appendChild(forcedCommentsAnonymous);
+
+            Node gradebookId = dom.createElement("gradebookId");
+            gradebookId.appendChild(dom.createTextNode(item.getGradebookId()));
+            itemNode.appendChild(gradebookId);
+
+            if( item.getGradebookPoints() != null ) {
+                Node gradebookPoints = dom.createElement("gradebookPoints");
+                gradebookPoints.appendChild(dom.createTextNode(Integer.toString(item.getGradebookPoints())));
+                itemNode.appendChild(gradebookPoints);
+            }
+
+            Node gradebookTitle = dom.createElement("gradebookTitle");
+            gradebookTitle.appendChild(dom.createTextNode(item.getGradebookTitle()));
+            itemNode.appendChild(gradebookTitle);
+
+            Node altGradebook = dom.createElement("altGradebook");
+            altGradebook.appendChild(dom.createTextNode(item.getAltGradebook()));
+            itemNode.appendChild(altGradebook);
+
+            if( item.getAltPoints() != null ) {
+                Node altPoints = dom.createElement("altPoints");
+                altPoints.appendChild(dom.createTextNode(Integer.toString(item.getAltPoints())));
+                itemNode.appendChild(altPoints);
+            }
+
+            Node altGradebookTitle = dom.createElement("altGradebookTitle");
+            altGradebookTitle.appendChild(dom.createTextNode(item.getAltGradebookTitle()));
+            itemNode.appendChild(altGradebookTitle);
+
+            Node isGroupOwned = dom.createElement("isGroupOwned");
+            isGroupOwned.appendChild(dom.createTextNode(item.isGroupOwned() ? "true" : "false"));
+            itemNode.appendChild(isGroupOwned);
+
+            Node ownerGroups = dom.createElement("ownerGroups");
+            ownerGroups.appendChild(dom.createTextNode(item.getOwnerGroups()));
+            itemNode.appendChild(ownerGroups);
+
+            Node attributeString = dom.createElement("attributeString");
+            attributeString.appendChild(dom.createTextNode(item.getAttributeString()));
+            itemNode.appendChild(attributeString);
+
+            Node showPeerEval = dom.createElement("showPeerEval");
+            showPeerEval.appendChild(dom.createTextNode(item.getShowPeerEval() ? "true" : "false"));
+            itemNode.appendChild(showPeerEval);
+
+            if( bRecursive && item.getType() == SimplePageItem.PAGE ) {
+                long lPageId = Long.parseLong(item.getSakaiId());
+                SimplePage subPage = simplePageToolDao.getPage(lPageId);
+				if( subPage != null ) {
+                    addPageItemsToDom( dom, itemNode, subPage, "subpageitem", true );
+
+                    //Get Page Url
+                    Node pageUrl = dom.createElement("pageurl");
+                    pageUrl.appendChild(dom.createTextNode(simplePageToolDao.getPageUrl(lPageId)));
+                    itemNode.appendChild(pageUrl);
+				}
+            } else if( item.getPageId() > 0 ){
+                //Get Page Url
+                Node pageUrl = dom.createElement("pageurl");
+                pageUrl.appendChild(dom.createTextNode(simplePageToolDao.getPageUrl(item.getPageId())));
+                itemNode.appendChild(pageUrl);
+            }
+        } catch (Exception e) {
+            strRet = "Exception: " + e;
+        }
+        return strRet;
+    }
+
+    /*
+     * Support Webservices addOrUpdateItemInLesson
+     */
+	public String addOrUpdateItemInLesson(String parentItemId, String itemId, int type, int sequence, String name, String html, String url, String customCss) {
+		//get item by id
+		SimplePageItem itemLesson = simplePageToolDao.findItem(Integer.parseInt(parentItemId));
+
+		if(itemLesson == null) {
+	    	return "failure - Could not find passed lessonId";
+		}
+
+		SimplePage page = null;
+
+		if (itemLesson.getType() == SimplePageItem.PAGE)
+			page = simplePageToolDao.getPage(Long.parseLong(itemLesson.getSakaiId()));
+		else
+			page = simplePageToolDao.getPage(itemLesson.getPageId());
+
+		if(page != null)
+		{
+            setCurrentSiteId(page.getSiteId());
+            setCurrentPageId(page.getPageId());
+
+            if (canEditSite() != true)
+    	    	return "failure - permission-failed canEditSite";
+
+            SimplePageItem item = null;
+
+            // itemId of null means we're adding a new item to the page,
+            // specified itemId means we're updating an existing one
+            long lItemId = 0;
+
+            if (itemId != null ) {
+                lItemId = Long.parseLong(itemId);
+            }
+
+            if( lItemId > 0 ) {
+                item = findItem(lItemId);
+            } else {
+                if( type == SimplePageItem.PAGE ) {
+                  Long parent = page.getPageId();
+                  Long topParent = page.getTopParent();
+
+                  String owner = page.getOwner();
+                  String group = page.getGroup();
+
+                  if (topParent == null) {
+                      topParent = parent;
+                  }
+
+                  String toolId = ((ToolConfiguration) toolManager.getCurrentPlacement()).getPageId();
+                  SimplePage subpage = null;
+                  subpage = simplePageToolDao.makePage(toolId, getCurrentSiteId(), name, parent, topParent);
+                  subpage.setOwner(owner);
+                  subpage.setGroup(group);
+                  saveItem(subpage);
+                  selectedEntity = String.valueOf(subpage.getPageId());
+
+                  SimplePageItem i = null;
+                  i = appendItem(selectedEntity, subpage.getTitle(), SimplePageItem.PAGE);
+
+                  if (i == null)
+                      return "failure";
+
+                  i.setNextPage(true);
+                  i.setFormat("");
+          	      i.setAttribute(SimplePageItem.CUSTOMCSSCLASS, customCss);
+                  saveOrUpdate(i);
+
+                  try {
+                      updatePageObject(subpage.getPageId());
+                      updatePageItem(i.getId());
+                  } catch (PermissionException e) {
+                      return "failed - create subpage";
+                  }
+
+                  return "success - itemid=" + i.getId();
+                } else {
+                  item = appendItem("", "", type);
+                }
+            }
+
+            if( item != null ) {
+              item.setName(name);
+              if( item.getType() == SimplePageItem.TEXT ) {
+                  item.setHtml(html);
+              } else if( item.getType() == SimplePageItem.MULTIMEDIA || item.getType() == SimplePageItem.RESOURCE) {
+                  item.setAttribute("multimediaUrl", url);
+              } else if( item.getType() == SimplePageItem.URL ) {
+                  item.setSakaiId(url);
+              }
+              item.setSequence(sequence);
+              saveOrUpdate(item);
+              return "success - itemid=" + item.getId();
+            }
+            else
+            {
+    	    return "failure - item not found";
+            }
+		}
+		else
+		{
+    	    return "failure - page not found";
+		}
+	}
+
+    /*
+     * Support Webservices deleteItemInLesson
+     */
+	public String deleteItemInLesson(String parentItemId, String itemId) {
+		//get item by id
+		SimplePageItem itemLesson = simplePageToolDao.findItem(Integer.parseInt(parentItemId));
+
+		if(itemLesson == null) {
+	    	return "failure - Could not find passed lessonId";
+		}
+
+		SimplePage page = null;
+
+		if (itemLesson.getType() == SimplePageItem.PAGE)
+			page = simplePageToolDao.getPage(Long.parseLong(itemLesson.getSakaiId()));
+		else
+			page = simplePageToolDao.getPage(itemLesson.getPageId());
+
+		if(page != null)
+		{
+            setCurrentSiteId(page.getSiteId());
+
+            if (canEditSite() != true)
+    	    	return "failure - permission-failed canEditSite";
+
+            SimplePageItem item = null;
+
+            long lItemId = 0;
+
+            if (itemId != null ) {
+                lItemId = Long.parseLong(itemId);
+            }
+
+            if( lItemId > 0 ) {
+                item = findItem(lItemId);
+            }
+
+            if( item != null ) {
+                deleteItem(item);
+                return "success";
+            }
+            else
+            {
+        	    return "failure - item not found";
+            }
+		}
+		else
+		{
+    	    return "failure";
+		}
+	}
 }
