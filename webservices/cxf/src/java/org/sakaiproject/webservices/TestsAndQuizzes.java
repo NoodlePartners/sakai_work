@@ -456,7 +456,7 @@ public class TestsAndQuizzes extends AbstractWebService {
                     assessNode.appendChild(title);
 
                     Node type = dom.createElement("type");
-                    type.appendChild(dom.createTextNode(fac.getAssessmentType()));
+                    type.appendChild(dom.createTextNode(fac.getTypeId().toString()));
                     assessNode.appendChild(type);
                 }
             }
