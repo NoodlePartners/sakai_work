@@ -8574,7 +8574,30 @@ public class SimplePageBean {
             } else if( item.getPageId() > 0 ){
                 //Get Page Url
                 Node pageUrl = dom.createElement("pageurl");
-                pageUrl.appendChild(dom.createTextNode(simplePageToolDao.getPageUrl(item.getPageId())));
+
+                String strTheUrl = simplePageToolDao.getPageUrl(item.getPageId());
+
+                if( item.getType() == SimplePageItem.FORUM || item.getType() == SimplePageItem.ASSESSMENT) {
+                    int    start = strTheUrl.indexOf("/tool/") + 6;
+                    int    end   = strTheUrl.indexOf("/", start );
+            		String toolId = strTheUrl.substring(start, end);
+            		String clearAttr = "";
+
+            		if( item.getType() == SimplePageItem.ASSESSMENT ) {
+            		    clearAttr = "LESSONBUILDER_RETURNURL_SAMIGO";
+            		}
+
+                    StringBuilder sb = new StringBuilder(ServerConfigurationService.getPortalUrl());
+                    sb.append("/site/").append(getCurrentSiteId()).append("/tool/").append(toolId)
+                      .append("/ShowItem?returnView=&studentItemId=0&backPath=&errorMessage=&clearAttr=").append(clearAttr)
+                      .append("&source=&title=&sendingPage=").append(item.getPageId())
+                      .append("&newTopLevel=false&postedComment=false&addBefore=&path=&itemId=").append(item.getId())
+                      .append("&addTool=-1&recheck=&id=");
+
+                    strTheUrl = sb.toString();
+                }
+                pageUrl.appendChild(dom.createTextNode(strTheUrl));
+
                 itemNode.appendChild(pageUrl);
             }
         } catch (Exception e) {

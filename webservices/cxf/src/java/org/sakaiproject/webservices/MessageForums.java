@@ -35,6 +35,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import java.util.List;
+import java.util.Iterator;
+
+import org.sakaiproject.util.Xml;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.RPC, use = SOAPBinding.Use.LITERAL)
@@ -192,6 +199,107 @@ public class MessageForums extends AbstractWebService {
         }
 
         return "Failure";
+    }
+
+    /**
+     * Lists all Forums for a site
+     * @param sessionid the session to use
+     * @param siteId    the siteId to use
+     * @return the string representation of the forums within the site in XML
+     */
+    @WebMethod
+    @Path("/getForumsInSite")
+    @Produces("text/plain")
+    @GET
+    public String getForumsInSite(
+            @WebParam(name = "sessionid", partName = "sessionid") @QueryParam("sessionid") String sessionid,
+            @WebParam(name = "siteId", partName = "siteId") @QueryParam("siteId") String siteId) {
+        Session session = establishSession(sessionid);
+
+        try {
+            Site site = siteService.getSite(siteId);
+            if( site == null ) {
+                LOG.warn("WS getForumsInSite(): Site not found.");
+                throw new RuntimeException("WS getForumsInSite(): Site not found.");
+            }
+
+            // If not admin, check maintainer membership in the source site
+    		if (!securityService.isSuperUser(session.getUserId()) && !securityService.unlock(siteService.SECURE_UPDATE_SITE, site.getReference()))
+    		{
+                LOG.warn("WS getForumsInSite(): Permission denied. Must be super user to getForumsInSite as part of a site in which you are not a maintainer.");
+                throw new RuntimeException("WS getForumsInSite(): Permission denied. Must be super user to getForumsInSite as part of a site in which you are not a maintainer.");
+            }
+
+            ToolConfiguration tool = site.getToolForCommonId("sakai.forums");
+
+            if (tool == null) {
+                return "Tool sakai.forums not found in site=" + siteId;
+            }
+
+            // Lets go down and hack our essence into the thread
+            threadLocalManager.set(CURRENT_PLACEMENT, tool);
+            threadLocalManager.set(CURRENT_TOOL, tool.getTool());
+
+            List<DiscussionForum> forums = messageForumsForumManager.getForumsForMainPage();
+
+            Document dom = Xml.createDocument();
+            Node list = dom.createElement("forumlist");
+            dom.appendChild(list);
+
+            int forumCnt = 0;
+            if( forums != null ) {
+                forumCnt = forums.size();
+
+                for (DiscussionForum dForum : forums) {
+                    Element forumNode = dom.createElement("forum");
+                    list.appendChild(forumNode);
+
+                    Attr idAttr = dom.createAttribute("id");
+                    idAttr.setNodeValue(Long.toString(dForum.getId()));
+                    forumNode.setAttributeNode(idAttr);
+
+                    Node title = dom.createElement("title");
+                    title.appendChild(dom.createTextNode(dForum.getTitle()));
+                    forumNode.appendChild(title);
+
+                    Element topiclist = dom.createElement("topiclist");
+                    forumNode.appendChild(topiclist);
+
+                    int topicCnt = 0;
+                    if (dForum.getTopics() != null) {
+                        for (Iterator itor = dForum.getTopics().iterator(); itor.hasNext(); ) {
+                            topicCnt++;
+                            DiscussionTopic topic = (DiscussionTopic) itor.next();
+
+                            Element topicNode = dom.createElement("topic");
+                            topiclist.appendChild(topicNode);
+
+                            Attr topicidAttr = dom.createAttribute("id");
+                            topicidAttr.setNodeValue(Long.toString(topic.getId()));
+                            topicNode.setAttributeNode(topicidAttr);
+
+                            Node topictitle = dom.createElement("title");
+                            topictitle.appendChild(dom.createTextNode(topic.getTitle()));
+                            topicNode.appendChild(topictitle);
+                        }
+                    }
+                    Node topicTotal = dom.createElement("topiclistTotal");
+                    topicTotal.appendChild(dom.createTextNode(Integer.toString(topicCnt)));
+                    forumNode.appendChild(topicTotal);
+                }
+            }
+
+            //add total size node (nice attribute to save the end user doing an XSLT count every time)
+            Node forumTotal = dom.createElement("forumlistTotal");
+            forumTotal.appendChild(dom.createTextNode(Integer.toString(forumCnt)));
+            list.appendChild(forumTotal);
+
+            return Xml.writeDocumentToString(dom);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><errormsg>permission-failed canEditSite</errormsg>";
     }
 
 }
