@@ -13,6 +13,7 @@
 		<property name="connectionsLogic" ref="org.sakaiproject.profile2.logic.ProfileConnectionsLogic" />
 		<property name="linkLogic" ref="org.sakaiproject.profile2.logic.ProfileLinkLogic" />
 		<property name="messagingLogic" ref="org.sakaiproject.profile2.logic.ProfileMessagingLogic" />
+		<property name="preferencesService" ref="org.sakaiproject.user.api.PreferencesService" />
 	</bean>
 	
 	
@@ -22,12 +23,6 @@
 	<bean parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider" 
 		class="org.sakaiproject.profile2.tool.entityprovider.ProfileLinkEntityProvider">
 		<property name="linkLogic" ref="org.sakaiproject.profile2.logic.ProfileLinkLogic" />
-	</bean>
-	
-	<bean parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider" 
-		class="org.sakaiproject.profile2.tool.entityprovider.ProfileStatusEntityProvider">
-		<property name="statusLogic" ref="org.sakaiproject.profile2.logic.ProfileStatusLogic" />
-		<property name="sakaiProxy" ref="org.sakaiproject.profile2.logic.SakaiProxy" />
 	</bean>
 	
 	<bean parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider" 

@@ -17,9 +17,14 @@ package org.sakaiproject.profile2.tool.entityprovider;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,6 +32,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.entitybroker.EntityReference;
 import org.sakaiproject.entitybroker.EntityView;
 import org.sakaiproject.entitybroker.entityprovider.CoreEntityProvider;
@@ -47,6 +53,8 @@ import org.sakaiproject.entitybroker.exception.EntityException;
 import org.sakaiproject.entitybroker.exception.EntityNotFoundException;
 import org.sakaiproject.entitybroker.util.AbstractEntityProvider;
 import org.sakaiproject.entitybroker.util.TemplateParseUtil;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.profile2.logic.ProfileConnectionsLogic;
 import org.sakaiproject.profile2.logic.ProfileImageLogic;
 import org.sakaiproject.profile2.logic.ProfileLinkLogic;
@@ -54,12 +62,15 @@ import org.sakaiproject.profile2.logic.ProfileLogic;
 import org.sakaiproject.profile2.logic.ProfileMessagingLogic;
 import org.sakaiproject.profile2.logic.SakaiProxy;
 import org.sakaiproject.profile2.model.BasicConnection;
+import org.sakaiproject.profile2.model.BasicPerson;
 import org.sakaiproject.profile2.model.Person;
 import org.sakaiproject.profile2.model.ProfileImage;
 import org.sakaiproject.profile2.model.UserProfile;
 import org.sakaiproject.profile2.util.Messages;
 import org.sakaiproject.profile2.util.ProfileConstants;
 import org.sakaiproject.profile2.util.ProfileUtils;
+import org.sakaiproject.user.api.PreferencesService;
+import org.sakaiproject.user.api.PreferencesEdit;
 
 /**
  * This is the entity provider for a user's profile.
@@ -71,12 +82,20 @@ import org.sakaiproject.profile2.util.ProfileUtils;
 public class ProfileEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, AutoRegisterEntityProvider, Outputable, Resolvable, Sampleable, Describeable, Redirectable, ActionsExecutable, RequestAware {
 
 	public final static String ENTITY_PREFIX = "profile";
-	
+
+    private final static String TAB_LABEL_PREF = "tab:label";
+    private final static String ORDER_SITE_LISTS = "order";
+    private final static String EXCLUDE_SITE_LISTS = "exclude";
+
+	private final static Pattern OVERRIDEREGEX = Pattern.compile("^override:([\\w:]*):([\\w\\d-]*)$");
+
+	private static final String SITENAV_PREFS_KEY = "sakai:portal:sitenav";
+
 	@Override
 	public String getEntityPrefix() {
 		return ENTITY_PREFIX;
 	}
-		
+
 	@Override
 	public boolean entityExists(String eid) {
 		return true;
@@ -86,7 +105,7 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 	public Object getSampleEntity() {
 		return new UserProfile();
 	}
-	
+
 	@Override
 	public Object getEntity(EntityReference ref) {
 	
@@ -106,10 +125,10 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 		}
 		return userProfile;
 	}
-	
-	
-	
-	
+
+
+
+
 	@EntityCustomAction(action="image",viewKey=EntityView.VIEW_SHOW)
 	public Object getProfileImage(OutputStream out, EntityView view, Map<String,Object> params, EntityReference ref) {
 		
@@ -229,8 +248,7 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 		if(connections == null) {
 			throw new EntityException("Error retrieving connections for " + ref.getId(), ref.getReference());
 		}
-		ActionReturn actionReturn = new ActionReturn(connections);
-		return actionReturn;
+		return new ActionReturn(connections);
 	}
 		
 	@EntityCustomAction(action="friendStatus",viewKey=EntityView.VIEW_SHOW)
@@ -389,26 +407,67 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 
     @EntityCustomAction(action="incomingConnectionRequests", viewKey=EntityView.VIEW_SHOW)
 	public Object getIncomingConnectionRequests(EntityView view, EntityReference ref) {
-		
+
 		if(!sakaiProxy.isLoggedIn()) {
 			throw new SecurityException("You must be logged in to get the incoming connection list.");
 		}
-		
+
 		//convert input to uuid
 		String uuid = sakaiProxy.ensureUuid(ref.getId());
 		if(StringUtils.isBlank(uuid)) {
 			throw new EntityNotFoundException("Invalid user.", ref.getId());
 		}
 		
-		//get list of connection requests
-		List<Person> requests = connectionsLogic.getConnectionRequestsForUser(uuid);
+		final List<BasicConnection> requests
+			= connectionsLogic.getConnectionRequestsForUser(uuid).stream().map(p -> {
+							BasicConnection bc = new BasicConnection();
+							bc.setUuid(p.getUuid());
+							bc.setDisplayName(p.getDisplayName());
+							bc.setEmail(p.getProfile().getEmail());
+                            bc.setProfileUrl(linkLogic.getInternalDirectUrlToUserProfile(p.getUuid()));
+							bc.setType(p.getType());
+							bc.setSocialNetworkingInfo(p.getProfile().getSocialInfo());
+						   	return bc;
+				}).collect(Collectors.toList());
+
 		if(requests == null) {
 			throw new EntityException("Error retrieving connection requests for " + ref.getId(), ref.getReference());
 		}
-		ActionReturn actionReturn = new ActionReturn(requests);
-		return actionReturn;
+		return new ActionReturn(requests);
 	}
-	
+
+	@EntityCustomAction(action="outgoingConnectionRequests", viewKey=EntityView.VIEW_SHOW)
+	public Object getOutgoingConnectionRequests(EntityView view, EntityReference ref) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to get the outgoing connection list.");
+		}
+
+		//convert input to uuid
+		String uuid = sakaiProxy.ensureUuid(ref.getId());
+		if (StringUtils.isBlank(uuid)) {
+			throw new EntityNotFoundException("Invalid user.", ref.getId());
+		}
+
+		final List<BasicConnection> requests
+			= connectionsLogic.getOutgoingConnectionRequestsForUser(uuid).stream().map(p -> {
+							BasicConnection bc = new BasicConnection();
+							bc.setUuid(p.getUuid());
+							bc.setDisplayName(p.getDisplayName());
+							bc.setEmail(p.getProfile().getEmail());
+                            bc.setProfileUrl(linkLogic.getInternalDirectUrlToUserProfile(p.getUuid()));
+							bc.setType(p.getType());
+							bc.setSocialNetworkingInfo(p.getProfile().getSocialInfo());
+						   	return bc;
+				}).collect(Collectors.toList());
+
+		if (requests == null) {
+			throw new EntityException("Error retrieving outgoing connection requests for " + uuid, ref.getReference());
+		}
+
+		return new ActionReturn(requests);
+	}
+
 	@EntityURLRedirect("/{prefix}/{id}/account")
 	public String redirectUserAccount(Map<String,String> vars) {
 		return "user/" + vars.get("id") + vars.get(TemplateParseUtil.DOT_EXTENSION);
@@ -456,22 +515,6 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 			sb.append("<div class=\"profile2-profile-displayName\">");
 			sb.append(StringEscapeUtils.escapeHtml(displayName));
 			sb.append("</div>");
-		}
-		
-		//status
-		if(userProfile.getStatus() != null) {
-			String message = userProfile.getStatus().getMessage();
-			if(StringUtils.isNotBlank(message)) {
-				sb.append("<div class=\"profile2-profile-statusMessage\">");
-				sb.append(StringEscapeUtils.escapeHtml(message));
-				sb.append("</div>");
-			}
-			
-			if(StringUtils.isNotBlank(userProfile.getStatus().getDateFormatted())) {
-				sb.append("<div class=\"profile2-profile-statusDate\">");
-				sb.append(userProfile.getStatus().getDateFormatted());
-				sb.append("</div>");
-			}
 		}
 		
 		if(StringUtils.isNotBlank(userProfile.getUserUuid())) {
@@ -701,8 +744,138 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 		
 		return sb.toString();
 	}
-	
-	
+
+	@EntityCustomAction(action="updateNotifications", viewKey=EntityView.VIEW_NEW)
+	public boolean updateNotifications(EntityView view, Map<String, Object> params) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to update notifications.");
+		}
+
+		String currentUserId = sakaiProxy.getCurrentUserId();
+
+		Map<String, Map<String, String>> overrides = new HashMap();
+
+		for (String key : params.keySet()) {
+			if (key.endsWith("registration")) {
+				String pref = key.split("-")[0];
+				sakaiProxy.savePreferences(currentUserId, pref, (String) params.get(key));
+			} else {
+				Matcher matcher = OVERRIDEREGEX.matcher(key);
+				if (matcher.matches()) {
+					String tool = matcher.group(1);
+					String siteId = matcher.group(2);
+					String value = (String) params.get(key);
+					if (!overrides.containsKey(tool)) {
+						Map<String, String> siteMap = new HashMap();
+						siteMap.put(siteId, value);
+						overrides.put(tool, siteMap);
+					} else {
+						overrides.get(tool).put(siteId, value);
+					}
+				}
+			}
+		}
+
+		sakaiProxy.saveNotificationSiteOverrides(currentUserId, overrides);
+		return true;
+	}
+
+	@EntityCustomAction(action="updateTimezone", viewKey=EntityView.VIEW_NEW)
+	public boolean updateTimezone(EntityView view, Map<String, Object> params) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to update your timezone.");
+		}
+
+		String timeZone = (String) params.get("timezone");
+
+		if (StringUtils.isEmpty(timeZone)) {
+			throw new EntityException("You must supply a timezone", "", HttpServletResponse.SC_BAD_REQUEST);
+		}
+
+		sakaiProxy.setTimezoneForCurrentUser(timeZone);
+
+		return true;
+	}
+
+	@EntityCustomAction(action="updateLanguage", viewKey=EntityView.VIEW_NEW)
+	public boolean updateLanguage(EntityView view, Map<String, Object> params) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to update your language.");
+		}
+
+		String language = (String) params.get("language");
+
+		if (StringUtils.isEmpty(language)) {
+			throw new EntityException("You must supply a language", "", HttpServletResponse.SC_BAD_REQUEST);
+		}
+
+		sakaiProxy.setLanguageForCurrentUser(language);
+
+		return true;
+	}
+
+	@EntityCustomAction(action="updateSiteVisibility", viewKey=EntityView.VIEW_NEW)
+	public boolean updateSiteVisibility(EntityView view, Map<String, Object> params) {
+
+		if (!sakaiProxy.isLoggedIn()) {
+			throw new SecurityException("You must be logged in to update your language.");
+		}
+
+		Set<String> siteIds = params.keySet().stream()
+									.filter(k -> k.startsWith("site-"))
+									.map(k -> k.substring(5)).collect(Collectors.toSet());
+
+		try {
+			PreferencesEdit prefsEdit = null;
+			try {
+				prefsEdit = preferencesService.edit(sakaiProxy.getCurrentUserId());
+			} catch (IdUnusedException e) {
+				prefsEdit = preferencesService.add(sakaiProxy.getCurrentUserId());
+			}
+
+			ResourcePropertiesEdit propsEdit = prefsEdit.getPropertiesEdit(SITENAV_PREFS_KEY);
+
+			List<String> currentFavoriteSites = (List<String>) propsEdit.getPropertyList("order");
+
+			if (currentFavoriteSites == null) {
+				currentFavoriteSites = Collections.<String>emptyList();
+			}
+
+			propsEdit.removeProperty(TAB_LABEL_PREF);
+			propsEdit.removeProperty(ORDER_SITE_LISTS);
+			propsEdit.removeProperty(EXCLUDE_SITE_LISTS);
+
+			preferencesService.commit(prefsEdit);
+
+			prefsEdit = preferencesService.edit(sakaiProxy.getCurrentUserId());
+
+			// Set favorites and hidden sites
+			propsEdit = prefsEdit.getPropertiesEdit(SITENAV_PREFS_KEY);
+
+			// Any site now hidden should also be removed from favorites
+			for (String siteId : siteIds) {
+				currentFavoriteSites.remove(siteId);
+			}
+
+			for (String siteId : currentFavoriteSites) {
+				propsEdit.addPropertyToList(ORDER_SITE_LISTS, siteId);
+			}
+
+			for (String siteId : siteIds) {
+				propsEdit.addPropertyToList(EXCLUDE_SITE_LISTS, siteId);
+			}
+
+			propsEdit.addProperty(TAB_LABEL_PREF, (String) params.get(TAB_LABEL_PREF));
+			preferencesService.commit(prefsEdit);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return true;
+	}
 	
 	
 	
@@ -723,16 +896,19 @@ public class ProfileEntityProvider extends AbstractEntityProvider implements Cor
 	@Setter
 	private ProfileLogic profileLogic;
 	
-	@Setter	
+	@Setter
 	private ProfileConnectionsLogic connectionsLogic;
 	
-	@Setter	
+	@Setter
 	private ProfileImageLogic imageLogic;
 	
-	@Setter	
+	@Setter
 	private ProfileLinkLogic linkLogic;
 
-	@Setter	
+	@Setter
 	private ProfileMessagingLogic messagingLogic;
+
+	@Setter
+	private PreferencesService preferencesService;
 	
 }

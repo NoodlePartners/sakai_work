@@ -45,7 +45,6 @@ import org.sakaiproject.profile2.model.Person;
 import org.sakaiproject.profile2.model.ProfilePreferences;
 import org.sakaiproject.profile2.model.ProfilePrivacy;
 import org.sakaiproject.profile2.tool.components.ProfileImage;
-import org.sakaiproject.profile2.tool.components.ProfileStatusRenderer;
 import org.sakaiproject.profile2.tool.dataproviders.ConfirmedFriendsDataProvider;
 import org.sakaiproject.profile2.tool.models.FriendAction;
 import org.sakaiproject.profile2.tool.pages.MySearch;
@@ -220,12 +219,6 @@ public class ConfirmedFriends extends Panel {
 				};
 				profileLink.add(new Label("connectionName", displayName));
 		    	item.add(profileLink);
-		    	
-		    	//status component
-				ProfileStatusRenderer status = new ProfileStatusRenderer("connectionStatus", person, "connection-status-msg", "connection-status-date");
-				status.setOutputMarkupId(true);
-				item.add(status);
-		    	
 		    	
 		    	/* ACTIONS */
 		    	

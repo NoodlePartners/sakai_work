@@ -467,5 +467,8 @@
 		</p>
 		<input type="hidden" name="sakai_csrf_token" value="$sakai_csrf_token" />
 	</form>
+	#if ($assignment.getContent().getHasCommons())
+		#commons($assignment)
+	#end
 </div>
 <!-- end: chef_assignments_instructor_view_assignment.vm  -->

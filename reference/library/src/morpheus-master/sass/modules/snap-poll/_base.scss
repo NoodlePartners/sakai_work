@@ -1,0 +1,80 @@
+#snap-poll {
+    position: fixed !important;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -50px;
+    width: 200px;
+    z-index: 100000 !important;
+    background-color: $tool-tab-background-color;
+    color: $text-color;
+    border-color: $tool-border-color;
+    border-width: 1px;
+    border-style: solid;
+	box-shadow: 0 0 4px rgba( $text-color ,0.35);
+    padding: 5px;
+    display: none;
+
+    #snap-poll-question {
+        width: 150px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    #snap-poll-options {
+        width: 180px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+
+        .snap-poll-option {
+            cursor: pointer;
+            .snap-poll-img {
+                height:30px;
+                width: 30px;
+            }
+        }
+        .snap-poll-option.poll-option-selected {
+            .snap-poll-img {
+                height:40px;
+                width: 40px;
+            }
+        }
+    }
+
+    #snap-poll-ignore {
+        float: right;
+        span {
+            vertical-align: top;
+        }
+    }
+
+    #snap-poll-comment {
+        display: none;
+    }
+
+    #snap-poll-comment-title {
+        font-size: smaller;
+        width: 190px;
+        padding-top: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    #snap-poll-comment-box {
+        background-color: white;
+        width: 190px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #snap-poll-buttons {
+        margin-left: auto;
+        width: 190px;
+        margin-right: auto;
+        text-align: center;
+    }
+}

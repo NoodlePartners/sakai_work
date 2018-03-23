@@ -1093,10 +1093,8 @@ RESTful, ActionsExecutable, Redirectable, RequestStorable, DepthLimitable {
             start = (int) search.getStart() + 1;
         }
 
-        int limit = defaultPageSize;
-        if (search.getLimit() > 0 && search.getLimit() < Integer.MAX_VALUE) {
-            limit = (int) search.getLimit();
-        }
+        int limit = (int) search.getLimit();
+
         if (limit > maxPageSize) {
             limit = maxPageSize;
         }
@@ -1108,8 +1106,15 @@ RESTful, ActionsExecutable, Redirectable, RequestStorable, DepthLimitable {
         if (restrict != null) {
             criteria = restrict.value + "";
         }
-        List<Site> sites = siteService.getSites(sType, null, criteria, null, SortType.TITLE_ASC,
-                new PagingPosition(start, limit));
+        List<Site> sites = null;
+
+        if (limit == 0) {
+            sites = siteService.getSites(sType, null, criteria, null, SortType.TITLE_ASC, null);
+        } else {
+            sites = siteService.getSites(sType, null, criteria, null, SortType.TITLE_ASC,
+                    new PagingPosition(start, limit));
+        }
+
         // convert these into EntityUser objects
         List<EntitySite> entitySites = new ArrayList<EntitySite>();
         for (Site site : sites) {

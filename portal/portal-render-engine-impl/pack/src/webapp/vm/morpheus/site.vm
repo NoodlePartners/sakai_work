@@ -15,6 +15,25 @@
             ${sakai_html_head_js}
         #end ## END of IF ( ${bufferedResponse} && ${responseHead} )
 
+        <div id="snap-poll" style="display:none;">
+			<a id="snap-poll-ignore" href="#"><span class="fa fa-times"></span></a>
+            <div id="snap-poll-question">${rloader.snap_poll_question1}</div>
+            <div id="snap-poll-options">
+                <span class="snap-poll-option" data-option="1"><img class="snap-poll-img" src="/library/image/snap-poll/ic_mood_bad_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="2"><img class="snap-poll-img" src="/library/image/snap-poll/ic_sentiment_dissatisfied_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="3"><img class="snap-poll-img" src="/library/image/snap-poll/ic_sentiment_neutral_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="4"><img class="snap-poll-img" src="/library/image/snap-poll/ic_sentiment_satisfied_black_36px.svg"/></span>
+                <span class="snap-poll-option" data-option="5"><img class="snap-poll-img" src="/library/image/snap-poll/ic_mood_black_36px.svg"/></span>
+            </div>
+            <div id="snap-poll-comment">
+                <div id="snap-poll-comment-title">${rloader.snap_poll_question2}</div>
+                <textarea id="snap-poll-comment-box"></textarea>
+				<div id="snap-poll-buttons">
+					<button id="snap-poll-send" disabled="true">${rloader.snap_poll_send}</button>
+				</div>
+            </div>
+        </div>
+
         <div #if( ${roleSwitchState} ) class="Mrphs-portalWrapper swapped-view" #else class="Mrphs-portalWrapper"#end>
 
             ## Skip Nav
@@ -25,22 +44,27 @@
                 ## Header
                 <div class="Mrphs-topHeader">
                     #parse("/vm/morpheus/snippets/header-snippet.vm")
-                    #if (${tabsSites})
-                        ## tabs
-                        #parse("/vm/morpheus/includeTabs.vm")
-
-                    #end ## END of IF (${tabsSites})
-                    #parse("/vm/morpheus/includeLoginNav.vm")
                 </div>
-                
+
+                #if (${tabsSites})
+                    ## tabs
+                    #parse("/vm/morpheus/includeTabs.vm")
+                #end ## END of IF (${tabsSites})
+
             </div>
 
             #parse("/vm/morpheus/moresites.vm")
-
             #parse("/vm/morpheus/includePageWithNav.vm")
 
         </div> <!-- end Mrphs-portalWrapper -->
         <!-- END VM site.vm -->
+
+        <!-- Viewport helpers -->
+        <div id='Mrphs-viewport-helpers' aria-hidden='true'>
+          <div class='phone'></div>
+          <div class='tablet'></div>
+          <div class='desktop'></div>
+        </div>
 
         ## Make sure we at least have a jQuery 1.11 or higher, log messages
     #set ( $d = "$")
@@ -118,9 +142,21 @@
             <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script>
 <![endif]-->
 
+        <script>
+            if (typeof Handlebars == 'undefined') {
+                document.write('\x3Cscript src="${pageWebjarsPath}handlebars/4.0.5/handlebars.runtime.min.js$!{portalCDNQuery}">\x3C/script>');
+            }
+        </script>
+        <script src="/library/templates.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}trimpath-template-latest.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/bgiframe/jquery.bgiframe.min.js$!{portalCDNQuery}"></script>
         <script src="${pageScriptPath}jquery/cluetip/1.2.10/jquery.cluetip.min.js$!{portalCDNQuery}"></script>
+        <script>
+            if (typeof jQuery.i18n == 'undefined') {
+                document.write('\x3Cscript src="${pageWebjarsPath}jquery-i18n-properties/1.2.2/jquery.i18n.properties.min.js$!{portalCDNQuery}">\x3C/script>');
+            }
+        </script>
+        <script src="/library/js/jquery/jquery.clearsearch.js"></script>
         <script src="${pageSkinRepo}/${pageSkin}/js/morpheus.plugins.min.js$!{portalCDNQuery}"></script>
         <script src="${pageSkinRepo}/${pageSkin}/js/morpheus.scripts.min.js$!{portalCDNQuery}"></script>
         <script src="${pageWebjarsPath}/pnotify/2.1.0/pnotify.core.min.js$!{portalCDNQuery}"></script>
@@ -196,5 +232,6 @@
         #parse("/vm/morpheus/includeGoogleTagManager.vm")
 
         ${includeExtraHead}
+        #parse("/vm/morpheus/connection-manager.vm")
     </body>
 </html>

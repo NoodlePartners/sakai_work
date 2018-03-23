@@ -45,7 +45,6 @@ import org.sakaiproject.profile2.model.MessageParticipant;
 import org.sakaiproject.profile2.model.MessageThread;
 import org.sakaiproject.profile2.model.ProfilePreferences;
 import org.sakaiproject.profile2.model.ProfilePrivacy;
-import org.sakaiproject.profile2.model.ProfileStatus;
 import org.sakaiproject.profile2.model.SocialNetworkingInfo;
 import org.sakaiproject.profile2.model.UserProfile;
 import org.sakaiproject.profile2.model.WallItem;
@@ -62,7 +61,6 @@ import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 public class ProfileDaoImpl extends HibernateDaoSupport implements ProfileDao {
 
 	private static final Logger log = LoggerFactory.getLogger(ProfileDaoImpl.class);
-
 	
 	/**
  	 * {@inheritDoc}
@@ -85,6 +83,24 @@ public class ProfileDaoImpl extends HibernateDaoSupport implements ProfileDao {
 	  	
 	  	return (List<String>) getHibernateTemplate().executeFind(hcb);
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getOutgoingConnectionUserIdsForUser(final String userId) {
+
+		//get friends of this user [and map it automatically to the Friend object]
+		//updated: now just returns a List of Strings
+		HibernateCallback<List<String>> hcb = session -> {
+            Query q = session.getNamedQuery(QUERY_GET_OUTGOING_FRIEND_REQUESTS_FOR_USER);
+            q.setString(USER_UUID, userId);
+            q.setBoolean("false", Boolean.FALSE);
+
+            return q.list();
+        };
+
+        return getHibernateTemplate().execute(hcb);
+    }
 	
 	/**
  	 * {@inheritDoc}
@@ -342,70 +358,6 @@ public class ProfileDaoImpl extends HibernateDaoSupport implements ProfileDao {
 		return (ProfileFriend) getHibernateTemplate().execute(hcb);
 	}
 
-	/**
- 	 * {@inheritDoc}
- 	 */
-	public ProfileStatus getUserStatus(final String userId, final Date oldestDate) {
-		
-		HibernateCallback hcb = new HibernateCallback() {
-	  		public Object doInHibernate(Session session) throws HibernateException, SQLException {
-	  			Query q = session.getNamedQuery(QUERY_GET_USER_STATUS);
-	  			q.setParameter(USER_UUID, userId, Hibernate.STRING);
-	  			q.setParameter(OLDEST_STATUS_DATE, oldestDate, Hibernate.DATE);
-	  			q.setMaxResults(1);
-	  			return q.uniqueResult();
-			}
-		};
-	
-		return (ProfileStatus) getHibernateTemplate().execute(hcb);
-	}
-	
-	/**
- 	 * {@inheritDoc}
- 	 */
-	public boolean setUserStatus(ProfileStatus profileStatus) {
-		
-		try {
-			//only allowing one status object per user, hence saveOrUpdate
-			getHibernateTemplate().saveOrUpdate(profileStatus);
-			return true;
-		} catch (Exception e) {
-			log.error("ProfileLogic.setUserStatus() failed. " + e.getClass() + ": " + e.getMessage()); 
-			return false;
-		}
-	}
-	
-	/**
- 	 * {@inheritDoc}
- 	 */
-	public boolean clearUserStatus(ProfileStatus profileStatus) {
-				
-		try {
-			getHibernateTemplate().delete(profileStatus);
-			return true;
-		} catch (Exception e) {
-			log.error("ProfileLogic.clearUserStatus() failed. " + e.getClass() + ": " + e.getMessage());  
-			return false;
-		}
-	}
-	
-	/**
- 	 * {@inheritDoc}
- 	 */
-	public int getStatusUpdatesCount(final String userId) {
-		
-		HibernateCallback hcb = new HibernateCallback() {
-	  		public Object doInHibernate(Session session) throws HibernateException, SQLException {
-	  			
-	  			Query q = session.getNamedQuery(QUERY_GET_STATUS_UPDATES_COUNT);
-	  			q.setParameter(USER_UUID, userId, Hibernate.STRING);
-	  			return q.uniqueResult();
-	  		}
-	  	};
-	  	
-	  	return ((Integer)getHibernateTemplate().execute(hcb)).intValue();
-	}
-	
 	/**
  	 * {@inheritDoc}
  	 */

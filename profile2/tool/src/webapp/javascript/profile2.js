@@ -87,3 +87,37 @@ function doUpdateCK(){
         CKEDITOR.instances[instance].updateElement();
     }
 }
+
+var profile = profile || {};
+
+profile.translate = function () {
+
+    var args = Array.from(arguments);
+
+    var translation = profile.i18n[args[0]];
+
+    if (translation) {
+        var reg = /{\d}/;
+        if (arguments.length > 1) {
+            var index = 1;
+            while (translation.search(reg) != -1) {
+                translation = translation.replace(reg, args[index]);
+                index++;
+            }
+        }
+        return translation;
+    } else {
+        console.log('No translation for key ' + args[0]);
+        return args[0];
+    }
+
+    return translation;
+};
+
+Handlebars.registerHelper('translate', profile.translate);
+
+profile.renderTemplate = function (name, data, output) {
+
+    var template = Handlebars.templates[name];
+    document.getElementById(output).innerHTML = template(data);
+};

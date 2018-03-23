@@ -309,25 +309,6 @@ public class MyPrivacy extends BasePage {
 		
 		myFriendsContainer.setVisible(sakaiProxy.isConnectionsEnabledGlobally());
 
-		//myStatus privacy
-		WebMarkupContainer myStatusContainer = new WebMarkupContainer("myStatusContainer");
-		myStatusContainer.add(new Label("myStatusLabel", new ResourceModel("privacy.mystatus")));
-		DropDownChoice myStatusChoice = new DropDownChoice("myStatus", dropDownModelRelaxed, new HashMapChoiceRenderer(privacySettingsRelaxed));
-		myStatusChoice.setMarkupId("statusprivacyinput");
-		myStatusChoice.setOutputMarkupId(true);
-		myStatusContainer.add(myStatusChoice);
-		//tooltip
-		myStatusContainer.add(new IconWithClueTip("myStatusToolTip", ProfileConstants.INFO_IMAGE, new ResourceModel("text.privacy.mystatus.tooltip")));
-		form.add(myStatusContainer);
-		//updater
-		myStatusChoice.add(new AjaxFormComponentUpdatingBehavior("onchange") {
-            protected void onUpdate(AjaxRequestTarget target) {
-            	target.appendJavaScript("$('#" + formFeedbackId + "').fadeOut();");
-            }
-        });
-		
-		myStatusContainer.setVisible(sakaiProxy.isProfileStatusEnabled());
-
 		// gallery privacy
 		WebMarkupContainer myPicturesContainer = new WebMarkupContainer("myPicturesContainer");
 		myPicturesContainer.add(new Label("myPicturesLabel", new ResourceModel("privacy.mypictures")));
@@ -470,7 +451,6 @@ public class MyPrivacy extends BasePage {
 			personalInfoChoice.setEnabled(false);
 			birthYearCheckbox.setEnabled(false);
 			myFriendsChoice.setEnabled(false);
-			myStatusChoice.setEnabled(false);
 			myPicturesChoice.setEnabled(false);
 			messagesChoice.setEnabled(false);
 			myWallChoice.setEnabled(false);

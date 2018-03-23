@@ -94,11 +94,13 @@ public class BasePage extends WebPage implements IHeaderContributor {
 	Link<Void> myPicturesLink;
 	Link<Void> myProfileLink;
 	Link<Void> otherProfileLink;
-	Link<Void> myFriendsLink;
 	Link<Void> myMessagesLink;
 	Link<Void> myPrivacyLink;
-	Link<Void> searchLink;
 	Link<Void> preferencesLink;
+	Link<Void> notificationsLink;
+	Link<Void> timezoneLink;
+	Link<Void> languageLink;
+	Link<Void> sitesLink;
 
 	public BasePage() {
 		// super();
@@ -163,33 +165,6 @@ public class BasePage extends WebPage implements IHeaderContributor {
 
 		add(this.myPicturesLink);
 
-		// my friends link
-		this.myFriendsLink = new Link<Void>("myFriendsLink") {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void onClick() {
-				setResponsePage(new MyFriends());
-			}
-		};
-		this.myFriendsLink.add(new Label("myFriendsLabel", new ResourceModel("link.my.friends")));
-		this.myFriendsLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.friends.tooltip")));
-
-		// get count of new connection requests
-		final int newRequestsCount = this.connectionsLogic.getConnectionRequestsForUserCount(currentUserUuid);
-		final Label newRequestsLabel = new Label("newRequestsLabel", new Model<Integer>(newRequestsCount));
-		this.myFriendsLink.add(newRequestsLabel);
-
-		if (newRequestsCount == 0) {
-			newRequestsLabel.setVisible(false);
-		}
-
-		if (!this.sakaiProxy.isConnectionsEnabledGlobally()) {
-			this.myFriendsLink.setVisible(false);
-		}
-
-		add(this.myFriendsLink);
-
 		// messages link
 		this.myMessagesLink = new Link<Void>("myMessagesLink") {
 			private static final long serialVersionUID = 1L;
@@ -234,24 +209,6 @@ public class BasePage extends WebPage implements IHeaderContributor {
 
 		add(this.myPrivacyLink);
 
-		// search link
-		this.searchLink = new Link<Void>("searchLink") {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void onClick() {
-				setResponsePage(new MySearch());
-			}
-		};
-		this.searchLink.add(new Label("searchLabel", new ResourceModel("link.my.search")));
-		this.searchLink.add(new AttributeModifier("title", true, new ResourceModel("link.my.search.tooltip")));
-
-		if (!this.sakaiProxy.isSearchEnabledGlobally()) {
-			this.searchLink.setVisible(false);
-		}
-
-		add(this.searchLink);
-
 		// preferences link
 		this.preferencesLink = new Link<Void>("preferencesLink") {
 			private static final long serialVersionUID = 1L;
@@ -268,6 +225,62 @@ public class BasePage extends WebPage implements IHeaderContributor {
 			this.preferencesLink.setVisible(false);
 		}
 		add(this.preferencesLink);
+
+		// notifications link
+		this.notificationsLink = new Link<Void>("notificationsLink") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick() {
+				setResponsePage(new MyNotifications());
+			}
+		};
+		this.notificationsLink.add(new Label("notificationsLabel", new ResourceModel("notifications.tab")));
+		this.notificationsLink.add(new AttributeModifier("title", true, new ResourceModel("notifications.tab.tooltip")));
+
+		add(this.notificationsLink);
+
+        // timezone link
+		this.timezoneLink = new Link<Void>("timezoneLink") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick() {
+				setResponsePage(new MyTimezone());
+			}
+		};
+		this.timezoneLink.add(new Label("timezoneLabel", new ResourceModel("timezone.tab")));
+		this.timezoneLink.add(new AttributeModifier("title", true, new ResourceModel("timezone.tab.tooltip")));
+
+		add(this.timezoneLink);
+
+		// language link
+		this.languageLink = new Link<Void>("languageLink") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick() {
+				setResponsePage(new MyLanguage());
+			}
+		};
+		this.languageLink.add(new Label("languageLabel", new ResourceModel("language.tab")));
+		this.languageLink.add(new AttributeModifier("title", true, new ResourceModel("language.tab.tooltip")));
+
+		add(this.languageLink);
+
+        // sites link
+		this.sitesLink = new Link<Void>("sitesLink") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void onClick() {
+				setResponsePage(new MySites());
+			}
+		};
+		this.sitesLink.add(new Label("sitesLabel", new ResourceModel("sites.tab")));
+		this.sitesLink.add(new AttributeModifier("title", true, new ResourceModel("sites.tab.tooltip")));
+
+		add(this.sitesLink);
 
 		// rss link
 		/*
@@ -293,9 +306,6 @@ public class BasePage extends WebPage implements IHeaderContributor {
 
 		// Tool additions (at end so we can override if required)
 		response.render(StringHeaderItem.forString("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"));
-		response.render(CssHeaderItem.forUrl("/profile2-tool/css/profile2.css"));
-		response.render(JavaScriptHeaderItem.forUrl("/profile2-tool/javascript/profile2.js"));
-
 	}
 
 	/*

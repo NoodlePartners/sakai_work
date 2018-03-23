@@ -31,7 +31,6 @@ import org.sakaiproject.profile2.model.MessageParticipant;
 import org.sakaiproject.profile2.model.MessageThread;
 import org.sakaiproject.profile2.model.ProfilePreferences;
 import org.sakaiproject.profile2.model.ProfilePrivacy;
-import org.sakaiproject.profile2.model.ProfileStatus;
 import org.sakaiproject.profile2.model.SocialNetworkingInfo;
 import org.sakaiproject.profile2.model.UserProfile;
 import org.sakaiproject.profile2.model.WallItem;
@@ -52,6 +51,14 @@ public interface ProfileDao {
 	 * @param userId		uuid of the user to retrieve the list of friends for
 	 */
 	public List<String> getRequestedConnectionUserIdsForUser(final String userId);
+
+	/**
+	 * Get a list of unconfirmed outgoing Friend requests for a given user.
+	 * Returns: A list of userids that userId has sent requests to
+	 *
+	 * @param userId		uuid of the user to retrieve the list of friends for
+	 */
+	public List<String> getOutgoingConnectionUserIdsForUser(final String userId);
 	
 	/**
 	 * Get a list of confirmed connections for a given user. Uses a native SQL query so we can use unions
@@ -160,35 +167,6 @@ public interface ProfileDao {
 	 */
 	public ProfileFriend getPendingConnection(final String userId, final String friendId);
 
-	/**
-	 * Get a ProfileStatus record for a user, but only if the date of the record is within the given time
-	 * @param userId				uuid of the user
-	 * @param oldestStatusDate		oldest date to search until
-	 * @return
-	 */
-	public ProfileStatus getUserStatus(final String userId, final Date oldestStatusDate);
-	
-	/**
-	 * Set the status for a user
-	 * @param profileStatus		ProfileStatus object
-	 * @return	
-	 */
-	public boolean setUserStatus(ProfileStatus profileStatus);
-	
-	/**
-	 * Remove the ProfileStatus record for a user
-	 * @param profileStatus		ProfileStatus object
-	 * @return	
-	 */
-	public boolean clearUserStatus(ProfileStatus profileStatus);
-	
-	/**
-	 * Get a count of all status updates for a user
-	 * @param userUuid			uuid of the user
-	 * @return
-	 */
-	public int getStatusUpdatesCount(final String userUuid);
-	
 	/**
 	 * Add a new ProfilePrivacy record
 	 * @param privacy		ProfilePrivacy object
@@ -569,10 +547,10 @@ public interface ProfileDao {
 	final String QUERY_GET_COMPANY_PROFILES = "getCompanyProfiles";
 	
 	final String QUERY_GET_FRIEND_REQUESTS_FOR_USER = "getFriendRequestsForUser"; 
+	final String QUERY_GET_OUTGOING_FRIEND_REQUESTS_FOR_USER = "getOutgoingFriendRequestsForUser"; 
 	final String QUERY_GET_CONFIRMED_FRIEND_USERIDS_FOR_USER = "getConfirmedFriendUserIdsForUser"; 
 	final String QUERY_GET_FRIEND_REQUEST = "getFriendRequest"; 
 	final String QUERY_GET_FRIEND_RECORD = "getFriendRecord"; 
-	final String QUERY_GET_USER_STATUS = "getUserStatus"; 
 	final String QUERY_GET_PRIVACY_RECORD = "getPrivacyRecord"; 
 	final String QUERY_GET_CURRENT_PROFILE_IMAGE_RECORD = "getCurrentProfileImageRecord"; 
 	final String QUERY_OTHER_PROFILE_IMAGE_RECORDS = "getOtherProfileImageRecords"; 

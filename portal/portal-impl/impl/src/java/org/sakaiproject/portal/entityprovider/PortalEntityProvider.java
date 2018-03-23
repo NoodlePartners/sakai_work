@@ -6,8 +6,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
@@ -30,18 +31,35 @@ import org.sakaiproject.entitybroker.entityprovider.extension.ActionReturn;
 import org.sakaiproject.entitybroker.entityprovider.extension.Formats;
 import org.sakaiproject.entitybroker.exception.EntityException;
 
+import org.sakaiproject.memory.api.Cache;
+import org.sakaiproject.memory.api.MemoryService;
+import org.sakaiproject.memory.api.SimpleConfiguration;
 import org.sakaiproject.profile2.logic.ProfileConnectionsLogic;
 import org.sakaiproject.profile2.logic.ProfileLogic;
 import org.sakaiproject.profile2.logic.ProfileLinkLogic;
+import org.sakaiproject.profile2.model.BasicConnection;
+import org.sakaiproject.profile2.model.SocialNetworkingInfo;
 import org.sakaiproject.profile2.model.UserProfile;
 import org.sakaiproject.profile2.util.ProfileConstants;
+import org.sakaiproject.search.api.SearchList;
+import org.sakaiproject.search.api.SearchResult;
+import org.sakaiproject.search.api.SearchService;
+import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.site.api.SiteService.SelectionType;
 
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.ResourceLoader;
 
+import org.sakaiproject.portal.api.PortalService;
+import org.sakaiproject.portal.beans.BullhornAlert;
 import org.sakaiproject.portal.beans.PortalNotifications;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,26 +67,25 @@ import lombok.extern.slf4j.Slf4j;
  * An entity provider to serve Portal information
  * 
  */
-@Slf4j
+@Setter @Slf4j
 public class PortalEntityProvider extends AbstractEntityProvider implements AutoRegisterEntityProvider, Outputable, ActionsExecutable, Describeable {
 
 	public final static String PREFIX = "portal";
 	public final static String TOOL_ID = "sakai.portal";
+	private final static String CONNECTIONSEARCH_CACHE = "org.sakaiproject.portal.entityprovider.connectionSearchCache";
+	private final static String WORKSPACE_IDS_KEY = "workspaceIds";
+	private final static String ACTUAL_SAKAI_USERS = "actualSakaiUsers";
 
-	@Setter
-	private ProfileConnectionsLogic profileConnectionsLogic;
-
-	@Setter
-	private ProfileLogic profileLogic;
-
-	@Setter
-	private ProfileLinkLogic profileLinkLogic;
-
-	@Setter
-	private ServerConfigurationService serverConfigurationService;
-
-	@Setter
+	private PortalService portalService;
+	private MemoryService memoryService;
+	private SearchService searchService;
 	private SessionManager sessionManager;
+	private SiteService siteService;
+	private ProfileConnectionsLogic profileConnectionsLogic;
+	private ProfileLogic profileLogic;
+	private ProfileLinkLogic profileLinkLogic;
+	private ServerConfigurationService serverConfigurationService;
+	private UserDirectoryService userDirectoryService;
 
 	private Template formattedProfileTemplate = null;
 
@@ -120,52 +137,175 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 		return noti;
 	}
 
-	@EntityCustomAction(action="formatted",viewKey=EntityView.VIEW_SHOW)
-	public ActionReturn getFormattedProfile(EntityReference ref) {
+	@EntityCustomAction(action = "socialAlerts", viewKey = EntityView.VIEW_LIST)
+	public ActionReturn getSocialAlerts(EntityView view) {
+
+		String currentUserId = getCheckedCurrentUser();
+
+		List<BullhornAlert> alerts = portalService.getSocialAlerts(currentUserId);
+
+		ResourceLoader rl = new ResourceLoader("bullhorns");
+
+		if (alerts.size() > 0) {
+			Map<String, Object> data = new HashMap();
+			data.put("alerts", alerts);
+			data.put("i18n", rl);
+
+			return new ActionReturn(data);
+		} else {
+			Map<String, String> i18n = new HashMap();
+			i18n.put("noAlerts", rl.getString("noAlerts"));
+
+			Map<String, Object> data = new HashMap();
+			data.put("message", "NO_ALERTS");
+			data.put("i18n", i18n);
+
+			return new ActionReturn(data);
+		}
+	}
+
+	@EntityCustomAction(action = "clearBullhornAlert", viewKey = EntityView.VIEW_LIST)
+	public boolean clearBullhornAlert(Map<String, Object> params) {
+
+		String currentUserId = getCheckedCurrentUser();
+
+		try {
+			long alertId = Long.parseLong((String) params.get("id"));
+			return portalService.clearBullhornAlert(currentUserId, alertId);
+		} catch (Exception e) {
+			log.error("Failed to clear social alert", e);
+		}
+
+		return false;
+	}
+
+	@EntityCustomAction(action = "clearAllSocialAlerts", viewKey = EntityView.VIEW_LIST)
+	public boolean clearAllSocialAlerts(Map<String, Object> params) {
+
+		String currentUserId = getCheckedCurrentUser();
+
+		try {
+			return portalService.clearAllSocialAlerts(currentUserId);
+		} catch (Exception e) {
+			log.error("Failed to clear all social alerts", e);
+		}
+
+		return false;
+	}
+
+	@EntityCustomAction(action = "academicAlerts", viewKey = EntityView.VIEW_LIST)
+	public ActionReturn getAcademicAlerts(EntityView view) {
+
+		String currentUserId = getCheckedCurrentUser();
+
+		List<BullhornAlert> alerts = portalService.getAcademicAlerts(currentUserId);
+
+		ResourceLoader rl = new ResourceLoader("bullhorns");
+
+		if (alerts.size() > 0) {
+			Map<String, Object> data = new HashMap();
+			data.put("alerts", alerts);
+			data.put("i18n", rl);
+
+			return new ActionReturn(data);
+		} else {
+			Map<String, String> i18n = new HashMap();
+			i18n.put("noAlerts", rl.getString("noAlerts"));
+
+			Map<String, Object> data = new HashMap();
+			data.put("message", "NO_ALERTS");
+			data.put("i18n", i18n);
+
+			return new ActionReturn(data);
+		}
+	}
+
+	@EntityCustomAction(action = "clearAllAcademicAlerts", viewKey = EntityView.VIEW_LIST)
+	public boolean clearAllAcademicAlerts(Map<String, Object> params) {
+
+		String currentUserId = getCheckedCurrentUser();
+
+		try {
+			return portalService.clearAllAcademicAlerts(currentUserId);
+		} catch (Exception e) {
+			log.error("Failed to clear all academic alerts", e);
+		}
+
+		return false;
+	}
+
+	@EntityCustomAction(action = "bullhornCounts", viewKey = EntityView.VIEW_LIST)
+	public ActionReturn getBullhornCounts(EntityView view) {
+
+		String currentUserId = getCheckedCurrentUser();
+
+		Map<String, Integer> counts = new HashMap();
+		counts.put("academic", portalService.getAcademicAlertCount(currentUserId));
+		counts.put("social", portalService.getSocialAlertCount(currentUserId));
+
+		return new ActionReturn(counts);
+	}
+
+	private String getCheckedCurrentUser() throws SecurityException {
 
 		String currentUserId = developerHelperService.getCurrentUserId();
+
+		if (StringUtils.isBlank(currentUserId)) {
+			throw new SecurityException("You must be logged in to use this service");
+		} else {
+            return currentUserId;
+        }
+    }
+
+	@EntityCustomAction(action="formatted",viewKey=EntityView.VIEW_SHOW)
+	public ActionReturn getFormattedProfile(EntityReference ref, Map<String, Object> params) {
+
+		String currentUserId = getCheckedCurrentUser();
 
 		ResourceLoader rl = new ResourceLoader(currentUserId, "profile-popup");
 
 		UserProfile userProfile = (UserProfile) profileLogic.getUserProfile(ref.getId());
+        // See https://jira.sakaiproject.org/browse/SAK-32441
 
 		String connectionUserId = userProfile.getUserUuid();
 
 		VelocityContext context = new VelocityContext();
-		context.put("displayName", userProfile.getDisplayName());
+		context.put("i18n", rl);
 		context.put("profileUrl", profileLinkLogic.getInternalDirectUrlToUserProfile(connectionUserId));
 
-		String email = userProfile.getEmail();
-        if (StringUtils.isEmpty(email)) email = "";
+		final SocialNetworkingInfo socialInfo
+			= (userProfile != null) ? userProfile.getSocialInfo() : new SocialNetworkingInfo();
+
+		String facebookUrl = socialInfo.getFacebookUrl();
+		if (StringUtils.isEmpty(facebookUrl)) facebookUrl = "";
+		String twitterUrl = socialInfo.getTwitterUrl();
+		if (StringUtils.isEmpty(twitterUrl)) twitterUrl = "";
+		context.put("facebookUrl", facebookUrl);
+		context.put("twitterUrl", twitterUrl);
+
+		String email = (userProfile != null) ? userProfile.getEmail() : "";
+		if (StringUtils.isEmpty(email)) email = "";
 		context.put("email", email);
 
 		context.put("currentUserId", currentUserId);
 		context.put("connectionUserId", connectionUserId);
-		context.put("requestMadeLabel", rl.getString("connection.requested"));
-		context.put("cancelLabel", rl.getString("connection.cancel"));
-		context.put("incomingRequestLabel", rl.getString("connection.incoming.request"));
-		context.put("removeConnectionLabel", rl.getString("connection.remove"));
-		context.put("acceptLabel", rl.getString("connection.accept"));
-		context.put("rejectLabel", rl.getString("connection.reject"));
-		context.put("addConnectionLabel", rl.getString("connection.add"));
 
-		boolean connectionsEnabled = serverConfigurationService.getBoolean("profile2.connections.enabled",
-					ProfileConstants.SAKAI_PROP_PROFILE2_CONNECTIONS_ENABLED);
+        boolean connectionsEnabled = serverConfigurationService.getBoolean("profile2.connections.enabled",
+            ProfileConstants.SAKAI_PROP_PROFILE2_CONNECTIONS_ENABLED);
 
-		if (connectionsEnabled && !currentUserId.equals(connectionUserId)) {
+        if (connectionsEnabled && !currentUserId.equals(connectionUserId)) {
+            int connectionStatus = profileConnectionsLogic.getConnectionStatus(currentUserId, connectionUserId);
 
-			int connectionStatus = profileConnectionsLogic.getConnectionStatus(currentUserId, connectionUserId);
-
-			if (connectionStatus == ProfileConstants.CONNECTION_CONFIRMED) {
-				context.put("connected" , true);
-			} else if (connectionStatus == ProfileConstants.CONNECTION_REQUESTED) {
-				context.put("requested" , true);
-			} else if (connectionStatus == ProfileConstants.CONNECTION_INCOMING) {
-				context.put("incoming" , true);
-			} else {
-				context.put("unconnected" , true);
-			}
-		}
+            if (connectionStatus == ProfileConstants.CONNECTION_CONFIRMED) {
+                context.put("connected" , true);
+            } else if (connectionStatus == ProfileConstants.CONNECTION_REQUESTED) {
+                context.put("requested" , true);
+            } else if (connectionStatus == ProfileConstants.CONNECTION_INCOMING) {
+                context.put("incoming" , true);
+            } else {
+                context.put("unconnected" , true);
+            }
+        }
 
 		StringWriter writer = new StringWriter();
 
@@ -176,4 +316,109 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 			throw new EntityException("Failed to format profile.", ref.getReference());
 		}
 	}
+
+	@EntityCustomAction(action="connectionsearch",viewKey=EntityView.VIEW_LIST)
+	public ActionReturn searchForConnections(Map<String, Object> params) {
+
+		String currentUserId = getCheckedCurrentUser();
+
+		String query = (String) params.get("query");
+		if (StringUtils.isBlank(query)) {
+			throw new EntityException("No query supplied", "");
+		}
+
+		final boolean limitToActualSakaiUsers
+			= serverConfigurationService.getBoolean("connectionmanager.limitToActualSakaiUsers", true);
+
+		try {
+			Cache cache = getCache(CONNECTIONSEARCH_CACHE);
+
+			List<String> workspaceIds = (List<String>) cache.get(WORKSPACE_IDS_KEY);
+			List<String> actualSakaiUsers = (List<String>) cache.get(ACTUAL_SAKAI_USERS);
+
+			if (workspaceIds == null) {
+				log.debug("Cache MISS on {}.", WORKSPACE_IDS_KEY);
+				workspaceIds = new ArrayList<>();
+				actualSakaiUsers = new ArrayList<>();
+				List<String> all = siteService.getSiteIds(SelectionType.ANY, null, null, null, null, null);
+				for (String id : all) {
+					if (id.startsWith("~")) {
+						// This is a user workspace
+						workspaceIds.add(id);
+						actualSakaiUsers.add(id.substring(1));
+					}
+				}
+				cache.put(WORKSPACE_IDS_KEY, workspaceIds);
+				cache.put(ACTUAL_SAKAI_USERS, actualSakaiUsers);
+			} else {
+				log.debug("Cache HIT on {}.", WORKSPACE_IDS_KEY);
+			}
+
+			if (log.isDebugEnabled()) {
+				workspaceIds.forEach(id -> log.debug("workspace id: {}", id));
+			}
+
+			SearchList results = searchService.search(query, workspaceIds, 0, 100);
+
+			Set<BasicConnection> hits = results.stream().filter(r -> "profile".equals(r.getTool()))
+				.map(r ->
+					{
+						try {
+							return connectionFromUser(userDirectoryService.getUser(r.getId()));
+						} catch (UserNotDefinedException unde) {
+							log.error("No user for id " + r.getId() + ". Returning null ...");
+							return null;
+						} catch (Exception e) {
+							log.error("Exception caught whilst looking up user " + r.getId() + ". Returning null ...", e);
+							return null;
+						}
+					}).collect(Collectors.toSet());
+
+			if (log.isDebugEnabled()) {
+				hits.forEach(hit -> log.debug("User display name: " + hit.getDisplayName()));
+			}
+
+			// Now search the users. TODO: Move to ElasticSearch eventually.
+			List<User> users = userDirectoryService.searchUsers(query, 1, 100);
+			users.addAll(userDirectoryService.searchExternalUsers(query, 1, 100));
+
+			for (User user : users) {
+				if (limitToActualSakaiUsers) {
+					if (actualSakaiUsers.contains(user.getId())) {
+						hits.add(connectionFromUser(user));
+					}
+				} else {
+					hits.add(connectionFromUser(user));
+				}
+			}
+
+			return new ActionReturn(hits);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private Cache getCache(String name) {
+
+		try {
+			return memoryService.getCache(name);
+		} catch (Exception e) {
+			log.error("Exception whilst retrieving '" + name + "' cache. Returning null ...", e);
+			return null;
+		}
+	}
+
+    private BasicConnection connectionFromUser(User u) {
+
+		BasicConnection bc = new BasicConnection();
+		bc.setUuid(u.getId());
+		bc.setDisplayName(u.getDisplayName());
+		bc.setEmail(u.getEmail());
+		bc.setProfileUrl(profileLinkLogic.getInternalDirectUrlToUserProfile(u.getId()));
+		bc.setType(u.getType());
+		bc.setSocialNetworkingInfo(profileLogic.getSocialNetworkingInfo(u.getId()));
+		return bc;
+    }
 }

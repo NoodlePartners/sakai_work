@@ -313,6 +313,24 @@ function resizeFrame(){
 		        </fieldset>
 		        </div>
 		    </div>
+
+		    #if( $commonsAvailable && $allowPostToCommons)
+			<div class="row">
+				<div class="col-md-12">
+				<fieldset>
+					<legend>
+						<h4>$tlang.getString("commons.title")</h4>
+					</legend>
+                    <div class="radio">
+                        <label for="commons-checkbox">
+                            <input type="checkbox" id="commons-checkbox" name="postToCommons" value="true" #if($postToCommonsChecked)checked#end />
+                            $tlang.getString("commons.post_to_commons")
+                        </label>
+                    </div>
+				</fieldset>
+			    </div>
+			</div>
+		    #end
             
             #javascript("/library/js/lang-datepicker/lang-datepicker.js")
 

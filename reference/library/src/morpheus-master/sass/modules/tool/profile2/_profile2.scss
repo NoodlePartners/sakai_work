@@ -18,7 +18,10 @@
 	}
 
 	.navIntraTool {
-	    margin: -2px -14px 0 -14px;
+	    margin: -2px -14px 0 0;
+	    @media #{$phone}{
+	    	margin-top: 10px;
+	    }
 	}
 
 	.Mrphs-pageColumns--single {
@@ -99,4 +102,55 @@
 	    max-width: 65em;
 	}
 
+	.profile-update-success {
+		display: none;
+		color: $ok-color;
+		background-color: $ok-background-color;
+		margin: 20px 0;
+		padding: 8px 15px 8px 15px;
+		border: 1px solid;
+		border-left-width: 5px;
+		border-color: lighten($ok-color, 25%);
+		border-left-color: $ok-color;
+		color: darken($ok-color, 30%);
+	}
+
+    .profile-sitestab-site {
+		border: 1px solid darken( $tool-tab-background-color, 30% );
+		padding: 0.1em 0.5em 0.1em 0.5em;
+        width: 380px;
+        margin-bottom: 5px;
+        overflow: auto;
+        @include border-radius(4px);
+        background: $tool-tab-background-color;
+        color: $text-color;
+    }
+
+    .profile-sitestab-site-title {
+        float: left;
+    }
+
+    .profile-sitestab-site-checkbox {
+        float: right;
+        margin-bottom: 5px;
+    }
+
+    .profile-sitestab-site-checked {
+        background: $sites-nav-menu-item-selected-background;
+		border: 1px solid darken( $sites-nav-menu-item-selected-background, 30% );
+        color: $sites-nav-menu-item-selected-color;
+    }
+
+    .profile-sitestab-term {
+		padding: 0.1em 0.5em 0.1em 0.5em;
+        width: 400px;
+        overflow: auto;
+        font-weight: bold;
+		border: 1px solid darken( $sites-nav-menu-item-background, 30% );
+        @include border-radius(4px);
+        background: $sites-nav-menu-item-background;
+        color: $sites-nav-menu-item-color;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 }

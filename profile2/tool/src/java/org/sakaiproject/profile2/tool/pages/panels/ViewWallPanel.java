@@ -189,11 +189,8 @@ public class ViewWallPanel extends Panel {
 				item.add(new WallItemPanel("wallItemPanel", userUuid, wallItem));
 				
 				if (ProfileConstants.WALL_ITEM_TYPE_STATUS == wallItem.getType()) {					
-					// only show if a super user or non-super user is permitted
-					if (!sakaiProxy.isSuperUser() && !privacyLogic.isActionAllowed(wallItem.getCreatorUuid(), currentUserId, PrivacyType.PRIVACY_OPTION_MYSTATUS)) {
-						
-						item.setVisible(false);
-					}
+					// Never show this anymore - deprecated
+					item.setVisible(false);
 				}
 			}
 		};

@@ -2,14 +2,41 @@
  * For More Sites in Morpheus
  */
 
-var dhtml_view_sites = function(){
+var setSites = function(buttonType) {
+    if (buttonType === 'other' || buttonType === 'course') {
+        var container = $PBJQ('#selectSite');
+        $PBJQ('.tab-btn', container).removeClass('active');
+        $PBJQ('.tab-btn.'+buttonType, container).addClass('active');
+        if(buttonType === 'other')  {
+            $PBJQ('.moresites-left-col').hide();
+            $PBJQ('.moresites-right-col').show();
+            $PBJQ('#newSite_li').hide();
+            $PBJQ('#newGroupSite_li').show();
+            $PBJQ('#tab-btn-courses').addClass("not-selected");
+            $PBJQ('#tab-btn-others').removeClass("not-selected");
+        } else {
+            $PBJQ('.moresites-left-col').show();
+            $PBJQ('.moresites-right-col').hide();
+            $PBJQ('#newSite_li').show();
+            $PBJQ('#newGroupSite_li').hide();
+            $PBJQ('#tab-btn-courses').removeClass("not-selected");
+            $PBJQ('#tab-btn-others').addClass("not-selected");
+        }
+    }
+};
+
+var dhtml_view_sites = function(buttonType){
 
   // first time through set up the DOM
   $PBJQ('#selectSiteModal').addClass('dhtml_more_tabs'); // move the selectSite in the DOM
   $PBJQ('.more-tab').position();
+  var paneHeight = $PBJQ(window).height()*0.8;
 
   // then recast the function to the post initialized state which will run from then on
-  dhtml_view_sites = function(){
+  dhtml_view_sites = function (buttonType){
+
+    if (!buttonType) buttonType = 'course';
+    setSites(buttonType);
 
     var modal = $PBJQ('#selectSiteModal');
     
@@ -20,15 +47,15 @@ var dhtml_view_sites = function(){
       $PBJQ('body').toggleClass('active-more-sites');
 
       // Align with the bottom of the main header in desktop mode
-      var allSitesButton = $PBJQ('.view-all-sites-btn:visible');
+      var allSitesButton = $PBJQ('#view-' + buttonType + '-sites-btn:visible');
 
-      var topPadding = 10;
+      var topPadding = allSitesButton.height() + 5;
 
       if (allSitesButton.length > 0) {
         // Raise the button to keep it visible over the modal overlay
         allSitesButton.css('z-index', 1005);
 
-        var topPosition = allSitesButton.offset().top + allSitesButton.outerHeight() + topPadding;
+        var topPosition = allSitesButton.offset().top - $(window).scrollTop() + topPadding;
         var rightPosition = $PBJQ('body').outerWidth() - (allSitesButton.offset().left + allSitesButton.outerWidth());
         if( $PBJQ('html').attr('dir') !== "rtl" ){
           modal.css('top', topPosition).css('right', rightPosition);
@@ -38,19 +65,18 @@ var dhtml_view_sites = function(){
       }
       
       modal.toggleClass('outscreen');
-
-      var paneHeight = $PBJQ(window).height();
-
+      
       // Adjust for our offset from the top of the screen
-      paneHeight -= $PBJQ('.tab-pane').offset().top;
+      paneHeight -= topPosition;
 
       // and adjust to show the bottom of the modal frame
-      paneHeight -= parseInt(modal.css('padding-bottom'), 10);
+      paneHeight -= parseInt(modal.css('padding-bottom'), 20);
 
-      $PBJQ('.tab-pane').css('max-height', paneHeight);
+      // Avoid auto zoom to focus text field on touch devices
+      if (MorpheusViewportHelper.isNonPhone()) {
+        $PBJQ('#txtSearch').focus();
+      }
 
-
-      $PBJQ('#txtSearch').focus();
       createDHTMLMask(dhtml_view_sites);
 
       $PBJQ('.selectedTab').bind('click', function(e){
@@ -68,7 +94,8 @@ var dhtml_view_sites = function(){
       $PBJQ('#selectSiteModal').toggleClass('outscreen'); //hide the box
 
       // Restore the button's zIndex so it doesn't hover over other overlays
-      var allSitesButton = $PBJQ('.view-all-sites-btn');
+      var allSitesButton = $PBJQ('#view-' + buttonType + '-sites-btn');
+      //var allSitesButton = $PBJQ('#view-course-sites-btn');
       allSitesButton.css('z-index', 'auto');
 
       $PBJQ('#selectSite').attr('tabindex', '-1');
@@ -76,10 +103,17 @@ var dhtml_view_sites = function(){
       $PBJQ('#otherSiteTools').remove();
       $PBJQ('.selectedTab').unbind('click');
     }
+    
   }
-
+  
+  
+  if($(window).width() < 800) {
+	  paneHeight = paneHeight*0.85;
+  }
+  $PBJQ('.tab-pane').css('height', paneHeight);
+  
   // finally run the inner function, first time through
-  dhtml_view_sites();
+  dhtml_view_sites(buttonType);
 }
 
 function closeDrawer() {
@@ -138,6 +172,8 @@ function showToolMenu(jqObj){
 
     var goToSite = li_template.clone();
 
+    goToSite.addClass('gotosite');
+
     goToSite.find('a')
       .attr('href', portal.portalPath + '/site/' + classId)
       .attr('title', maxToolsText)
@@ -163,7 +199,7 @@ function showToolMenu(jqObj){
 
           // And its icon
           li.find('a span')
-            .addClass('icon-' + item.tools[0].toolId.replace(/\./gi, '-'))
+            .addClass('icon-sakai--' + item.tools[0].toolId.replace(/\./gi, '-'))
             .addClass('otherSiteToolIcon');
 
           if (item.toolpopup) {
@@ -197,10 +233,17 @@ $PBJQ(document).ready(function(){
   }
 
   // Open all Sites with mobile view
-   $PBJQ(".js-toggle-sites-nav", "#skipNav").on("click", dhtml_view_sites);
+   $PBJQ(".js-toggle-sites-nav", "#skipNav").on("click", function (e) {
+       dhtml_view_sites()
+   });
 
   // Open all Sites with Desktop view
-  $PBJQ("#show-all-sites, .view-all-sites-btn").on("click", dhtml_view_sites);
+  $PBJQ("#show-all-sites, #view-course-sites-btn").click(function (e) { dhtml_view_sites(); });
+
+  $PBJQ("#view-other-sites-btn").click(function (e) {
+
+      dhtml_view_sites('other');
+  });
 
   // prepend site title to tool title
   // here as reminder to work on an actual breadcrumb integrated with neo style tool updates
@@ -228,7 +271,7 @@ $PBJQ(document).ready(function(){
       $PBJQ('.fav-sites-term, .fav-sites-entry').hide();
 
       var matched_sites = $PBJQ('.fav-sites-entry').filter(function (idx, entry) {
-          return ($PBJQ('.fav-title a', entry).attr('title').toLowerCase().indexOf(queryString) >= 0);
+          return ($PBJQ('.fav-title a span.fullTitle', entry).text().toLowerCase().indexOf(queryString) >= 0);
       });
 
       matched_sites.show();
@@ -286,7 +329,16 @@ $PBJQ(document).ready(function(){
 
 $PBJQ(document).ready(function($){
   // The list of favorites currently stored
+  var autoFavoritesEnabled = true;
+
+  // Keep a copy of the favoritesList as it was before any changes were made.
+  // If the user makes a set of changes that ultimately revert us back to where we
+  // started, we don't need to show the indicator to reload the page.
+  var initialFavoritesList = undefined;
+
   var favoritesList = [];
+
+  var maxFavoriteEntries = $PBJQ('#max-favorite-entries').text().trim();
 
   // True if we've finished fetching and displaying the initial list
   //
@@ -321,11 +373,17 @@ $PBJQ(document).ready(function($){
     $PBJQ.ajax({
       url: '/portal/favorites/list',
       method: 'GET',
-      dataType: 'text',
+      dataType: 'json',
       success: function (data) {
-        favoritesList = data.split(';').filter(function (e, i) {
+        autoFavoritesEnabled = data.autoFavoritesEnabled;
+
+        favoritesList = data.favoriteSiteIds.filter(function (e, i) {
           return e != '';
         });
+
+        if (initialFavoritesList == undefined) {
+          initialFavoritesList = favoritesList;
+        }
 
         callback(favoritesList);
       }
@@ -349,15 +407,44 @@ $PBJQ(document).ready(function($){
   };
 
   var renderFavoriteCount = function () {
-    var favoriteCount = $PBJQ('.site-favorite', favoritesPane).length;
+    var favoriteCount = $PBJQ('.fav-sites-entry .site-favorite', favoritesPane).length;
 
     $PBJQ('.favoriteCount', container).text('(' + favoriteCount + ')');
 
-    if (favoriteCount < 2) {
-      $PBJQ('.organizeFavorites', container).addClass('tab-disabled');
+    if (favoriteCount > maxFavoriteEntries) {
+      $PBJQ('.favoriteCountAndWarning').addClass('maxFavoritesReached');
     } else {
-      $PBJQ('.organizeFavorites', container).removeClass('tab-disabled');
+      $PBJQ('.favoriteCountAndWarning').removeClass('maxFavoritesReached');
     }
+  };
+
+  var setAllOrNoneStarStates = function () {
+    $PBJQ('.favorites-select-all-none', favoritesPane).each(function (idx, selectAllNone) {
+      var termContainer = $(selectAllNone).closest('.fav-sites-term');
+
+      var siteCount = termContainer.find('.fav-sites-entry:not(.my-workspace)').length;
+      var favoritedSiteCount = termContainer.find('.fav-sites-entry .site-favorite').length;
+
+      if (siteCount == 0) {
+        // No favoritable sites under this section
+        $(selectAllNone).hide();
+      } else {
+        if (favoritedSiteCount == siteCount) {
+          $(selectAllNone).data('favorite-state', 'favorite');
+          $(selectAllNone).html(button_states.favorite.markup);
+        } else {
+          $(selectAllNone).data('favorite-state', 'nonfavorite');
+          $(selectAllNone).html(button_states.nonfavorite.markup);
+        }
+
+        $(selectAllNone).show();
+      }
+    });
+  };
+
+  var hideFavoriteButtons = function () {
+    $PBJQ('.site-favorite-btn', favoritesPane).empty();
+    $PBJQ('.favorites-select-all-none', favoritesPane).empty();
   };
 
   var renderFavorites = function (favorites) {
@@ -375,6 +462,15 @@ $PBJQ(document).ready(function($){
       }
     });
 
+    $('.favorites-help-text').hide();
+
+    if (autoFavoritesEnabled) {
+      $('.favorites-help-text.autofavorite-enabled').show();
+    } else {
+      $('.favorites-help-text.autofavorite-disabled').show();
+    }
+
+    setAllOrNoneStarStates();
     renderFavoriteCount();
 
     favoritesLoaded = true;
@@ -387,11 +483,48 @@ $PBJQ(document).ready(function($){
     }).toArray();
   }
 
-  var loadFromServer = function () {
-    getUserFavorites(renderFavorites);
-  }
+  var loadFromServer = function (attempt) {
+    if (syncInProgress) {
+      // Don't let the user edit the current state if we know it's going to be invalidated.
+      favoritesLoaded = false;
+      hideFavoriteButtons();
+    }
+
+    if (!attempt) {
+      attempt = 0;
+    }
+
+    if (syncInProgress && attempt < 100) {
+      setTimeout(function () {
+        loadFromServer(attempt + 1);
+      }, 50);
+    } else {
+      getUserFavorites(renderFavorites);
+    }
+  };
+
+  var arrayEqual = function (a1, a2) {
+    if (a1.length != a2.length) {
+      return false;
+    }
+
+    for (var i = 0; i < a1.length; i++) {
+      if (a1[i] != a2[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   var showRefreshNotification = function () {
+
+    if (arrayEqual(favoritesList, initialFavoritesList)) {
+      // The user is back to where they started!
+      $PBJQ('.moresites-refresh-notification').remove();
+      return;
+    }
+
     if ($PBJQ('.moresites-refresh-notification').length > 0) {
       // Already got it
       return;
@@ -405,9 +538,37 @@ $PBJQ(document).ready(function($){
     notification.css('top', ($PBJQ('.Mrphs-siteHierarchy').offset().top) + 'px');
   };
 
+  var syncInProgress = false;
+  var nextToSync = [];
+
+  // The user might go crazy with the clicky, so queue our updates so they run
+  // in a defined order.
+  var runNextServerUpdate = function (onError) {
+    var newState;
+
+    // we can skip intermediate updates because they'll just get overwritten anyway.
+    while (nextToSync.length > 0) {
+      newState = nextToSync.shift();
+    }
+
+    if (newState) {
+      $PBJQ.ajax({
+        url: '/portal/favorites/update',
+        method: 'POST',
+        data: {
+          userFavorites: JSON.stringify(newState),
+        },
+        error: onError,
+        complete: runNextServerUpdate
+      });
+    } else {
+      // All done!
+      syncInProgress = false;
+    }
+  };
+
   var syncWithServer = function (onError) {
     if (!favoritesLoaded) {
-      console.log("Can't update favorites as they haven't been loaded yet.");
       return;
     }
 
@@ -428,18 +589,57 @@ $PBJQ(document).ready(function($){
       }
     });
 
-    $PBJQ.ajax({
-      url: '/portal/favorites/update',
-      method: 'POST',
-      data: {
-        favorites: newFavorites.join(';')
-      },
-      error: onError
-    });
+    var newState = {
+      favoriteSiteIds: newFavorites,
+      autoFavoritesEnabled: autoFavoritesEnabled,
+    };
+
+    nextToSync.push(newState);
+
+    if (syncInProgress) {
+      /* It'll up our next state when it next runs */
+    } else {
+      syncInProgress = true;
+      runNextServerUpdate(onError);
+    };
 
     // Finally, update our stored list of favorites
     favoritesList = newFavorites;
     showRefreshNotification();
+  };
+
+  var returnElementToOriginalPositionIfPossible = function (siteId) {
+    if (initialFavoritesList && initialFavoritesList.includes(siteId)) {
+      var idx = initialFavoritesList.indexOf(siteId);
+
+      // We'll attempt to place our item to the right its original left
+      // neighbor.  If the left neighbor was removed too, keep scanning left
+      // until we find one of the original elements and place it to the right.
+      // Otherwise, insert at the beginning of the array.
+      //
+      // The intention here is to allow multiple elements to be removed and
+      // re-added in arbitrary order, and to reproduce the original ordering.
+
+      var placed = false;
+
+      for (var neighborIdx = idx - 1; neighborIdx >= 0; neighborIdx--) {
+        var neighbor = initialFavoritesList[neighborIdx];
+
+        var neighborCurrentIndex = favoritesList.indexOf(neighbor);
+
+        if (neighborCurrentIndex >= 0 && neighborCurrentIndex < idx) {
+          /* Place our element after it */
+          favoritesList.splice(neighborCurrentIndex + 1, 0, siteId)
+          placed = true;
+          break;
+        }
+      }
+
+      if (!placed) {
+        // place at the beginning
+        favoritesList.splice(idx, 0, siteId)
+      }
+    }
   };
 
   $PBJQ(favoritesPane).on('click', '.site-favorite-btn', function () {
@@ -461,7 +661,15 @@ $PBJQ(document).ready(function($){
       newState = 'favorite';
     }
 
+    // If a favorite has been added that was removed and re-added during this
+    // same session, put it back in the same slot rather than sending it to the
+    // end
+    if (newState == 'favorite') {
+      returnElementToOriginalPositionIfPossible(siteId);
+    }
+
     setButton(self, newState);
+    setAllOrNoneStarStates();
     renderFavoriteCount();
 
     syncWithServer(function () {
@@ -470,15 +678,38 @@ $PBJQ(document).ready(function($){
     });
   });
 
-  $PBJQ(container).on('click', '.tab-btn', function () {
-    if ($PBJQ(this).hasClass('tab-disabled')) {
-      return false;
+  $PBJQ(favoritesPane).on('click', '.favorites-select-all-none', function () {
+    var state = $(this).data('favorite-state');
+    var buttons = $(this).closest('.fav-sites-term').find('.fav-sites-entry:not(.my-workspace) .site-favorite-btn');
+
+    var newState;
+
+    if (state == 'favorite') {
+      newState = 'nonfavorite';
+    } else {
+      newState = 'favorite';
     }
 
+    buttons.each(function (idx, button) {
+      setButton($(button), newState);
+    });
+
+    renderFavoriteCount();
+    setAllOrNoneStarStates();
+
+    syncWithServer(function () {
+      // If anything goes wrong while saving, refresh from the server.
+      loadFromServer();
+    });
+  });
+
+  $PBJQ(container).on('click', '.tab-btn', function () {
     $PBJQ('.tab-btn', container).removeClass('active');
     $PBJQ(this).addClass('active');
 
     var panel = $PBJQ(this).data('tab-target');
+	var type = $PBJQ(this).data('site-type');
+	setSites(type);
 
     $PBJQ('.tab-box').hide();
     $PBJQ(container).trigger('tab-shown', panel);
@@ -495,6 +726,9 @@ $PBJQ(document).ready(function($){
       // favorites
       var list = $PBJQ('#organizeFavoritesList');
       list.empty();
+
+      $('#noFavoritesToShow').hide();
+      $('#favoritesToShow').hide();
 
       // Collapse any visible tool menus
       $PBJQ('#otherSiteTools').remove();
@@ -531,9 +765,39 @@ $PBJQ(document).ready(function($){
         favoriteItem.show();
       });
 
+      if (list.find('li').length == 0) {
+        // No favorites are present
+        $('#noFavoritesToShow').show();
+      } else {
+        $('#favoritesToShow').show();
+      }
+
+      var highlightMaxItems = function () {
+        var items = $('.organize-favorite-item');
+
+        items.removeClass('site-favorite-is-past-max');
+        $PBJQ('.favorites-max-marker').remove();
+
+        $PBJQ.each(items, function (idx, li) {
+          if (idx >= maxFavoriteEntries) {
+            $(li).addClass('site-favorite-is-past-max');
+          }
+
+          if (idx == maxFavoriteEntries) {
+            $(li).before($PBJQ('<li class="favorites-max-marker"><i class="fa fa-warning warning-icon"></i> ' + $('#maxFavoritesLimitReachedText').text() + '</li>'));
+          }
+        });
+      };
+
+      highlightMaxItems();
+
       list.sortable({
+        items: "li:not(.favorites-max-marker)",
         handle: ".fav-drag-handle",
         stop: function () {
+          // Rehighlight the first N items
+          highlightMaxItems();
+
           // Update our ordering based on the new selection
           favoritesList = list.find('.organize-favorite-item').map(function () {
             return $PBJQ(this).data('site-id');
@@ -545,6 +809,9 @@ $PBJQ(document).ready(function($){
       });
 
       list.disableSelection();
+
+      $('#autoFavoritesEnabled').prop('checked', autoFavoritesEnabled)
+      $('#organizeFavorites .onoffswitch').show();
     }
   });
 
@@ -570,7 +837,21 @@ $PBJQ(document).ready(function($){
       // The clicked item was currently in "purgatory", having been unfavorited
       // in the process of organizing favorites.  This click will promote it
       // back to a favorite
-      $PBJQ('#organizeFavoritesList').append(li);
+      var siteId = $PBJQ(self).data('site-id');
+      returnElementToOriginalPositionIfPossible(siteId)
+
+      var newIndex = favoritesList.indexOf(siteId);
+
+      if (newIndex == 0) {
+        $PBJQ('#organizeFavoritesList').prepend(li);
+      } else if (newIndex > 0) {
+        // Put it into the right position (note: nth-child starts indexing at 1)
+        $PBJQ('#organizeFavoritesList li:nth-child(' + newIndex + ')').after(li);
+      } else {
+        // Just tack it on the end
+        $PBJQ('#organizeFavoritesList').append(li);
+      }
+
       buttonState = 'favorite';
     } else {
       // This item has just been unfavorited.  To purgatory!
@@ -578,19 +859,37 @@ $PBJQ(document).ready(function($){
       buttonState = 'nonfavorite';
     }
 
+
     // Set the favorite state for both the entry under "Organize" and the
     // original entry under "Sites"
     setButton(self, buttonState);
     setButton(itemsBySiteId[$PBJQ(self).data('site-id')].find('.site-favorite-btn'),
               buttonState);
 
+    setAllOrNoneStarStates();
     renderFavoriteCount();
 
     syncWithServer(function () {
       // If anything goes wrong while saving, refresh from the server.
       loadFromServer();
     });
+
   });
+
+  $PBJQ('#autoFavoritesEnabled').on('change', function () {
+    autoFavoritesEnabled = this.checked;
+
+    $('.favorites-help-text').hide();
+
+    if (this.checked) {
+      $('.favorites-help-text.autofavorite-enabled').show();
+    } else {
+      $('.favorites-help-text.autofavorite-disabled').show();
+    }
+
+    syncWithServer();
+    return true;
+  })
 
   $PBJQ('.otherSitesMenuClose').on('click', function () {
     // Close the pane

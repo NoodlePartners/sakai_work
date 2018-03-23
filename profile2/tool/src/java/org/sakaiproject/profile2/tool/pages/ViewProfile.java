@@ -45,7 +45,6 @@ import org.sakaiproject.profile2.model.ProfilePreferences;
 import org.sakaiproject.profile2.model.ProfilePrivacy;
 import org.sakaiproject.profile2.tool.components.OnlinePresenceIndicator;
 import org.sakaiproject.profile2.tool.components.ProfileImage;
-import org.sakaiproject.profile2.tool.components.ProfileStatusRenderer;
 import org.sakaiproject.profile2.tool.models.FriendAction;
 import org.sakaiproject.profile2.tool.pages.panels.FriendsFeed;
 import org.sakaiproject.profile2.tool.pages.panels.GalleryFeed;
@@ -86,11 +85,13 @@ public class ViewProfile extends BasePage {
 		}
 
 		myPicturesLink.setVisible(false);
-		myFriendsLink.setVisible(false);
 		myMessagesLink.setVisible(false);
 		myPrivacyLink.setVisible(false);
-		searchLink.setVisible(false);
 		preferencesLink.setVisible(false);
+		notificationsLink.setVisible(false);
+		timezoneLink.setVisible(false);
+		languageLink.setVisible(false);
+		sitesLink.setVisible(false);
 
 		// post view event
 		this.sakaiProxy.postEvent(ProfileConstants.EVENT_PROFILE_VIEW_OTHER, "/profile/" + userUuid, false);
@@ -157,13 +158,6 @@ public class ViewProfile extends BasePage {
 			add(new EmptyPanel("online"));
 		}
 
-		/* STATUS PANEL */
-		if (this.sakaiProxy.isProfileStatusEnabled()) {
-			add(new ProfileStatusRenderer("status", userUuid, privacy, null, "tiny"));
-		} else {
-			add(new EmptyPanel("status"));
-		}
-
 		/* TABS */
 		final List<ITab> tabs = new ArrayList<ITab>();
 
@@ -206,6 +200,7 @@ public class ViewProfile extends BasePage {
 			});
 		}
 
+		// DEPRECATED: UNLESS THERE IS AN EXPRESSED DESIRE FOR THIS FUNCTIONALITY THE WALL WILL BE REMOVED FOR 13.
 		if (this.sakaiProxy.isWallEnabledGlobally()) {
 
 			tabs.add(new AbstractTab(new ResourceModel("link.tab.wall")) {

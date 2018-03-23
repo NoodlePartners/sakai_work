@@ -23,6 +23,7 @@ package org.sakaiproject.portal.charon.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,6 +58,7 @@ import org.sakaiproject.portal.api.PortalRenderContext;
 import org.sakaiproject.portal.api.SiteView;
 import org.sakaiproject.portal.api.StoredState;
 import org.sakaiproject.portal.charon.site.AllSitesViewImpl;
+import org.sakaiproject.portal.charon.site.PortalSiteHelperImpl;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolSession;
 import org.sakaiproject.tool.api.ToolManager;
@@ -125,7 +127,7 @@ public class SiteHandler extends WorksiteHandler
 
 	// SAK-27774 - We are going inline default but a few tools need a crutch 
 	// This is Sakai 11 only so please do not back-port or merge this default value
-	private static final String IFRAME_SUPPRESS_DEFAULT = ":all:sakai.rsf.evaluation";
+	private static final String IFRAME_SUPPRESS_DEFAULT = ":all:sakai.gradebook.gwt.rpc:com.rsmart.certification:sakai.melete";
 
 	public SiteHandler()
 	{
@@ -406,16 +408,19 @@ public class SiteHandler extends WorksiteHandler
 		session.removeAttribute(Portal.ATTR_SITE_PAGE + siteId);
 
 		// SAK-29138 - form a context sensitive title
+		List<String> providers = PortalSiteHelperImpl.getProviderIDsForSites(((List<Site>) Arrays.asList(new Site[] { site }))).get(site.getReference());
 		String title = ServerConfigurationService.getString("ui.service","Sakai") + " : "
-				+ portal.getSiteHelper().getUserSpecificSiteTitle( site, false );
+				+ portal.getSiteHelper().getUserSpecificSiteTitle(site, false, false, providers);
 
 		// Lookup the page in the site - enforcing access control
 		// business rules
 		SitePage page = portal.getSiteHelper().lookupSitePage(pageId, site);
 		if (page != null)
 		{
-			// store the last page visited
-			session.setAttribute(Portal.ATTR_SITE_PAGE + siteId, page.getId());
+			if (ServerConfigurationService.getBoolean("portal.rememberSitePage", true)) {
+				// store the last page visited
+				session.setAttribute(Portal.ATTR_SITE_PAGE + siteId, page.getId());
+			}
 			title += " : " + page.getTitle();
 		}
 
@@ -533,8 +538,8 @@ public class SiteHandler extends WorksiteHandler
 			rcontext.put("siteTitle", rb.getString("sit_mywor") );
 			rcontext.put("siteTitleTruncated", rb.getString("sit_mywor") );
 		}else{
-			rcontext.put("siteTitle", Web.escapeHtml(site.getTitle()));
-			rcontext.put("siteTitleTruncated", portal.getSiteHelper().getUserSpecificSiteTitle( site, false ) );
+			rcontext.put("siteTitle", portal.getSiteHelper().getUserSpecificSiteTitle(site, false, true, providers));
+			rcontext.put("siteTitleTruncated", portal.getSiteHelper().getUserSpecificSiteTitle(site, true, false, providers));
 		}
 		
 		addLocale(rcontext, site, session.getUserId());
@@ -855,7 +860,7 @@ public class SiteHandler extends WorksiteHandler
 			if (loggedIn) 
 			{
 				Preferences prefs = PreferencesService.getPreferences(session.getUserId());
-				ResourceProperties props = prefs.getProperties("sakai:portal:sitenav");
+				ResourceProperties props = prefs.getProperties(org.sakaiproject.user.api.PreferencesService.SITENAV_PREFS_KEY);
 				try 
 				{
 					tabDisplayLabel = (int) props.getLongProperty("tab:label");

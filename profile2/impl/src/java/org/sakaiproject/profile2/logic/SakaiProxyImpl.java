@@ -18,9 +18,12 @@ package org.sakaiproject.profile2.logic;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -38,6 +41,7 @@ import org.sakaiproject.emailtemplateservice.model.RenderedTemplate;
 import org.sakaiproject.emailtemplateservice.service.EmailTemplateService;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.event.api.ActivityService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.event.api.NotificationService;
@@ -54,13 +58,21 @@ import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.SiteService.SelectionType;
 import org.sakaiproject.site.api.SiteService.SortType;
 import org.sakaiproject.site.api.ToolConfiguration;
+import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.tool.api.Placement;
+import org.sakaiproject.user.api.Preferences;
+import org.sakaiproject.user.api.PreferencesEdit;
+import org.sakaiproject.user.api.PreferencesService;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserEdit;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.user.api.UserNotificationPreferencesRegistration;
+import org.sakaiproject.user.api.UserNotificationPreferencesRegistrationService;
+import org.sakaiproject.util.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -295,6 +307,16 @@ public class SakaiProxyImpl implements SakaiProxy {
 			return tool.getTitle();
 		} else {
 			return "Profile";
+		}
+	}
+
+	public String getCurrentToolId() {
+
+		final Placement placement = this.toolManager.getCurrentPlacement();
+		if (placement != null) {
+			return placement.getId();
+		} else {
+			return null;
 		}
 	}
 
@@ -1323,8 +1345,6 @@ public class SakaiProxyImpl implements SakaiProxy {
 				ProfileConstants.DEFAULT_BIRTHYEAR_VISIBILITY));
 		props.put("myFriends", this.serverConfigurationService.getInt("profile2.privacy.default.myFriends",
 				ProfileConstants.DEFAULT_PRIVACY_OPTION_MYFRIENDS));
-		props.put("myStatus", this.serverConfigurationService.getInt("profile2.privacy.default.myStatus",
-				ProfileConstants.DEFAULT_PRIVACY_OPTION_MYSTATUS));
 		props.put("myPictures", this.serverConfigurationService.getInt("profile2.privacy.default.myPictures",
 				ProfileConstants.DEFAULT_PRIVACY_OPTION_MYPICTURES));
 		props.put("messages", this.serverConfigurationService.getInt("profile2.privacy.default.messages",
@@ -1672,16 +1692,6 @@ public class SakaiProxyImpl implements SakaiProxy {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean isProfileStatusEnabled() {
-		return this.serverConfigurationService.getBoolean("profile2.profile.status.enabled",
-				ProfileConstants.SAKAI_PROP_PROFILE2_PROFILE_STATUS_ENABLED);
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public boolean isMenuEnabledGlobally() {
 		return this.serverConfigurationService.getBoolean("profile2.menu.enabled", ProfileConstants.SAKAI_PROP_PROFILE2_MENU_ENABLED);
 	}
@@ -1767,6 +1777,138 @@ public class SakaiProxyImpl implements SakaiProxy {
 	public boolean isOnlineStatusEnabledGlobally() {
 		return this.serverConfigurationService.getBoolean("profile2.onlineStatus.enabled",
 				ProfileConstants.SAKAI_PROP_PROFILE2_ONLINE_STATUS_ENABLED);
+	}
+
+	public List<UserNotificationPreferencesRegistration> getRegisteredNotificationItems() {
+		return userNotificationPreferencesRegistrationService.getRegisteredItems();
+	}
+
+	public Preferences getPreferences() {
+		return preferencesService.getPreferences(getCurrentUserId());
+	}
+
+	public void savePreferences(String userId, String type, String value) {
+
+		PreferencesEdit edit = null;
+		try {
+			edit = preferencesService.edit(userId);
+		} catch (IdUnusedException iue) {
+			try {
+				edit = preferencesService.add(userId);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			ResourcePropertiesEdit props = edit.getPropertiesEdit(NotificationService.PREFS_TYPE + type);
+			props.removeProperty("2");
+			props.addProperty("2", value);
+			preferencesService.commit(edit);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void saveNotificationSiteOverrides(String userId, Map<String, Map<String,String>> overrides) {
+
+		PreferencesEdit edit = null;
+		try {
+			edit = preferencesService.edit(userId);
+		} catch (IdUnusedException iue) {
+			try {
+				edit = preferencesService.add(userId);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			if (overrides.size() <= 0) {
+				// Remove any current overrides
+				for (String prefsKey : (Collection<String>) edit.getKeys()) {
+					if (prefsKey.endsWith(NotificationService.NOTI_OVERRIDE_EXTENSION)) {
+						ResourcePropertiesEdit props = edit.getPropertiesEdit(prefsKey);
+						props.clear();
+					}
+				}
+			} else {
+				for (String type : overrides.keySet()) {
+					String prefsKey = NotificationService.PREFS_TYPE + type + NotificationService.NOTI_OVERRIDE_EXTENSION;
+					ResourcePropertiesEdit props = edit.getPropertiesEdit(prefsKey);
+					Map<String, String> sites = overrides.get(type);
+					for (String siteId : sites.keySet()){
+						props.removeProperty(siteId);
+						props.addProperty(siteId, sites.get(siteId));
+					}
+				}
+			}
+			preferencesService.commit(edit);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setTimezoneForCurrentUser(String timeZone) {
+
+		String userId = getCurrentUserId();
+
+		PreferencesEdit edit = null;
+		try {
+			edit = preferencesService.edit(userId);
+		} catch (IdUnusedException iue) {
+			try {
+				edit = preferencesService.add(userId);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		ResourceProperties timezoneProps = edit.getPropertiesEdit(TimeService.APPLICATION_ID);
+
+		timezoneProps.removeProperty(TimeService.TIMEZONE_KEY);
+		timezoneProps.addProperty(TimeService.TIMEZONE_KEY, timeZone);
+
+		preferencesService.commit(edit);
+	}
+
+	public Locale[] getSakaiLocales() {
+		return serverConfigurationService.getSakaiLocales();
+	}
+
+	public Locale getLocaleFromString(String language) {
+		return serverConfigurationService.getLocaleFromString(language);
+	}
+
+	public void setLanguageForCurrentUser(String language) {
+
+		String userId = getCurrentUserId();
+
+		PreferencesEdit edit = null;
+		try {
+			edit = preferencesService.edit(userId);
+		} catch (IdUnusedException iue) {
+			try {
+				edit = preferencesService.add(userId);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		ResourceProperties localeProps = edit.getPropertiesEdit(ResourceLoader.APPLICATION_ID);
+
+		localeProps.removeProperty(ResourceLoader.LOCALE_KEY);
+		localeProps.addProperty(ResourceLoader.LOCALE_KEY, language);
+
+		preferencesService.commit(edit);
 	}
 
 	// PRIVATE METHODS FOR SAKAIPROXY
@@ -1866,6 +2008,12 @@ public class SakaiProxyImpl implements SakaiProxy {
 
 	@Setter
 	private ActivityService activityService;
+
+	@Setter
+	private UserNotificationPreferencesRegistrationService userNotificationPreferencesRegistrationService;
+
+	@Setter
+	private PreferencesService preferencesService;
 
 	// INJECT OTHER RESOURCES
 	@Setter

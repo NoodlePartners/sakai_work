@@ -159,6 +159,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 	 * messages.
 	 */
 	private static ResourceLoader rloader = new ResourceLoader("sitenav");
+	private static ResourceLoader cmLoader = new ResourceLoader("connection-manager");
 
 	/**
 	 * Parameter value to indicate to look up a tool ID within a site
@@ -1023,9 +1024,14 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 		rcontext.put("pageWebjarsPath", PortalUtils.getWebjarsPath());
 		rcontext.put("portalCDNPath", PortalUtils.getCDNPath());
 		rcontext.put("portalCDNQuery", PortalUtils.getCDNQuery());
+
+		int snapPollTimeout = ServerConfigurationService.getInt("portal.snapPollTimeout", 25000);
+		rcontext.put("snapPollTimeout", snapPollTimeout);
+
 		rcontext.put("includeLatestJQuery", PortalUtils.includeLatestJQuery("Portal"));
 		rcontext.put("pageTop", Boolean.valueOf(true));
 		rcontext.put("rloader", rloader);
+		rcontext.put("cmLoader", cmLoader);
 		//rcontext.put("browser", new BrowserDetector(request));
 		// Allow for inclusion of extra header code via property
 		String includeExtraHead = ServerConfigurationService.getString("portal.include.extrahead", "");
@@ -1283,7 +1289,8 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 	{
 		Properties retval = new Properties();
 
-		String headCss = CSSUtils.getCssHead(skin,ToolUtils.isInlineRequest(req));
+		boolean isInlineReq = ToolUtils.isInlineRequest(req);
+		String headCss = CSSUtils.getCssHead(skin, isInlineReq);
 		
 		Editor editor = portalService.getActiveEditor(placement);
 		String preloadScript = editor.getPreloadScript() == null ? ""
@@ -1378,8 +1385,8 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 		retval.setProperty("sakai.html.head", head);
 		retval.setProperty("sakai.html.head.css", headCss);
 		retval.setProperty("sakai.html.head.lang", rloader.getLocale().getLanguage());
-		retval.setProperty("sakai.html.head.css.base", CSSUtils.getCssToolBaseLink(skin,ToolUtils.isInlineRequest(req)));
-		retval.setProperty("sakai.html.head.css.skin", CSSUtils.getCssToolSkinLink(skin));
+		retval.setProperty("sakai.html.head.css.base", CSSUtils.getCssToolBaseLink(skin, isInlineReq));
+		retval.setProperty("sakai.html.head.css.skin", CSSUtils.getCssToolSkinLink(skin, isInlineReq));
 		retval.setProperty("sakai.html.head.js", headJs.toString());
 
 		return retval;
@@ -1692,6 +1699,9 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
                         rcontext.put("portalVideoChatTimeout", 
 				ServerConfigurationService.getInt("portal.chat.video.timeout", 25));
 
+            rcontext.put("portalBullhornsPollInterval",
+                    ServerConfigurationService.getInt("portal.bullhorns.poll.interval", 10000));
+
                         if(sakaiTutorialEnabled && thisUser != null) {
                         	if (!("1".equals(prefs.getProperties().getProperty("sakaiTutorialFlag")))) {
                         		rcontext.put("tutorial", true);
@@ -1745,6 +1755,9 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 			rcontext.put("bottomNavServiceVersion", serviceVersion);
 			rcontext.put("bottomNavSakaiVersion", sakaiVersion);
 			rcontext.put("bottomNavServer", server);
+
+			boolean useBullhornAlerts = ServerConfigurationService.getBoolean("useBullhornAlerts", true);
+			rcontext.put("useBullhornAlerts", useBullhornAlerts);
 
 			// SAK-25931 - Do not remove this from session here - removal is done by /direct
 	                Session s = SessionManager.getCurrentSession();

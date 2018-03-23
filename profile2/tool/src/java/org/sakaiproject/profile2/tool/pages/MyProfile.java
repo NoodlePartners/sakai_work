@@ -44,6 +44,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.cookies.CookieDefaults;
 import org.apache.wicket.util.cookies.CookieUtils;
 import org.sakaiproject.api.common.edu.person.SakaiPerson;
@@ -62,7 +63,6 @@ import org.sakaiproject.profile2.tool.pages.panels.FriendsFeed;
 import org.sakaiproject.profile2.tool.pages.panels.GalleryFeed;
 import org.sakaiproject.profile2.tool.pages.panels.KudosPanel;
 import org.sakaiproject.profile2.tool.pages.panels.MyProfilePanel;
-import org.sakaiproject.profile2.tool.pages.panels.MyStatusPanel;
 import org.sakaiproject.profile2.tool.pages.panels.MyWallPanel;
 import org.sakaiproject.profile2.tool.pages.panels.ViewWallPanel;
 import org.sakaiproject.profile2.tool.pages.windows.AddFriend;
@@ -85,6 +85,14 @@ public class MyProfile extends BasePage {
 		String userUuid = sakaiProxy.getCurrentUserId();
 		renderMyProfile(userUuid);
 	}
+
+	public MyProfile(PageParameters pageParameters) {
+
+		final String requestedTab = pageParameters.get(0).toString(ProfileConstants.PROFILE);
+
+		String userUuid = sakaiProxy.getCurrentUserId();
+		renderMyProfile(userUuid, requestedTab);
+	}
 	
 	/**
 	 * This constructor is called if we are viewing someone elses but in edit mode.
@@ -103,31 +111,35 @@ public class MyProfile extends BasePage {
 		//render for given user
 		renderMyProfile(userUuid);
 	}
-	
+
+	private void renderMyProfile(final String userUuid) {
+	    renderMyProfile(userUuid, ProfileConstants.PROFILE);
+	}
+
 	/**
 	 * Does the actual rendering of the page
 	 * @param userUuid
 	 */
-	private void renderMyProfile(final String userUuid) {
-		
+	private void renderMyProfile(final String userUuid, final String requestedTab) {
+
 		//don't do this for super users viewing other people's profiles as otherwise there is no way back to own profile
-		if(!sakaiProxy.isSuperUserAndProxiedToUser(userUuid)) {
+		if (!sakaiProxy.isSuperUserAndProxiedToUser(userUuid)) {
 			disableLink(myProfileLink);
 		}
-		
+
 		//add the feedback panel for any error messages
 		FeedbackPanel feedbackPanel = new FeedbackPanel("feedbackPanel");
 		add(feedbackPanel);
 		feedbackPanel.setVisible(false); //hide by default
-		
+
 		//get the prefs record, or a default if none exists yet
 		final ProfilePreferences prefs = preferencesLogic.getPreferencesRecordForUser(userUuid);
-		
+
 		//if null, throw exception
 		if(prefs == null) {
 			throw new ProfilePreferencesNotDefinedException("Couldn't create default preferences record for " + userUuid);
 		}
-		
+
 		//get SakaiPerson for this user
 		SakaiPerson sakaiPerson = sakaiProxy.getSakaiPerson(userUuid);
 		//if null, create one 
@@ -141,13 +153,13 @@ public class MyProfile extends BasePage {
 			//post create event
 			sakaiProxy.postEvent(ProfileConstants.EVENT_PROFILE_NEW, userUuid, true);
 		} 
-		
+
 		//post view event
 		sakaiProxy.postEvent(ProfileConstants.EVENT_PROFILE_VIEW_OWN, "/profile/"+userUuid, false);
 
 		//get some values from SakaiPerson or SakaiProxy if empty
 		//SakaiPerson returns NULL strings if value is not set, not blank ones
-	
+
 		//these must come from Account to keep it all in sync
 		//we *could* get a User object here and get the values.
 		String userDisplayName = sakaiProxy.getUserDisplayName(userUuid);
@@ -157,58 +169,58 @@ public class MyProfile extends BasePage {
 		*/
 
 		String userEmail = sakaiProxy.getUserEmail(userUuid);
-		
+
 		//create instance of the UserProfile class
 		//we then pass the userProfile in the constructor to the child panels
 		final UserProfile userProfile = new UserProfile();
-				
+
 		//get rest of values from SakaiPerson and setup UserProfile
 		userProfile.setUserUuid(userUuid);
-		
+
 		userProfile.setNickname(sakaiPerson.getNickname());
 		userProfile.setDateOfBirth(sakaiPerson.getDateOfBirth());
 		userProfile.setDisplayName(userDisplayName);
 		//userProfile.setFirstName(userFirstName);
 		//userProfile.setLastName(userLastName);
 		//userProfile.setMiddleName(sakaiPerson.getInitials());
-		
+
 		userProfile.setEmail(userEmail);
 		userProfile.setHomepage(sakaiPerson.getLabeledURI());
 		userProfile.setHomephone(sakaiPerson.getHomePhone());
 		userProfile.setWorkphone(sakaiPerson.getTelephoneNumber());
 		userProfile.setMobilephone(sakaiPerson.getMobile());
 		userProfile.setFacsimile(sakaiPerson.getFacsimileTelephoneNumber());
-		
+
 		userProfile.setDepartment(sakaiPerson.getOrganizationalUnit());
 		userProfile.setPosition(sakaiPerson.getTitle());
 		userProfile.setSchool(sakaiPerson.getCampus());
 		userProfile.setRoom(sakaiPerson.getRoomNumber());
-		
+
 		userProfile.setCourse(sakaiPerson.getEducationCourse());
 		userProfile.setSubjects(sakaiPerson.getEducationSubjects());
-		
+
 		userProfile.setStaffProfile(sakaiPerson.getStaffProfile());
 		userProfile.setAcademicProfileUrl(sakaiPerson.getAcademicProfileUrl());
 		userProfile.setUniversityProfileUrl(sakaiPerson.getUniversityProfileUrl());
 		userProfile.setPublications(sakaiPerson.getPublications());
-		
+
 		// business fields
 		userProfile.setBusinessBiography(sakaiPerson.getBusinessBiography());
 		userProfile.setCompanyProfiles(profileLogic.getCompanyProfiles(userUuid));
-		
+
 		userProfile.setFavouriteBooks(sakaiPerson.getFavouriteBooks());
 		userProfile.setFavouriteTvShows(sakaiPerson.getFavouriteTvShows());
 		userProfile.setFavouriteMovies(sakaiPerson.getFavouriteMovies());
 		userProfile.setFavouriteQuotes(sakaiPerson.getFavouriteQuotes());
 		userProfile.setPersonalSummary(sakaiPerson.getNotes());
-		
+
 		// social networking fields
 		SocialNetworkingInfo socialInfo = profileLogic.getSocialNetworkingInfo(userProfile.getUserUuid());
 		if(socialInfo == null){
 			socialInfo = new SocialNetworkingInfo();
 		}
 		userProfile.setSocialInfo(socialInfo);
-		
+
 		//PRFL-97 workaround. SakaiPerson table needs to be upgraded so locked is not null, but this handles it if not upgraded.
 		if(sakaiPerson.getLocked() == null) {
 			userProfile.setLocked(false);
@@ -217,17 +229,17 @@ public class MyProfile extends BasePage {
 			this.setLocked(sakaiPerson.getLocked());
 			userProfile.setLocked(this.isLocked());
 		}
-		
-	
+
+
 		//what type of picture changing method do we use?
 		int profilePictureType = sakaiProxy.getProfilePictureType();
-		
+
 		//change picture panel (upload or url depending on property)
 		final Panel changePicture;
-		
+
 		//render appropriate panel with appropriate constructor ie if superUser etc
 		if(profilePictureType == ProfileConstants.PICTURE_SETTING_UPLOAD) {
-			
+
 			if(sakaiProxy.isSuperUserAndProxiedToUser(userUuid)){
 				changePicture = new ChangeProfilePictureUpload("changePicture", userUuid);
 			} else {
@@ -447,93 +459,14 @@ public class MyProfile extends BasePage {
 		}
 		
 		add(sideLinks);
-		
-		
-		//status panel
-		Panel myStatusPanel = new MyStatusPanel("myStatusPanel", userProfile);
-		add(myStatusPanel);
-		
-		List<ITab> tabs = new ArrayList<ITab>();
-		
-		AjaxTabbedPanel tabbedPanel = new AjaxTabbedPanel("myProfileTabs", tabs) {
-			
-			private static final long serialVersionUID = 1L;
 
-			// overridden so we can add tooltips to tabs
-			@Override
-			protected WebMarkupContainer newLink(String linkId, final int index) {
-				WebMarkupContainer link = super.newLink(linkId, index);
-				
-				if (ProfileConstants.TAB_INDEX_PROFILE == index) {
-					link.add(new AttributeModifier("title", true,
-							new ResourceModel("link.tab.profile.tooltip")));
-					
-				} else if (ProfileConstants.TAB_INDEX_WALL == index) {
-					link.add(new AttributeModifier("title", true,
-							new ResourceModel("link.tab.wall.tooltip")));	
-				}
-				return link;
-			}
-		};
-		
-		
-		CookieUtils utils = new CookieUtils();
-		Cookie tabCookie = utils.getCookie(ProfileConstants.TAB_COOKIE);
-		
-		if (sakaiProxy.isProfileFieldsEnabled()) {
-			tabs.add(new AbstractTab(new ResourceModel("link.tab.profile")) {
-	
-				private static final long serialVersionUID = 1L;
-	
-				@Override
-				public Panel getPanel(String panelId) {
-	
-					setTabCookie(ProfileConstants.TAB_INDEX_PROFILE);
-					MyProfilePanelState panelState = new MyProfilePanelState();
-					panelState.showBusinessDisplay = sakaiProxy.isBusinessProfileEnabled();
-					panelState.showSocialNetworkingDisplay = sakaiProxy.isSocialProfileEnabled();
-					panelState.showInterestsDisplay = sakaiProxy.isInterestsProfileEnabled();
-					panelState.showStaffDisplay = sakaiProxy.isStaffProfileEnabled();
-					panelState.showStudentDisplay = sakaiProxy.isStudentProfileEnabled();
-					return new MyProfilePanel(panelId, userProfile,panelState);
-				}
-	
-			});
-		}
-		
-		if (true == sakaiProxy.isWallEnabledGlobally()) {
-			
-			tabs.add(new AbstractTab(new ResourceModel("link.tab.wall")) {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public Panel getPanel(String panelId) {
-
-					setTabCookie(ProfileConstants.TAB_INDEX_WALL);
-					if (true == sakaiProxy.isSuperUser()) {
-						return new MyWallPanel(panelId, userUuid);
-					} else {
-						return new MyWallPanel(panelId);
-					}
-				}
-			});
-			
-			if (true == sakaiProxy.isWallDefaultProfilePage() && null == tabCookie) {
-				
-				tabbedPanel.setSelectedTab(ProfileConstants.TAB_INDEX_WALL);
-			}
-		}
-		
-		if (null != tabCookie) {
-			try {
-				tabbedPanel.setSelectedTab(Integer.parseInt(tabCookie.getValue()));
-			} catch (IndexOutOfBoundsException e) {
-				//do nothing. This will be thrown if the cookie contains a value > the number of tabs but thats ok.
-			}
-		}
-		
-		add(tabbedPanel);
+		MyProfilePanelState panelState = new MyProfilePanelState();
+		panelState.showBusinessDisplay = sakaiProxy.isBusinessProfileEnabled();
+		panelState.showSocialNetworkingDisplay = sakaiProxy.isSocialProfileEnabled();
+		panelState.showInterestsDisplay = sakaiProxy.isInterestsProfileEnabled();
+		panelState.showStaffDisplay = sakaiProxy.isStaffProfileEnabled();
+		panelState.showStudentDisplay = sakaiProxy.isStudentProfileEnabled();
+		add(new MyProfilePanel("myProfilePanel", userProfile, panelState));
 		
 		//kudos panel
 		add(new AjaxLazyLoadPanel("myKudos"){
