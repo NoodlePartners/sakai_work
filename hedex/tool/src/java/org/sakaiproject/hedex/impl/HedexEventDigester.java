@@ -22,6 +22,7 @@ public class HedexEventDigester implements Observer {
     private List<String> handledEvents;
     private int batchSize;
     private List<Event> batchedEvents = new ArrayList<>();
+    private final String[] defaultEvents = new String[] {"user.login", "user.logout"};
 
     @Setter
     private ServerConfigurationService serverConfigurationService;
@@ -35,9 +36,12 @@ public class HedexEventDigester implements Observer {
     public void init() {
 
         log.debug("HedexEventDigester.init()");
+
         String[] events = serverConfigurationService.getStrings("hedex.events");
-        handledEvents = Arrays.asList(events == null ? new String[] {"user.login", "user.logout"} : events);
+        handledEvents = Arrays.asList(events == null ? defaultEvents : events);
+        log.debug("Handled events: {}", String.join(",", handledEvents));
         batchSize = serverConfigurationService.getInt("hedex.batch_size", 10);
+        log.debug("batchSize: {}", batchSize);
         eventTrackingService.addObserver(this);
     }
 
