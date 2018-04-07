@@ -1,50 +1,68 @@
 package org.sakaiproject.hedex.impl;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.event.api.Event;
+import org.sakaiproject.event.api.EventTrackingService;
 
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class HedexEventDigester implements Observer {
 
     private List<String> handledEvents;
+    private int batchSize;
+    private List<Event> batchedEvents = new ArrayList<>();
 
     @Setter
     private ServerConfigurationService serverConfigurationService;
+
+    @Setter
+    private EventTrackingService eventTrackingService;
 
     @Setter
     private SessionFactory sessionFactory;
 
     public void init() {
 
-        System.out.println("HedexEventDigester.init()");
-        handledEvents = Arrays.asList(serverConfigurationService.getStrings("hedex.events"));
+        log.debug("HedexEventDigester.init()");
+        String[] events = serverConfigurationService.getStrings("hedex.events");
+        handledEvents = Arrays.asList(events == null ? new String[] {"user.login", "user.logout"} : events);
+        batchSize = serverConfigurationService.getInt("hedex.batch_size", 10);
+        eventTrackingService.addObserver(this);
     }
 
     public void update(Observable o, final Object arg) {
 
         if (arg instanceof Event) {
-            Event e = (Event) arg;
-            String event = e.getEvent();
-            if (handledEvents.contains(event)) {
-                // About to start a new thread that expects the changes in this hibernate session
-                // to have been persisted, so we flush.
-                try {
-                    sessionFactory.getCurrentSession().flush();
-                } catch (HibernateException he) {
-                    // This will be thrown if there is no current Hibernate session. Nothing to do.
-                }
+            Event event = (Event) arg;
+            String eventName = event.getEvent();
+            if (handledEvents.contains(eventName)) {
 
-                new Thread(() -> {
-                }).start();
+                log.debug("Handling event '{}' ...", eventName);
+
+                synchronized(batchedEvents) {
+                    log.debug("Added '{}' to batched events ...", eventName);
+                    batchedEvents.add(event);
+                    if (batchedEvents.size() == batchSize) {
+                        log.debug("Sending batch of events ...");
+                        List<Event> copy = new ArrayList<>(batchedEvents);
+                        new Thread(() -> {
+                            EventSender sender = new EventSender();
+                            sender.sendEvents(copy);
+                        }).start();
+                        batchedEvents.clear();
+                    }
+                }
             }
         }
     }
