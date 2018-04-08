@@ -4,23 +4,17 @@
         xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider" 
-		class="org.sakaiproject.hedex.tool.entityprovider.HedexEntityProvider">
+    <bean id="org.sakaiproject.hedex.impl.EventSender"
+        class="org.sakaiproject.hedex.impl.EventSender" init-method="init">
+		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
     </bean>
 
     <bean id="org.sakaiproject.hedex.impl.HedexEventDigester"
         class="org.sakaiproject.hedex.impl.HedexEventDigester" init-method="init">
+		<property name="eventSender" ref="org.sakaiproject.hedex.impl.EventSender" />
 		<property name="eventTrackingService" ref="org.sakaiproject.event.api.EventTrackingService" />
 		<property name="serverConfigurationService" ref="org.sakaiproject.component.api.ServerConfigurationService" />
 		<property name="sessionFactory" ref="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory"/>
     </bean>
 
-    <bean id="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappings.hedex"
-          class="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappingsImpl">
-        <property name="annotatedClasses">
-            <list>
-                <value>org.sakaiproject.hedex.api.model.EngagementActivity</value>
-            </list>
-        </property>
-    </bean>
 </beans>
